@@ -1,0 +1,147 @@
+{
+  "meta": {
+    "project": "Quiz Uygulaması",
+    "date": "2025-10-04",
+    "prepared_by": "Software Development Manager"
+  },
+  "product_overview": "Quiz Uygulaması is a modern real-time multiplayer quiz web application designed for interactive quiz experiences across education, corporate events, and entertainment. It uses Socket.IO for live communication and includes an admin panel, quiz host interface, and player view.",
+  "core_goals": [
+    "Provide an engaging and interactive quiz experience for multiple users simultaneously.",
+    "Enable administrators to easily manage quiz questions including bulk upload via Excel files.",
+    "Support real-time quiz game hosting and player participation with live feedback and score tracking.",
+    "Ensure a responsive and user-friendly interface with secure access control for admin features.",
+    "Facilitate scalable and maintainable architecture with modern web technologies and real-time communication."
+  ],
+  "key_features": [
+    "Real-time multiplayer quiz games managed through a Quiz Host interface.",
+    "Admin panel supporting secure login, manual and bulk quiz question management, and server health monitoring.",
+    "Player interface allowing easy game joining, answering questions, and viewing scores and rankings.",
+    "Socket.IO based real-time communication and event handling for game management and player interaction.",
+    "Excel file upload support with validation and asynchronous processing for bulk question import.",
+    "QR code generation for straightforward player game joining via scanning or link sharing.",
+    "Robust backend server with RESTful APIs for health checks, question retrieval, file uploads, and game state management.",
+    "Responsive and modern UI design using React, TypeScript, Tailwind CSS with gradient and glassmorphism effects."
+  ],
+  "user_flow_summary": [
+    "User accesses the main application and selects a role (Admin, Quiz Host, or Player) via the home menu.",
+    "Admin logs in securely and manages quiz questions either manually or by uploading Excel files; monitors server and connection status.",
+    "Quiz Host selects game mode (sequential or random), shares QR code for player joining, starts the quiz and controls question flow with a timer, views live scores.",
+    "Players join the quiz by entering their name or scanning the QR code, receive questions in real-time, submit answers quickly, and track their scores and rankings live.",
+    "Throughout the gameplay, the system handles real-time updates, connection states, and error management to ensure smooth interaction."
+  ],
+  "validation_criteria": [
+    "Successful real-time communication via Socket.IO events ensuring timely player joins, question delivery, answer confirmation, and score updates.",
+    "Admin panel securely restricts access and correctly manages questions including bulk uploads with appropriate format validation.",
+    "Player interface must properly connect, display questions accurately, allow answer submission, and handle connection disruptions gracefully.",
+    "Excel uploads are correctly parsed, validated, and questions integrated without data loss or corruption.",
+    "QR code accurately encodes the game join link and is scannable by players for easy access.",
+    "RESTful API endpoints respond correctly for health checks, question listing, and file uploads with proper error handling.",
+    "UI components are responsive and visually consistent across devices, featuring gradient and glassmorphism styles as per design specifications."
+  ],
+  "code_summary": {
+    "tech_stack": [
+      "JavaScript",
+      "TypeScript",
+      "React",
+      "Node.js",
+      "Express",
+      "Socket.IO",
+      "Vite",
+      "Tailwind CSS",
+      "Multer",
+      "XLSX",
+      "QRCode"
+    ],
+    "features": [
+      {
+        "name": "Main Application",
+        "description": "Main React application with routing and view management",
+        "files": [
+          "src/App.tsx",
+          "src/main.tsx",
+          "src/index.css"
+        ]
+      },
+      {
+        "name": "Admin Panel",
+        "description": "Administrative interface for managing questions, uploading Excel files, and monitoring server health",
+        "files": [
+          "src/components/AdminPanel.tsx"
+        ]
+      },
+      {
+        "name": "Quiz Host",
+        "description": "Host interface for starting quiz games, managing questions, displaying QR codes, and real-time game control",
+        "files": [
+          "src/components/QuizHost.tsx"
+        ]
+      },
+      {
+        "name": "Player View",
+        "description": "Player interface for joining games, answering questions, and viewing results",
+        "files": [
+          "src/components/PlayerView.tsx"
+        ]
+      },
+      {
+        "name": "Error Boundary",
+        "description": "Error handling component for React error boundaries",
+        "files": [
+          "src/components/ErrorBoundary.tsx"
+        ]
+      },
+      {
+        "name": "Backend Server",
+        "description": "Express.js server with Socket.IO for real-time communication, file upload handling, and game state management",
+        "files": [
+          "server/server.js"
+        ]
+      },
+      {
+        "name": "Question Management",
+        "description": "JSON-based question storage and Excel file processing for bulk question uploads",
+        "files": [
+          "data/questions.json",
+          "server/server.js"
+        ]
+      },
+      {
+        "name": "Real-time Communication",
+        "description": "Socket.IO implementation for real-time game events, player connections, and live updates",
+        "files": [
+          "server/server.js",
+          "src/components/QuizHost.tsx",
+          "src/components/PlayerView.tsx"
+        ]
+      },
+      {
+        "name": "File Upload System",
+        "description": "Multer-based file upload system for Excel question files with validation and processing",
+        "files": [
+          "server/server.js"
+        ]
+      },
+      {
+        "name": "QR Code Generation",
+        "description": "QR code generation for player game joining functionality",
+        "files": [
+          "src/components/QuizHost.tsx"
+        ]
+      },
+      {
+        "name": "Game State Management",
+        "description": "Server-side game state tracking including players, scores, questions, and timing",
+        "files": [
+          "server/server.js"
+        ]
+      },
+      {
+        "name": "API Endpoints",
+        "description": "RESTful API endpoints for health checks, question retrieval, and file uploads",
+        "files": [
+          "server/server.js"
+        ]
+      }
+    ]
+  }
+}
