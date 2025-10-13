@@ -1,0 +1,36 @@
+stages:
+  - build
+  - deploy
+
+variables:
+  NODE_VERSION: "18"
+
+cache:
+  paths:
+    - node_modules/
+
+build-frontend:
+  stage: build
+  image: node:18
+  script:
+    - npm install
+    - npm run build
+  artifacts:
+    paths:
+      - dist/
+    expire_in: 1 hour
+  only:
+    - main
+
+pages:
+  stage: deploy
+  image: node:18
+  script:
+    - npm install
+    - npm run build
+    - cp -r dist/* public/
+  artifacts:
+    paths:
+      - public
+  only:
+    - main
