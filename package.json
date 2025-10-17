@@ -11,7 +11,11 @@
     "preview": "vite preview",
     "start": "npm run build && concurrently \"npm run server\" \"npm run serve-build\"",
     "serve-build": "vite preview --port 5173",
-    "start:prod": "node server/server.js"
+    "start:prod": "node server/server.js",
+    "monitor": "node render-monitor.js start",
+    "monitor:restart": "node render-monitor.js restart",
+    "monitor:health": "node render-monitor.js health",
+    "monitor:logs": "node render-monitor.js logs"
   },
   "dependencies": {
     "concurrently": "^8.2.2",
