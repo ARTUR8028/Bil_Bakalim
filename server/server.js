@@ -7,6 +7,7 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
+import QRCode from 'qrcode';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -279,26 +280,21 @@ app.get('/api/download/apk', (req, res) => {
 });
 
 // QR Code for APK Download
-app.get('/api/qr/apk', (req, res) => {
+app.get('/api/qr/apk', async (req, res) => {
   console.log('📱 APK QR kodu isteği alındı');
   
   const apkUrl = `${req.protocol}://${req.get('host')}/api/download/apk`;
   
-  // QR kod oluştur
-  const QRCode = require('qrcode');
-  
-  QRCode.toDataURL(apkUrl, {
-    width: 300,
-    margin: 2,
-    color: {
-      dark: '#1A1A2E',
-      light: '#FFFFFF'
-    }
-  }, (err, qrCodeDataURL) => {
-    if (err) {
-      console.error('❌ QR kod oluşturma hatası:', err);
-      return res.status(500).json({ error: 'QR kod oluşturulamadı' });
-    }
+  try {
+    // QR kod oluştur
+    const qrCodeDataURL = await QRCode.toDataURL(apkUrl, {
+      width: 300,
+      margin: 2,
+      color: {
+        dark: '#1A1A2E',
+        light: '#FFFFFF'
+      }
+    });
     
     console.log('✅ APK QR kodu oluşturuldu');
     res.json({
@@ -306,7 +302,10 @@ app.get('/api/qr/apk', (req, res) => {
       downloadUrl: apkUrl,
       message: 'Android TV uygulamasını indirmek için QR kodu tarayın'
     });
-  });
+  } catch (err) {
+    console.error('❌ QR kod oluşturma hatası:', err);
+    res.status(500).json({ error: 'QR kod oluşturulamadı' });
+  }
 });
 
 app.get('/api/test', (req, res) => {
