@@ -252,6 +252,63 @@ app.get('/api/health', (req, res) => {
   res.json(health);
 });
 
+// APK Download endpoint
+app.get('/api/download/apk', (req, res) => {
+  console.log('📱 APK indirme isteği alındı');
+  
+  const apkPath = path.join(__dirname, '../public/apps/BilBakalimTV.apk');
+  
+  // APK dosyası var mı kontrol et
+  if (!fs.existsSync(apkPath)) {
+    console.log('❌ APK dosyası bulunamadı:', apkPath);
+    return res.status(404).json({ 
+      error: 'APK dosyası bulunamadı',
+      message: 'Android uygulaması henüz hazır değil'
+    });
+  }
+  
+  // APK dosyasını gönder
+  res.download(apkPath, 'BilBakalimTV.apk', (err) => {
+    if (err) {
+      console.error('❌ APK indirme hatası:', err);
+      res.status(500).json({ error: 'APK indirilemedi' });
+    } else {
+      console.log('✅ APK başarıyla indirildi');
+    }
+  });
+});
+
+// QR Code for APK Download
+app.get('/api/qr/apk', (req, res) => {
+  console.log('📱 APK QR kodu isteği alındı');
+  
+  const apkUrl = `${req.protocol}://${req.get('host')}/api/download/apk`;
+  
+  // QR kod oluştur
+  const QRCode = require('qrcode');
+  
+  QRCode.toDataURL(apkUrl, {
+    width: 300,
+    margin: 2,
+    color: {
+      dark: '#1A1A2E',
+      light: '#FFFFFF'
+    }
+  }, (err, qrCodeDataURL) => {
+    if (err) {
+      console.error('❌ QR kod oluşturma hatası:', err);
+      return res.status(500).json({ error: 'QR kod oluşturulamadı' });
+    }
+    
+    console.log('✅ APK QR kodu oluşturuldu');
+    res.json({
+      qrCode: qrCodeDataURL,
+      downloadUrl: apkUrl,
+      message: 'Android TV uygulamasını indirmek için QR kodu tarayın'
+    });
+  });
+});
+
 app.get('/api/test', (req, res) => {
   const testData = {
     message: '✅ Sunucu çalışıyor!',
