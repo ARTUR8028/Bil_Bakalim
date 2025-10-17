@@ -11,6 +11,30 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="theme-color" content="#1e40af" />
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="/manifest.json" />
+    
+    <!-- TV Optimized Meta Tags -->
+    <meta name="tv-app" content="true" />
+    <meta name="tv-orientation" content="landscape" />
+    <meta name="tv-display" content="fullscreen" />
+    
+    <!-- Service Worker Registration -->
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js')
+            .then((registration) => {
+              console.log('📺 TV Service Worker registered:', registration);
+            })
+            .catch((error) => {
+              console.log('📺 TV Service Worker registration failed:', error);
+            });
+        });
+      }
+    </script>
+    
     <title>Bil Bakalım - TV Quiz Uygulaması</title>
   </head>
   <body>

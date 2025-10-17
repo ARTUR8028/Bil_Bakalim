@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';  
-import { Settings, Play, Trophy } from 'lucide-react';
+import { Settings, Play, Trophy, Tv } from 'lucide-react';
 import AdminPanel from './components/AdminPanel';
 import QuizHost from './components/QuizHost';
 import PlayerView from './components/PlayerView';
+import TVHost from './components/TVHost';
 import ErrorBoundary from './components/ErrorBoundary';
 
-type ViewMode = 'home' | 'admin' | 'host' | 'player';
+type ViewMode = 'home' | 'admin' | 'host' | 'player' | 'tv';
 
 function App() {
   // İlk yüklemede hash'i kontrol et
@@ -29,6 +30,8 @@ function App() {
         setCurrentView('admin');
       } else if (hash === 'host') {
         setCurrentView('host');
+      } else if (hash === 'tv') {
+        setCurrentView('tv');
       } else {
         setCurrentView('home');
       }
@@ -56,6 +59,8 @@ function App() {
           setCurrentView('home');
           window.location.hash = '';
         }} />;
+      case 'tv':
+        return <TVHost onBack={() => setCurrentView('home')} />;
       default:
         return (
           <div className="min-h-screen bg-gradient-to-br from-blue-900 via-purple-900 to-indigo-900 flex items-center justify-center p-4 mobile-safe-top mobile-safe-bottom">
@@ -69,7 +74,7 @@ function App() {
                 </p>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mb-6 md:mb-8 mobile-grid-1">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 mb-6 md:mb-8 mobile-grid-1">
                 <div 
                   onClick={() => setCurrentView('admin')}
                   className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 md:p-8 cursor-pointer transform hover:scale-105 transition-all duration-300 hover:bg-white/20 border border-white/20 mobile-btn mobile-touch-manipulation"
@@ -86,6 +91,15 @@ function App() {
                   <Play className="w-10 h-10 md:w-12 md:h-12 text-green-300 mx-auto mb-3 md:mb-4" />
                   <h3 className="text-lg md:text-xl font-semibold text-white mb-2 mobile-text-lg">Oyun Sunucusu</h3>
                   <p className="text-blue-200 text-sm mobile-text-sm">Quiz oyununu başlatın ve yönetin</p>
+                </div>
+
+                <div 
+                  onClick={() => setCurrentView('tv')}
+                  className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 md:p-8 cursor-pointer transform hover:scale-105 transition-all duration-300 hover:bg-white/20 border border-white/20 mobile-btn mobile-touch-manipulation"
+                >
+                  <Tv className="w-10 h-10 md:w-12 md:h-12 text-purple-300 mx-auto mb-3 md:mb-4" />
+                  <h3 className="text-lg md:text-xl font-semibold text-white mb-2 mobile-text-lg">📺 Google TV</h3>
+                  <p className="text-blue-200 text-sm mobile-text-sm">TV ekranında soruları yayınlayın</p>
                 </div>
               </div>
 

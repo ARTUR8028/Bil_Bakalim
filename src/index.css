@@ -7,6 +7,55 @@
 @tailwind components;
 @tailwind utilities;
 
+/* TV Optimized Styles */
+@media (min-width: 1920px) {
+  .tv-optimized {
+    font-size: 1.5rem;
+  }
+  
+  .tv-text-large {
+    font-size: 3rem;
+  }
+  
+  .tv-text-xl {
+    font-size: 2.5rem;
+  }
+  
+  .tv-text-2xl {
+    font-size: 3rem;
+  }
+  
+  .tv-text-3xl {
+    font-size: 4rem;
+  }
+  
+  .tv-text-4xl {
+    font-size: 5rem;
+  }
+  
+  .tv-text-5xl {
+    font-size: 6rem;
+  }
+  
+  .tv-text-6xl {
+    font-size: 8rem;
+  }
+}
+
+/* TV Remote Navigation */
+.tv-focusable:focus {
+  outline: 4px solid #3b82f6;
+  outline-offset: 4px;
+}
+
+/* TV Landscape Orientation */
+@media (orientation: landscape) and (min-width: 1024px) {
+  .tv-landscape {
+    height: 100vh;
+    overflow: hidden;
+  }
+}
+
 /* Prevent automatic translation */
 * {
   -webkit-translate: no;
