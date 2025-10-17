@@ -1074,10 +1074,16 @@ function calculateResults() {
       const num = parseFloat(answerObj.value);
       const diff = Math.abs(num - currentAnswer);
       // En yakın mesafedeki tüm oyunculara puan ver
-      if (diff === minDiff && players[id]) {
-        players[id].score += 10;
-        globalScores[players[id].name] = (globalScores[players[id].name] || 0) + 10; // Global puanı güncelle
-        console.log(`🏆 ${players[id].name} 10 puan kazandı! (Cevap: ${num}, Mesafe: ${diff}, Toplam: ${players[id].score}, Global: ${globalScores[players[id].name]})`);
+      if (diff === minDiff) {
+        // Mevcut oyuncuya puan ver
+        if (players[id]) {
+          players[id].score += 10;
+          console.log(`🏆 ${players[id].name} 10 puan kazandı! (Cevap: ${num}, Mesafe: ${diff}, Toplam: ${players[id].score})`);
+        }
+        
+        // Global puanı her zaman güncelle (oyuncu çıksa bile)
+        globalScores[answerObj.playerName] = (globalScores[answerObj.playerName] || 0) + 10;
+        console.log(`🌍 ${answerObj.playerName} global puanı güncellendi: ${globalScores[answerObj.playerName]}`);
       }
     }
   }
