@@ -934,4 +934,3 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onBack }) => {
 };
 
 export default AdminPanel;
-export default AdminPanel;
