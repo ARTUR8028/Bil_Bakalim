@@ -476,21 +476,13 @@ app.post('/api/upload', (req, res) => {
             const answerStr = answerText.toString().trim();
             
             if (questionStr && answerStr) {
-              const isDuplicate = existing.some(q => 
-                q.question.toLowerCase() === questionStr.toLowerCase()
-              );
-              
-              if (!isDuplicate) {
-                merged.push({
-                  question: questionStr,
-                  answer: answerStr
-                });
-                addedCount++;
-                console.log(`✅ Soru eklendi: ${questionStr.substring(0, 50)}...`);
-              } else {
-                skippedCount++;
-                console.log(`⚠️ Soru atlandı (duplicate): ${questionStr.substring(0, 30)}...`);
-              }
+              // Duplicate kontrolünü kaldır - tüm soruları ekle
+              merged.push({
+                question: questionStr,
+                answer: answerStr
+              });
+              addedCount++;
+              console.log(`✅ Soru eklendi: ${questionStr.substring(0, 50)}...`);
             } else {
               skippedCount++;
               console.log(`⚠️ Satır ${index + 1} atlandı: boş veri`);
