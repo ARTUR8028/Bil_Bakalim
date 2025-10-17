@@ -15,7 +15,7 @@ const app = express();
 const server = createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: NODE_ENV === 'production' 
+    origin: process.env.NODE_ENV === 'production' 
       ? ["https://your-domain.com", "https://www.your-domain.com"] 
       : ["http://localhost:5173", "http://127.0.0.1:5173", "http://0.0.0.0:5173"],
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
