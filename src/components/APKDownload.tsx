@@ -67,10 +67,10 @@ const APKDownload: React.FC<APKDownloadProps> = ({ onBack }) => {
               <p className="text-2xl text-gray-300 mb-8">
                 Google TV için PWA Uygulaması
               </p>
-              <div className="bg-yellow-900/20 border border-yellow-500/30 rounded-lg p-4 mb-6">
-                <p className="text-yellow-200 text-lg">
-                  ⚠️ <strong>Önemli:</strong> APK dosyası yerine PWA kullanmanızı öneriyoruz. 
-                  PWA daha güvenli, hızlı ve güncel kalır.
+              <div className="bg-red-900/20 border border-red-500/30 rounded-lg p-4 mb-6">
+                <p className="text-red-200 text-lg">
+                  ⚠️ <strong>APK Sorunu:</strong> APK dosyası ayrıştırma hatası veriyor. 
+                  Bu sorunu çözmek için PWA kullanmanızı öneriyoruz.
                 </p>
               </div>
             </div>
@@ -142,10 +142,17 @@ const APKDownload: React.FC<APKDownloadProps> = ({ onBack }) => {
                 <button
                   onClick={handleDownload}
                   disabled={!downloadUrl || loading}
-                  className="bg-green-600 hover:bg-green-700 disabled:bg-gray-500 text-white text-xl px-8 py-4 rounded-2xl transition-colors tv-focusable w-full"
+                  className="bg-red-600 hover:bg-red-700 disabled:bg-gray-500 text-white text-xl px-8 py-4 rounded-2xl transition-colors tv-focusable w-full"
                 >
-                  {loading ? 'Yükleniyor...' : '📱 APK İndir'}
+                  {loading ? 'Yükleniyor...' : '⚠️ APK İndir (Sorunlu)'}
                 </button>
+                
+                <div className="mt-4 p-3 bg-red-900/20 border border-red-500/30 rounded-lg">
+                  <p className="text-red-200 text-sm">
+                    ❌ <strong>Uyarı:</strong> APK dosyası ayrıştırma hatası veriyor. 
+                    PWA kullanımı daha güvenli ve sorunsuzdur.
+                  </p>
+                </div>
                 
                 {downloadUrl && (
                   <div className="mt-4 p-4 bg-white/5 rounded-lg">
