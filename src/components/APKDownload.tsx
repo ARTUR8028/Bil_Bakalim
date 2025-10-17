@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Download, QrCode, Smartphone, Tv } from 'lucide-react';
+import { Download, QrCode } from 'lucide-react';
 
 interface APKDownloadProps {
   onBack: () => void;
