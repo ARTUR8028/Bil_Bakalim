@@ -127,10 +127,11 @@ const APKDownload: React.FC<APKDownloadProps> = ({ onBack }) => {
                 </p>
                 
                 <button
-                  onClick={() => window.open('https://bil-bakalim.onrender.com/#tv', '_blank')}
-                  className="bg-green-600 hover:bg-green-700 text-white text-xl px-8 py-4 rounded-2xl transition-colors tv-focusable w-full"
+                  onClick={handleDownload}
+                  disabled={!downloadUrl || loading}
+                  className="bg-green-600 hover:bg-green-700 disabled:bg-gray-500 text-white text-xl px-8 py-4 rounded-2xl transition-colors tv-focusable w-full"
                 >
-                  📺 TV Uygulamasını Aç
+                  {loading ? 'Yükleniyor...' : '📱 APK İndir'}
                 </button>
                 
                 {downloadUrl && (
