@@ -486,6 +486,12 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onBack }) => {
           <div className="flex items-center space-x-4">
             <ConnectionIndicator />
             <button
+              onClick={() => setShowChangePassword(!showChangePassword)}
+              className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              🔐 Şifre Değiştir
+            </button>
+            <button
               onClick={() => {
                 setIsLoggedIn(false);
                 setUsername('');
@@ -549,20 +555,20 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onBack }) => {
         )}
 
         {/* Şifre Değiştirme */}
-        <div className="mb-8 bg-white/10 backdrop-blur-lg rounded-2xl p-6 border border-white/20">
-          <div className="flex justify-between items-center mb-4">
-            <h3 className="text-xl font-semibold text-white flex items-center">
-              🔐 Şifre Değiştir
-            </h3>
-            <button
-              onClick={() => setShowChangePassword(!showChangePassword)}
-              className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm"
-            >
-              {showChangePassword ? 'Gizle' : 'Şifre Değiştir'}
-            </button>
-          </div>
+        {showChangePassword && (
+          <div className="mb-8 bg-white/10 backdrop-blur-lg rounded-2xl p-6 border border-white/20">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-xl font-semibold text-white flex items-center">
+                🔐 Şifre Değiştir
+              </h3>
+              <button
+                onClick={() => setShowChangePassword(false)}
+                className="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors text-sm"
+              >
+                ✕ Kapat
+              </button>
+            </div>
 
-          {showChangePassword && (
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-300 mb-2">
