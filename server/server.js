@@ -3,7 +3,8 @@ import { createServer } from 'http';
 import { Server } from 'socket.io';
 import multer from 'multer';
 import xlsx from 'xlsx';
-import fs from 'fs';
+import { promises as fs } from 'fs';
+import fsSync from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
@@ -163,7 +164,7 @@ async function initializeServer() {
     const questionsPath = path.join(__dirname, '../data/questions.json');
     console.log('📁 Soru dosyası yolu:', questionsPath);
     
-    if (fs.existsSync(questionsPath)) {
+    if (fsSync.existsSync(questionsPath)) {
       const raw = await fs.readFile(questionsPath, 'utf-8');
       questions = JSON.parse(raw);
       gameState.totalQuestions = questions.length;
@@ -264,7 +265,7 @@ app.get('/api/download/apk', (req, res) => {
   const apkPath = path.join(__dirname, '../public/apps/BilBakalimTV.apk');
   
   // APK dosyası var mı kontrol et
-  if (!fs.existsSync(apkPath)) {
+  if (!fsSync.existsSync(apkPath)) {
     console.log('❌ APK dosyası bulunamadı:', apkPath);
     return res.status(404).json({ 
       error: 'APK dosyası bulunamadı',
