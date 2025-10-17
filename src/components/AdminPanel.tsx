@@ -683,8 +683,8 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onBack }) => {
                 )}
               </button>
             </div>
-          )}
-        </div>
+          </div>
+        )}
 
         {message && (
           <div className={`mb-6 p-4 rounded-lg flex items-center max-w-4xl mx-auto ${
