@@ -20,6 +20,13 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onBack }) => {
   const [connectionStatus, setConnectionStatus] = useState<'connecting' | 'connected' | 'disconnected'>('connecting');
   const [serverHealth, setServerHealth] = useState<any>(null);
   const [uploadProgress, setUploadProgress] = useState(0);
+  const [showChangePassword, setShowChangePassword] = useState(false);
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const checkServerHealth = useCallback(async () => {
     try {
@@ -195,6 +202,62 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onBack }) => {
       setIsLoading(false);
     }
   }, [socket, newQuestion, newAnswer, showMessage, checkServerHealth]);
+
+  const handleChangePassword = async () => {
+    if (!currentPassword || !newPassword || !confirmPassword) {
+      setMessage({ type: 'error', text: 'Lütfen tüm alanları doldurun.' });
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      setMessage({ type: 'error', text: 'Yeni şifreler eşleşmiyor.' });
+      return;
+    }
+
+    if (newPassword.length < 6) {
+      setMessage({ type: 'error', text: 'Yeni şifre en az 6 karakter olmalıdır.' });
+      return;
+    }
+
+    if (currentPassword === newPassword) {
+      setMessage({ type: 'error', text: 'Yeni şifre mevcut şifre ile aynı olamaz.' });
+      return;
+    }
+
+    setIsLoading(true);
+    setMessage(null);
+
+    try {
+      const response = await fetch('http://localhost:3001/api/change-password', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          currentPassword,
+          newPassword,
+          username
+        }),
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        setMessage({ type: 'success', text: 'Şifre başarıyla değiştirildi!' });
+        setCurrentPassword('');
+        setNewPassword('');
+        setConfirmPassword('');
+        setShowChangePassword(false);
+      } else {
+        setMessage({ type: 'error', text: result.message || 'Şifre değiştirilemedi.' });
+      }
+    } catch (error) {
+      console.error('❌ Şifre değiştirme hatası:', error);
+      setMessage({ type: 'error', text: 'Sunucuya bağlanılamadı. Lütfen tekrar deneyin.' });
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleFileUpload = async () => {
     if (!selectedFile) {
@@ -484,6 +547,106 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onBack }) => {
             </div>
           </div>
         )}
+
+        {/* Şifre Değiştirme */}
+        <div className="mb-8 bg-white/10 backdrop-blur-lg rounded-2xl p-6 border border-white/20">
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="text-xl font-semibold text-white flex items-center">
+              🔐 Şifre Değiştir
+            </h3>
+            <button
+              onClick={() => setShowChangePassword(!showChangePassword)}
+              className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm"
+            >
+              {showChangePassword ? 'Gizle' : 'Şifre Değiştir'}
+            </button>
+          </div>
+
+          {showChangePassword && (
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Mevcut Şifre
+                </label>
+                <div className="relative">
+                  <input
+                    type={showCurrentPassword ? 'text' : 'password'}
+                    value={currentPassword}
+                    onChange={(e) => setCurrentPassword(e.target.value)}
+                    className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="Mevcut şifrenizi girin"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-white"
+                  >
+                    {showCurrentPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                  </button>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Yeni Şifre
+                </label>
+                <div className="relative">
+                  <input
+                    type={showNewPassword ? 'text' : 'password'}
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="Yeni şifrenizi girin (en az 6 karakter)"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowNewPassword(!showNewPassword)}
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-white"
+                  >
+                    {showNewPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                  </button>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Yeni Şifre Tekrar
+                </label>
+                <div className="relative">
+                  <input
+                    type={showConfirmPassword ? 'text' : 'password'}
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="Yeni şifrenizi tekrar girin"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-white"
+                  >
+                    {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                  </button>
+                </div>
+              </div>
+
+              <button
+                onClick={handleChangePassword}
+                disabled={isLoading || !currentPassword || !newPassword || !confirmPassword}
+                className="w-full bg-green-600 text-white py-3 rounded-lg hover:bg-green-700 transition-colors font-medium disabled:bg-gray-500 disabled:cursor-not-allowed flex items-center justify-center"
+              >
+                {isLoading ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                    Değiştiriliyor...
+                  </>
+                ) : (
+                  'Şifreyi Değiştir'
+                )}
+              </button>
+            </div>
+          )}
+        </div>
 
         {message && (
           <div className={`mb-6 p-4 rounded-lg flex items-center max-w-4xl mx-auto ${

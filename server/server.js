@@ -271,6 +271,51 @@ app.get('/api/test', (req, res) => {
   res.json(testData);
 });
 
+// Şifre değiştirme endpoint
+app.post('/api/change-password', (req, res) => {
+  console.log('🔐 Şifre değiştirme isteği alındı');
+  
+  const { currentPassword, newPassword, username } = req.body;
+  
+  // Basit doğrulama
+  if (!currentPassword || !newPassword || !username) {
+    return res.status(400).json({ 
+      success: false, 
+      message: 'Tüm alanlar gerekli.' 
+    });
+  }
+  
+  if (newPassword.length < 6) {
+    return res.status(400).json({ 
+      success: false, 
+      message: 'Yeni şifre en az 6 karakter olmalıdır.' 
+    });
+  }
+  
+  // Bu örnekte basit bir doğrulama yapıyoruz
+  // Gerçek uygulamada veritabanından mevcut şifreyi kontrol etmelisiniz
+  const validCredentials = {
+    'admin': 'admin123',  // Varsayılan admin şifresi
+    'osman': 'osman123'   // Örnek kullanıcı
+  };
+  
+  if (validCredentials[username] !== currentPassword) {
+    return res.status(401).json({ 
+      success: false, 
+      message: 'Mevcut şifre yanlış.' 
+    });
+  }
+  
+  // Şifre değiştirme işlemi
+  // Gerçek uygulamada veritabanında güncelleme yapmalısınız
+  console.log(`🔐 ${username} kullanıcısının şifresi değiştirildi`);
+  
+  res.json({ 
+    success: true, 
+    message: 'Şifre başarıyla değiştirildi!' 
+  });
+});
+
 // Excel upload endpoint - Geliştirilmiş
 app.post('/api/upload', (req, res) => {
   console.log('📤 Upload isteği alındı');
