@@ -241,10 +241,13 @@ const PlayerView: React.FC<PlayerViewProps> = ({ onBack }) => {
       console.log('⏰ Süre güncellendi:', data.timeLeft);
       setTimeLeft(data.timeLeft);
       
-      // Son 5 saniyede ses efekti çal (QuizHost ile aynı)
-      if (data.timeLeft <= 5 && data.timeLeft > 0 && lastPlayedSecond !== data.timeLeft) {
-        playCountdownSound(data.timeLeft);
-        setLastPlayedSecond(data.timeLeft);
+      // Sadece oyuncu oyuna katılmışsa ses efekti çal
+      if (playerName && playerName.trim() !== '') {
+        // Son 5 saniyede ses efekti çal (QuizHost ile aynı)
+        if (data.timeLeft <= 5 && data.timeLeft > 0 && lastPlayedSecond !== data.timeLeft) {
+          playCountdownSound(data.timeLeft);
+          setLastPlayedSecond(data.timeLeft);
+        }
       }
     });
 
