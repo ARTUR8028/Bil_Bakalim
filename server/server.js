@@ -316,6 +316,44 @@ app.post('/api/change-password', (req, res) => {
   });
 });
 
+// Tüm soruları silme endpoint
+app.delete('/api/delete-all-questions', (req, res) => {
+  console.log('🗑️ Tüm soruları silme isteği alındı');
+  
+  const { username } = req.body;
+  
+  // Basit doğrulama
+  if (!username) {
+    return res.status(400).json({ 
+      success: false, 
+      message: 'Kullanıcı adı gerekli.' 
+    });
+  }
+  
+  // Soruları temizle
+  questions = [];
+  
+  // Oyun durumunu sıfırla
+  gameState = {
+    isActive: false,
+    currentQuestion: null,
+    questionStartTime: null,
+    totalQuestions: 0,
+    currentQuestionIndex: 0
+  };
+  
+  // Cevapları temizle
+  answers = {};
+  
+  console.log(`🗑️ ${username} kullanıcısı tüm soruları sildi`);
+  
+  res.json({ 
+    success: true, 
+    message: 'Tüm sorular başarıyla silindi!',
+    deletedCount: questions.length
+  });
+});
+
 // Excel upload endpoint - Geliştirilmiş
 app.post('/api/upload', (req, res) => {
   console.log('📤 Upload isteği alındı');

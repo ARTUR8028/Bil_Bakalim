@@ -27,6 +27,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onBack }) => {
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   const checkServerHealth = useCallback(async () => {
     try {
@@ -253,6 +254,37 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onBack }) => {
       }
     } catch (error) {
       console.error('❌ Şifre değiştirme hatası:', error);
+      setMessage({ type: 'error', text: 'Sunucuya bağlanılamadı. Lütfen tekrar deneyin.' });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleDeleteAllQuestions = async () => {
+    setIsLoading(true);
+    setMessage(null);
+
+    try {
+      const response = await fetch('http://localhost:3001/api/delete-all-questions', {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ username })
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        setMessage({ type: 'success', text: 'Tüm sorular başarıyla silindi!' });
+        setShowDeleteConfirm(false);
+        // Sunucu durumunu yenile
+        checkServerHealth();
+      } else {
+        setMessage({ type: 'error', text: result.message || 'Sorular silinemedi.' });
+      }
+    } catch (error) {
+      console.error('❌ Soru silme hatası:', error);
       setMessage({ type: 'error', text: 'Sunucuya bağlanılamadı. Lütfen tekrar deneyin.' });
     } finally {
       setIsLoading(false);
@@ -805,6 +837,79 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onBack }) => {
                   </>
                 )}
               </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Soru Silme */}
+        <div className="mt-8 bg-white/10 backdrop-blur-lg rounded-2xl p-6 border border-white/20">
+          <div className="flex items-center mb-6">
+            <div className="w-6 h-6 text-red-400 mr-2 flex items-center justify-center">
+              🗑️
+            </div>
+            <h2 className="text-xl font-semibold text-white">Soru Yönetimi</h2>
+          </div>
+
+          <div className="space-y-4">
+            <div className="bg-red-900/20 border border-red-500/30 rounded-lg p-4">
+              <div className="flex items-center mb-2">
+                <div className="w-5 h-5 text-red-400 mr-2">⚠️</div>
+                <h3 className="text-lg font-semibold text-red-300">Tüm Soruları Sil</h3>
+              </div>
+              <p className="text-red-200 text-sm mb-4">
+                Bu işlem tüm soruları kalıcı olarak silecektir. Bu işlem geri alınamaz!
+              </p>
+              
+              {!showDeleteConfirm ? (
+                <button
+                  onClick={() => setShowDeleteConfirm(true)}
+                  className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors font-medium"
+                >
+                  🗑️ Tüm Soruları Sil
+                </button>
+              ) : (
+                <div className="space-y-3">
+                  <div className="bg-red-800/30 border border-red-500/50 rounded-lg p-3">
+                    <p className="text-red-200 text-sm font-medium">
+                      ⚠️ Bu işlem geri alınamaz! Tüm sorular silinecek.
+                    </p>
+                    <p className="text-red-300 text-xs mt-1">
+                      Mevcut soru sayısı: {serverHealth?.questions || 0}
+                    </p>
+                  </div>
+                  
+                  <div className="flex space-x-3">
+                    <button
+                      onClick={handleDeleteAllQuestions}
+                      disabled={isLoading}
+                      className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors font-medium disabled:bg-gray-500 disabled:cursor-not-allowed flex items-center"
+                    >
+                      {isLoading ? (
+                        <>
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                          Siliniyor...
+                        </>
+                      ) : (
+                        <>
+                          🗑️ Evet, Tümünü Sil
+                        </>
+                      )}
+                    </button>
+                    
+                    <button
+                      onClick={() => setShowDeleteConfirm(false)}
+                      disabled={isLoading}
+                      className="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors font-medium"
+                    >
+                      ❌ İptal
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="text-sm text-gray-300 bg-white/5 p-3 rounded-lg">
+              <strong>💡 İpucu:</strong> Tüm soruları sildikten sonra yeni Excel dosyası yükleyebilirsiniz.
             </div>
           </div>
         </div>
