@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { ArrowLeft, Plus, Upload, Eye, EyeOff, CheckCircle, AlertCircle, Wifi, WifiOff, Server, Database } from 'lucide-react';
+import { ArrowLeft, Plus, Upload, Eye, EyeOff, CheckCircle, AlertCircle, Wifi, WifiOff, Server, Database, Download, QrCode } from 'lucide-react';
 import { io, Socket } from 'socket.io-client';
 
 interface AdminPanelProps {
@@ -928,6 +928,50 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onBack }) => {
           </div>
         </div>
 
+      </div>
+
+      {/* Android TV Uygulaması */}
+      <div className="mt-8 bg-white/10 backdrop-blur-lg rounded-2xl p-6 border border-white/20">
+        <div className="flex items-center mb-6">
+          <div className="w-6 h-6 text-purple-400 mr-2 flex items-center justify-center">
+            📱
+          </div>
+          <h2 className="text-xl font-semibold text-white">Android TV Uygulaması</h2>
+        </div>
+
+        <div className="space-y-4">
+          <div className="bg-purple-900/20 border border-purple-500/30 rounded-lg p-4">
+            <div className="flex items-center mb-2">
+              <div className="w-5 h-5 text-purple-400 mr-2">📺</div>
+              <h3 className="text-lg font-semibold text-purple-300">TV Uygulaması İndir</h3>
+            </div>
+            <p className="text-purple-200 text-sm mb-4">
+              Google TV için Android uygulamasını indirin ve büyük ekranda kullanın.
+            </p>
+            
+            <div className="flex space-x-3">
+              <button
+                onClick={() => window.open('/#apk', '_blank')}
+                className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors font-medium flex items-center"
+              >
+                <QrCode className="w-4 h-4 mr-2" />
+                QR Kod ile İndir
+              </button>
+              
+              <button
+                onClick={() => window.open('/api/download/apk', '_blank')}
+                className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors font-medium flex items-center"
+              >
+                <Download className="w-4 h-4 mr-2" />
+                Direkt İndir
+              </button>
+            </div>
+            
+            <div className="mt-3 text-xs text-purple-300">
+              💡 <strong>İpucu:</strong> QR kod ile telefonunuzdan, direkt indir ile bilgisayarınızdan indirebilirsiniz.
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
