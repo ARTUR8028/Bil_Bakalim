@@ -60,14 +60,20 @@ const APKDownload: React.FC<APKDownloadProps> = ({ onBack }) => {
       {/* Main Content */}
       <div className="flex-1 flex items-center justify-center p-8">
         <div className="max-w-4xl w-full">
-          <div className="text-center mb-8">
-            <h1 className="text-5xl font-bold text-white mb-4">
-              📺 Bil Bakalım TV
-            </h1>
-            <p className="text-2xl text-gray-300 mb-8">
-              Google TV için PWA Uygulaması
-            </p>
-          </div>
+            <div className="text-center mb-8">
+              <h1 className="text-5xl font-bold text-white mb-4">
+                📺 Bil Bakalım TV
+              </h1>
+              <p className="text-2xl text-gray-300 mb-8">
+                Google TV için PWA Uygulaması
+              </p>
+              <div className="bg-yellow-900/20 border border-yellow-500/30 rounded-lg p-4 mb-6">
+                <p className="text-yellow-200 text-lg">
+                  ⚠️ <strong>Önemli:</strong> APK dosyası yerine PWA kullanmanızı öneriyoruz. 
+                  PWA daha güvenli, hızlı ve güncel kalır.
+                </p>
+              </div>
+            </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {/* QR Code Section */}
@@ -90,6 +96,13 @@ const APKDownload: React.FC<APKDownloadProps> = ({ onBack }) => {
                     <li>4. "Ana ekrana ekle" seçeneğini seçin</li>
                     <li>5. Uygulama ana ekranda görünecek!</li>
                   </ol>
+                  
+                  <div className="mt-4 p-3 bg-green-900/20 border border-green-500/30 rounded-lg">
+                    <p className="text-green-200 text-sm">
+                      ✅ <strong>Avantajlar:</strong> Otomatik güncelleme, güvenli, hızlı yükleme, 
+                      APK imzalama sorunu yok!
+                    </p>
+                  </div>
                 </div>
                 
                 {loading ? (
