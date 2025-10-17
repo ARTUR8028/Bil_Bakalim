@@ -160,19 +160,23 @@ async function initializeServer() {
   
   // Soruları yükle
   try {
-    const raw = await fs.readFile('data/questions.json', 'utf-8');
-    questions = JSON.parse(raw);
-    gameState.totalQuestions = questions.length;
-    console.log(`✅ ${questions.length} soru yüklendi`);
-  } catch (err) {
-    console.log('⚠️ Soru dosyası bulunamadı, yeni dosya oluşturuluyor...');
-    questions = [];
-    try {
-      await fs.writeFile('data/questions.json', JSON.stringify([], null, 2), 'utf-8');
-      console.log('✅ Boş soru dosyası oluşturuldu');
-    } catch (createErr) {
-      console.error('❌ Soru dosyası oluşturulamadı:', createErr);
+    const questionsPath = path.join(__dirname, '../data/questions.json');
+    console.log('📁 Soru dosyası yolu:', questionsPath);
+    
+    if (fs.existsSync(questionsPath)) {
+      const raw = await fs.readFile(questionsPath, 'utf-8');
+      questions = JSON.parse(raw);
+      gameState.totalQuestions = questions.length;
+      console.log(`✅ ${questions.length} soru yüklendi`);
+    } else {
+      console.log('⚠️ Soru dosyası bulunamadı:', questionsPath);
+      questions = [];
+      gameState.totalQuestions = 0;
     }
+  } catch (err) {
+    console.error('❌ Soru yükleme hatası:', err);
+    questions = [];
+    gameState.totalQuestions = 0;
   }
 }
 
