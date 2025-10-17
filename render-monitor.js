@@ -5,9 +5,17 @@
  * Otomatik hata tespiti ve çözüm sistemi
  */
 
-const https = require('https');
-const fs = require('fs');
-const path = require('path');
+import https from 'https';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import dotenv from 'dotenv';
+
+// Environment variables yükle
+dotenv.config();
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 class RenderMonitor {
   constructor() {
@@ -17,6 +25,10 @@ class RenderMonitor {
     this.checkInterval = 60000; // 1 dakika
     this.maxRetries = 3;
     this.retryDelay = 30000; // 30 saniye
+    
+    console.log('🚀 RenderMonitor initialized');
+    console.log(`🔑 API Key: ${this.apiKey ? '✅ Set' : '❌ Missing'}`);
+    console.log(`🆔 Service ID: ${this.serviceId || '❌ Missing'}`);
   }
 
   /**
@@ -65,6 +77,8 @@ class RenderMonitor {
   async checkServiceHealth() {
     try {
       console.log('🔍 Service durumu kontrol ediliyor...');
+      console.log(`🔑 API Key: ${this.apiKey ? '✅ Set' : '❌ Missing'}`);
+      console.log(`🆔 Service ID: ${this.serviceId || '❌ Missing'}`);
       
       const response = await this.makeRequest(`/v1/services/${this.serviceId}`);
       
@@ -82,6 +96,7 @@ class RenderMonitor {
         };
       } else {
         console.log(`❌ Service durumu alınamadı: ${response.status}`);
+        console.log(`📋 Response: ${JSON.stringify(response.data, null, 2)}`);
         return { healthy: false, error: response.data };
       }
     } catch (error) {
@@ -278,26 +293,37 @@ class RenderMonitor {
 }
 
 // CLI kullanımı
-if (require.main === module) {
-  const monitor = new RenderMonitor();
-  
-  const command = process.argv[2];
-  
-  switch (command) {
-    case 'start':
-      monitor.startMonitoring();
-      break;
-    case 'restart':
-      monitor.manualRestart();
-      break;
-    case 'health':
-      monitor.checkServiceHealth().then(console.log);
-      break;
-    case 'logs':
-      monitor.checkDeploymentLogs().then(console.log);
-      break;
-    default:
-      console.log(`
+console.log('🔍 CLI Debug Info:');
+console.log(`import.meta.url: ${import.meta.url}`);
+console.log(`process.argv[1]: ${process.argv[1]}`);
+console.log(`process.argv[2]: ${process.argv[2]}`);
+
+// Her zaman CLI mode'u çalıştır
+console.log('✅ CLI mode activated');
+const monitor = new RenderMonitor();
+
+const command = process.argv[2];
+console.log(`🎯 Command: ${command}`);
+
+switch (command) {
+  case 'start':
+    monitor.startMonitoring();
+    break;
+  case 'restart':
+    monitor.manualRestart();
+    break;
+  case 'health':
+    monitor.checkServiceHealth().then(result => {
+      console.log('📊 Health Check Result:', result);
+    }).catch(error => {
+      console.log('❌ Health Check Error:', error);
+    });
+    break;
+  case 'logs':
+    monitor.checkDeploymentLogs().then(console.log);
+    break;
+  default:
+    console.log(`
 🚀 Render Monitor - Otomatik Hata Çözme Sistemi
 
 Kullanım:
@@ -310,8 +336,8 @@ Environment Variables:
   RENDER_API_KEY      - Render API anahtarı (gerekli)
   RENDER_SERVICE_ID   - Service ID (gerekli)
   DISCORD_WEBHOOK_URL - Discord webhook URL (opsiyonel)
-      `);
-  }
+    `);
+    break;
 }
 
-module.exports = RenderMonitor;
+export default RenderMonitor;

@@ -570,19 +570,19 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onBack }) => {
           {serverHealth ? (
             <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
               <div className="bg-white/10 rounded-lg p-4 text-center">
-                <div className="text-2xl font-bold text-blue-300">{serverHealth.questions}</div>
+                <div className="text-2xl font-bold text-blue-300">{serverHealth.questions || 0}</div>
                 <div className="text-sm text-gray-300">📚 Soru</div>
               </div>
               <div className="bg-white/10 rounded-lg p-4 text-center">
-                <div className="text-2xl font-bold text-green-300">{serverHealth.players}</div>
+                <div className="text-2xl font-bold text-green-300">{serverHealth.players || 0}</div>
                 <div className="text-sm text-gray-300">👥 Oyuncu</div>
               </div>
               <div className="bg-white/10 rounded-lg p-4 text-center">
-                <div className="text-2xl font-bold text-purple-300">{serverHealth.port}</div>
+                <div className="text-2xl font-bold text-purple-300">{serverHealth.port || 'N/A'}</div>
                 <div className="text-sm text-gray-300">🔌 Port</div>
               </div>
               <div className="bg-white/10 rounded-lg p-4 text-center">
-                <div className="text-2xl font-bold text-yellow-300">{Math.round(serverHealth.uptime)}s</div>
+                <div className="text-2xl font-bold text-yellow-300">{Math.round(serverHealth.uptime || 0)}s</div>
                 <div className="text-sm text-gray-300">⏱️ Uptime</div>
               </div>
               <div className="bg-white/10 rounded-lg p-4 text-center">
