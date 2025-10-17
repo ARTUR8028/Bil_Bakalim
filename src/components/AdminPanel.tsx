@@ -543,48 +543,62 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onBack }) => {
         </div>
 
         {/* Sunucu Durumu */}
-        {serverHealth && (
-          <div className="mb-8 bg-white/10 backdrop-blur-lg rounded-2xl p-6 border border-white/20">
-            <h3 className="text-xl font-semibold text-white mb-4 flex items-center">
+        <div className="mb-8 bg-white/10 backdrop-blur-lg rounded-2xl p-6 border border-white/20">
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="text-xl font-semibold text-white flex items-center">
               <Server className="w-6 h-6 mr-2 text-green-400" />
               📊 Sunucu Durumu
             </h3>
+            <button
+              onClick={checkServerHealth}
+              disabled={isLoading}
+              className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm disabled:bg-gray-500 flex items-center"
+            >
+              {isLoading ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                  Yenileniyor...
+                </>
+              ) : (
+                <>
+                  🔄 Yenile
+                </>
+              )}
+            </button>
+          </div>
+          
+          {serverHealth ? (
             <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
               <div className="bg-white/10 rounded-lg p-4 text-center">
                 <div className="text-2xl font-bold text-blue-300">{serverHealth.questions}</div>
-                <div className="text-sm text-gray-300">Soru</div>
+                <div className="text-sm text-gray-300">📚 Soru</div>
               </div>
               <div className="bg-white/10 rounded-lg p-4 text-center">
                 <div className="text-2xl font-bold text-green-300">{serverHealth.players}</div>
-                <div className="text-sm text-gray-300">Oyuncu</div>
+                <div className="text-sm text-gray-300">👥 Oyuncu</div>
               </div>
               <div className="bg-white/10 rounded-lg p-4 text-center">
                 <div className="text-2xl font-bold text-purple-300">{serverHealth.port}</div>
-                <div className="text-sm text-gray-300">Port</div>
+                <div className="text-sm text-gray-300">🔌 Port</div>
               </div>
               <div className="bg-white/10 rounded-lg p-4 text-center">
                 <div className="text-2xl font-bold text-yellow-300">{Math.round(serverHealth.uptime)}s</div>
-                <div className="text-sm text-gray-300">Uptime</div>
+                <div className="text-sm text-gray-300">⏱️ Uptime</div>
               </div>
               <div className="bg-white/10 rounded-lg p-4 text-center">
                 <div className={`text-2xl font-bold ${serverHealth.gameActive ? 'text-red-300' : 'text-gray-300'}`}>
-                  {serverHealth.gameActive ? 'AKTİF' : 'BEKLEMEDE'}
+                  {serverHealth.gameActive ? '🎮 AKTİF' : '⏸️ BEKLEMEDE'}
                 </div>
-                <div className="text-sm text-gray-300">Oyun</div>
+                <div className="text-sm text-gray-300">🎯 Oyun</div>
               </div>
             </div>
-            
-            <div className="mt-4 flex justify-center">
-              <button
-                onClick={checkServerHealth}
-                disabled={isLoading}
-                className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm disabled:bg-gray-500"
-              >
-                🔄 Yenile
-              </button>
+          ) : (
+            <div className="text-center py-8">
+              <div className="text-gray-400 mb-2">📡 Sunucu durumu alınamadı</div>
+              <div className="text-sm text-gray-500">Yenile butonuna tıklayarak tekrar deneyin</div>
             </div>
-          </div>
-        )}
+          )}
+        </div>
 
         {/* Şifre Değiştirme */}
         {showChangePassword && (
@@ -919,4 +933,5 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onBack }) => {
   );
 };
 
+export default AdminPanel;
 export default AdminPanel;
