@@ -3564,7 +3564,11 @@
     "answer": "5"
   },
   {
-    "question": "test",
-    "answer": "1"
+    "question": "Deneme ?",
+    "answer": "5"
+  },
+  {
+    "question": "Dünyanın nüfusu kaçtır milyondur?",
+    "answer": "8250"
   }
 ]

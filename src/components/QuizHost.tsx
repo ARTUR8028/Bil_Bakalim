@@ -26,13 +26,13 @@ interface GameResult {
     answer: number;
     difference: number;
     isCorrect: boolean;
+    hasAnswered: boolean;
   }>;
 }
 
 const QuizHost: React.FC<QuizHostProps> = ({ onBack }) => {
   const [socket, setSocket] = useState<Socket | null>(null);
   const [gameMode, setGameMode] = useState<'sequential' | 'random' | null>(null);
-  const [gameStarted, setGameStarted] = useState(false);
   const [questions, setQuestions] = useState<Question[]>([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [playerCount, setPlayerCount] = useState<PlayerCount>({ total: 0, answered: 0 });
@@ -89,12 +89,23 @@ const QuizHost: React.FC<QuizHostProps> = ({ onBack }) => {
       socketConnection.emit('ping', { timestamp: Date.now(), source: 'host' });
       
       // Mevcut katılımcıları iste
-      socketConnection.emit('getParticipants');
+      console.log('📋 Mevcut katılımcıları istiyorum...');
+      setTimeout(() => {
+        if (socketConnection && socketConnection.connected) {
+          socketConnection.emit('getParticipants');
+          console.log('📤 getParticipants event gönderildi');
+        } else {
+          console.error('❌ Socket bağlantısı yok, getParticipants gönderilemedi');
+        }
+      }, 100);
     });
 
     socketConnection.on('disconnect', (reason) => {
       console.log('❌ Quiz Host socket bağlantısı kesildi:', reason);
       setConnectionStatus('disconnected');
+      // Bağlantı kesildiğinde oyuncu listesini temizle
+      setParticipantNames([]);
+      console.log('🧹 Bağlantı kesildi, oyuncu listesi temizlendi');
     });
 
     socketConnection.on('connect_error', (error) => {
@@ -151,28 +162,41 @@ const QuizHost: React.FC<QuizHostProps> = ({ onBack }) => {
 
     socketConnection.on('playerJoined', (playerName: string) => {
       console.log('👤 Oyuncu katıldı:', playerName);
-      
-      // Toast notification göster
       addToast(`🎉 ${playerName} oyuna katıldı!`, 'success');
-      
-      setParticipantNames(prev => {
-        // Eğer isim zaten listede yoksa ekle (bağlanma sırasına göre)
-        if (!prev.includes(playerName)) {
-          return [...prev, playerName];
-        }
-        return prev;
-      });
     });
 
     socketConnection.on('playerLeft', (playerName: string) => {
       console.log('👋 Oyuncu ayrıldı:', playerName);
-      setParticipantNames(prev => prev.filter(name => name !== playerName));
+      addToast(`👋 ${playerName} oyundan ayrıldı!`, 'info');
     });
 
     // Tüm katılımcıları al
     socketConnection.on('allParticipants', (participants: string[]) => {
-      console.log('👥 Tüm katılımcılar:', participants);
-      setParticipantNames(participants);
+      console.log('👥 Tüm katılımcılar alındı:', participants);
+      console.log('👥 Katılımcı sayısı:', participants.length);
+      console.log('👥 Socket bağlantı durumu:', socketConnection.connected);
+      
+      if (Array.isArray(participants)) {
+        // Katılımcıları ters sırada göster (son katılan üstte)
+        const reversedParticipants = [...participants].reverse();
+        setParticipantNames(reversedParticipants);
+        console.log('✅ Katılımcılar güncellendi:', reversedParticipants);
+      } else {
+        console.error('❌ Geçersiz katılımcı verisi:', participants);
+        setParticipantNames([]);
+      }
+    });
+
+    socketConnection.on('timerUpdate', (data: { timeLeft: number }) => {
+      console.log('⏰ Host süre güncellendi:', data.timeLeft);
+      setTimer(data.timeLeft);
+      
+      // Son 5 saniyede ses efekti çal
+      if (data.timeLeft <= 5 && data.timeLeft > 0) {
+        playSound('tick');
+      } else if (data.timeLeft === 0) {
+        playSound('final');
+      }
     });
 
     socketConnection.on('showResult', (result: GameResult) => {
@@ -185,6 +209,12 @@ const QuizHost: React.FC<QuizHostProps> = ({ onBack }) => {
     socketConnection.on('updateScores', (newScores: Record<string, number>) => {
       console.log('🏆 Skorlar güncellendi:', newScores);
       setScores(newScores);
+    });
+
+    socketConnection.on('gameEnded', (finalScores: Record<string, number>) => {
+      console.log('🏁 Oyun bitti, final skorları:', finalScores);
+      setScores(finalScores);
+      setShowFinalRankings(true);
     });
 
     return () => {
@@ -237,26 +267,7 @@ const QuizHost: React.FC<QuizHostProps> = ({ onBack }) => {
     }
   };
 
-  useEffect(() => {
-    let interval: NodeJS.Timeout;
-    if (gameStarted && timer > 0 && !showResult) {
-      interval = setInterval(() => {
-        setTimer(prev => {
-          const newTime = prev - 1;
-          
-          // Ses çalma
-          if (newTime <= 5 && newTime > 0) {
-            playSound('tick');
-          } else if (newTime === 0) {
-            playSound('final');
-          }
-          
-          return newTime;
-        });
-      }, 1000);
-    }
-    return () => clearInterval(interval);
-  }, [gameStarted, timer, showResult]);
+  // Client-side timer kaldırıldı - sadece server'dan gelen timer kullanılıyor
 
   const startGame = (mode: 'sequential' | 'random') => {
     console.log('🎮 Oyun modu seçildi:', mode);
@@ -271,7 +282,6 @@ const QuizHost: React.FC<QuizHostProps> = ({ onBack }) => {
   const startQuizGame = () => {
     console.log('🚀 Quiz oyunu başlatılıyor...');
     setWaitingForPlayers(false);
-    setGameStarted(true);
     // Oyun başladığında ilk soruyu otomatik başlat
     setTimeout(() => {
       if (currentQuestionIndex < questions.length && socket) {
@@ -283,6 +293,8 @@ const QuizHost: React.FC<QuizHostProps> = ({ onBack }) => {
         setGameResult(null);
         
         socket.emit('startQuestion', question);
+        // Süre sayacını oyunculara gönder
+        socket.emit('timerUpdate', { timeLeft: 30 });
       }
     }, 1000); // 1 saniye bekle, sonra soruyu başlat
   };
@@ -304,6 +316,8 @@ const QuizHost: React.FC<QuizHostProps> = ({ onBack }) => {
         setGameResult(null);
         
         socket.emit('startQuestion', question);
+        // Süre sayacını oyunculara gönder
+        socket.emit('timerUpdate', { timeLeft: 30 });
       }
     }, 1000); // 1 saniye bekle, sonra soruyu başlat
   };
@@ -314,7 +328,6 @@ const QuizHost: React.FC<QuizHostProps> = ({ onBack }) => {
       socket.emit('endGame');
     }
     setShowFinalRankings(true);
-    setGameStarted(false);
   };
 
   const copyLink = async () => {
@@ -330,9 +343,14 @@ const QuizHost: React.FC<QuizHostProps> = ({ onBack }) => {
 
   const goBackToModeSelection = () => {
     console.log('🔙 Mod seçimine dönülüyor...');
+    
+    // Server'a yeni oyun başlatma sinyali gönder
+    if (socket) {
+      socket.emit('startNewGame');
+    }
+    
     setGameMode(null);
     setWaitingForPlayers(false);
-    setGameStarted(false);
     setCurrentQuestionIndex(0);
     setShowResult(false);
     setScores({});
@@ -357,7 +375,7 @@ const QuizHost: React.FC<QuizHostProps> = ({ onBack }) => {
             </div>
           </div>
         ) : (
-          <div className="space-y-1 max-h-48 overflow-y-auto">
+          <div className="space-y-1 max-h-80 overflow-y-auto">
             {participantNames.map((name, index) => (
               <div
                 key={`${name}-${index}`}
@@ -380,11 +398,11 @@ const QuizHost: React.FC<QuizHostProps> = ({ onBack }) => {
 
   // Toast Component
   const ToastContainer = () => (
-    <div className="fixed top-4 right-4 z-50 space-y-2">
+    <div className="fixed top-4 right-2 md:right-4 z-50 space-y-2 mobile-safe-top">
       {toasts.map((toast) => (
         <div
           key={toast.id}
-          className={`px-6 py-3 rounded-lg shadow-lg backdrop-blur-lg border animate-slideInRight ${
+          className={`px-4 md:px-6 py-2 md:py-3 rounded-lg shadow-lg backdrop-blur-lg border animate-slideInRight mobile-btn ${
             toast.type === 'success' 
               ? 'bg-green-600/90 text-white border-green-500/30' 
               : toast.type === 'warning'
@@ -395,11 +413,11 @@ const QuizHost: React.FC<QuizHostProps> = ({ onBack }) => {
             animation: 'slideInRight 0.3s ease-out, fadeOut 0.3s ease-in 3.7s forwards'
           }}
         >
-          <div className="flex items-center">
+          <div className="flex items-center mobile-flex-row mobile-items-center">
             {toast.type === 'success' && '🎉'}
             {toast.type === 'warning' && '⚠️'}
             {toast.type === 'info' && 'ℹ️'}
-            <span className="ml-2 font-medium">{toast.message}</span>
+            <span className="ml-2 font-medium mobile-text-sm">{toast.message}</span>
           </div>
         </div>
       ))}
@@ -408,7 +426,7 @@ const QuizHost: React.FC<QuizHostProps> = ({ onBack }) => {
 
   // Bağlantı durumu göstergesi
   const ConnectionIndicator = () => (
-    <div className={`flex items-center space-x-2 px-3 py-1 rounded-full text-sm ${
+    <div className={`flex items-center space-x-2 px-2 md:px-3 py-1 rounded-full text-xs md:text-sm mobile-text-xs ${
       connectionStatus === 'connected' 
         ? 'bg-green-100 text-green-800' 
         : connectionStatus === 'connecting'
@@ -416,13 +434,13 @@ const QuizHost: React.FC<QuizHostProps> = ({ onBack }) => {
         : 'bg-red-100 text-red-800'
     }`}>
       {connectionStatus === 'connected' ? (
-        <Wifi className="w-4 h-4" />
+        <Wifi className="w-3 h-3 md:w-4 md:h-4" />
       ) : connectionStatus === 'connecting' ? (
-        <div className="w-4 h-4 border-2 border-yellow-600 border-t-transparent rounded-full animate-spin"></div>
+        <div className="w-3 h-3 md:w-4 md:h-4 border-2 border-yellow-600 border-t-transparent rounded-full animate-spin"></div>
       ) : (
-        <WifiOff className="w-4 h-4" />
+        <WifiOff className="w-3 h-3 md:w-4 md:h-4" />
       )}
-      <span>
+      <span className="mobile-text-xs">
         {connectionStatus === 'connected' && 'Sunucu Bağlı'}
         {connectionStatus === 'connecting' && 'Bağlanıyor...'}
         {connectionStatus === 'disconnected' && 'Sunucu Bağlantısı Yok'}
@@ -434,7 +452,7 @@ const QuizHost: React.FC<QuizHostProps> = ({ onBack }) => {
     const sortedScores = Object.entries(scores).sort(([,a], [,b]) => b - a);
     
     return (
-      <div className="min-h-screen bg-gradient-to-br from-green-900 via-blue-900 to-purple-900 p-4">
+      <div translate="no" className="min-h-screen bg-gradient-to-br from-green-900 via-blue-900 to-purple-900 p-4">
         <div className="max-w-4xl mx-auto">
           <div className="flex justify-between items-center mb-8">
             <button
@@ -454,8 +472,22 @@ const QuizHost: React.FC<QuizHostProps> = ({ onBack }) => {
               {/* Kazanan animasyonu */}
               {sortedScores.length > 0 && (
                 <div className="mb-8 relative">
-                  <div className="bg-gradient-to-r from-yellow-400/20 to-orange-500/20 rounded-xl p-6 border border-yellow-400/30">
-                    <h3 className="text-2xl font-semibold text-yellow-300 mb-4">🏆 KAZANAN</h3>
+                  {/* Havai Fişek Animasyonu */}
+                  <div className="absolute inset-0 pointer-events-none">
+                    <div className="absolute top-1/4 left-1/4 w-4 h-4 bg-yellow-400 rounded-full animate-fireworks" style={{ animationDelay: '0s', animationDuration: '2s' }}></div>
+                    <div className="absolute top-1/3 right-1/4 w-3 h-3 bg-orange-400 rounded-full animate-fireworks" style={{ animationDelay: '0.5s', animationDuration: '2.5s' }}></div>
+                    <div className="absolute top-1/2 left-1/3 w-5 h-5 bg-red-400 rounded-full animate-fireworks" style={{ animationDelay: '1s', animationDuration: '2.2s' }}></div>
+                    <div className="absolute top-2/3 right-1/3 w-3 h-3 bg-pink-400 rounded-full animate-fireworks" style={{ animationDelay: '1.5s', animationDuration: '2.8s' }}></div>
+                    <div className="absolute top-3/4 left-1/2 w-4 h-4 bg-purple-400 rounded-full animate-fireworks" style={{ animationDelay: '2s', animationDuration: '2.3s' }}></div>
+                    
+                    {/* Sparkle Effects */}
+                    <div className="absolute top-1/4 left-1/2 w-2 h-2 bg-white rounded-full animate-sparkle" style={{ animationDelay: '0.3s', animationDuration: '1.5s' }}></div>
+                    <div className="absolute top-1/2 right-1/2 w-2 h-2 bg-yellow-300 rounded-full animate-sparkle" style={{ animationDelay: '0.8s', animationDuration: '1.8s' }}></div>
+                    <div className="absolute top-3/4 left-1/4 w-2 h-2 bg-orange-300 rounded-full animate-sparkle" style={{ animationDelay: '1.3s', animationDuration: '1.6s' }}></div>
+                  </div>
+                  
+                  <div className="bg-gradient-to-r from-yellow-400/20 to-orange-500/20 rounded-xl p-6 border border-yellow-400/30 relative z-10">
+                    <h3 className="text-2xl font-semibold text-yellow-300 mb-4">🏆 TEBRİKLER KAZANAN</h3>
                     <div className="relative">
                       <p className="text-white text-6xl font-bold animate-pulse" style={{
                         animation: 'heartbeat 1.5s ease-in-out infinite, glow 2s ease-in-out infinite alternate'
@@ -465,30 +497,6 @@ const QuizHost: React.FC<QuizHostProps> = ({ onBack }) => {
                       <p className="text-yellow-300 text-2xl font-semibold mt-2">
                         {sortedScores[0][1]} Puan
                       </p>
-                      
-                      {/* Konfeti ve havai fişek efekti */}
-                      <div className="absolute inset-0 pointer-events-none">
-                        {/* Konfeti */}
-                        {[...Array(20)].map((_, i) => (
-                          <div
-                            key={i}
-                            className={`absolute w-3 h-3 rounded-full animate-bounce ${
-                              ['bg-yellow-400', 'bg-pink-400', 'bg-blue-400', 'bg-green-400', 'bg-purple-400', 'bg-red-400'][i % 6]
-                            }`}
-                            style={{
-                              left: `${Math.random() * 100}%`,
-                              top: `${Math.random() * 100}%`,
-                              animationDelay: `${Math.random() * 3}s`,
-                              animationDuration: `${2 + Math.random() * 2}s`
-                            }}
-                          ></div>
-                        ))}
-                        
-                        {/* Havai fişek */}
-                        <div className="absolute top-0 left-1/4 w-4 h-4 bg-yellow-400 rounded-full animate-ping" style={{ animationDelay: '0s' }}></div>
-                        <div className="absolute top-0 right-1/4 w-4 h-4 bg-pink-400 rounded-full animate-ping" style={{ animationDelay: '1s' }}></div>
-                        <div className="absolute top-0 left-1/2 w-4 h-4 bg-blue-400 rounded-full animate-ping" style={{ animationDelay: '2s' }}></div>
-                      </div>
                     </div>
                   </div>
                 </div>
@@ -529,48 +537,48 @@ const QuizHost: React.FC<QuizHostProps> = ({ onBack }) => {
   }
 
   if (!gameMode) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-green-900 via-blue-900 to-purple-900 flex items-center justify-center p-4">
-        <div className="max-w-2xl w-full text-center">
-          <div className="flex justify-between items-center mb-8">
+  return (
+    <div translate="no" className="min-h-screen bg-gradient-to-br from-green-900 via-blue-900 to-purple-900 flex items-center justify-center p-4 mobile-safe-top mobile-safe-bottom">
+      <div className="max-w-2xl w-full text-center mobile-container">
+          <div className="flex justify-between items-center mb-6 md:mb-8 mobile-flex-row mobile-justify-between mobile-items-center">
             <button
               onClick={onBack}
-              className="flex items-center text-white hover:text-green-300 transition-colors"
+              className="flex items-center text-white hover:text-green-300 transition-colors mobile-btn mobile-touch-manipulation"
             >
-              <ArrowLeft className="w-5 h-5 mr-2" />
-              Ana Menü
+              <ArrowLeft className="w-4 h-4 md:w-5 md:h-5 mr-2" />
+              <span className="mobile-text-sm">Ana Menü</span>
             </button>
             <ConnectionIndicator />
           </div>
 
-          <h1 className="text-5xl font-bold text-white mb-8">🎮 MODERN QUIZ</h1>
-          <p className="text-xl text-green-200 mb-12">Oyun modunu seçin ve başlayın</p>
+          <h1 className="text-3xl md:text-5xl font-bold text-white mb-6 md:mb-8 mobile-text-3xl">🎮 MODERN QUIZ</h1>
+          <p className="text-lg md:text-xl text-green-200 mb-8 md:mb-12 mobile-text-lg">Oyun modunu seçin ve başlayın</p>
 
           {questions.length === 0 && (
-            <div className="mb-8 p-4 bg-yellow-100 border border-yellow-200 rounded-lg text-yellow-800">
+            <div className="mb-6 md:mb-8 p-3 md:p-4 bg-yellow-100 border border-yellow-200 rounded-lg text-yellow-800 mobile-text-sm">
               ⚠️ Henüz soru eklenmemiş. Admin panelinden soru ekleyin.
             </div>
           )}
 
-          <div className="grid md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mobile-grid-1">
             <button
               onClick={() => startGame('sequential')}
               disabled={questions.length === 0 || connectionStatus !== 'connected'}
-              className="bg-white/10 backdrop-blur-lg rounded-2xl p-8 hover:bg-white/20 transition-all duration-300 border border-white/20 group disabled:opacity-50 disabled:cursor-not-allowed"
+              className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 md:p-8 hover:bg-white/20 transition-all duration-300 border border-white/20 group disabled:opacity-50 disabled:cursor-not-allowed mobile-btn mobile-touch-manipulation"
             >
-              <RotateCcw className="w-12 h-12 text-blue-300 mx-auto mb-4 group-hover:scale-110 transition-transform" />
-              <h3 className="text-2xl font-semibold text-white mb-2">Sıralı Mod</h3>
-              <p className="text-green-200">Sorular sırasıyla gelir</p>
+              <RotateCcw className="w-10 h-10 md:w-12 md:h-12 text-blue-300 mx-auto mb-3 md:mb-4 group-hover:scale-110 transition-transform" />
+              <h3 className="text-xl md:text-2xl font-semibold text-white mb-2 mobile-text-xl">Sıralı Mod</h3>
+              <p className="text-green-200 mobile-text-sm">Sorular sırasıyla gelir</p>
             </button>
 
             <button
               onClick={() => startGame('random')}
               disabled={questions.length === 0 || connectionStatus !== 'connected'}
-              className="bg-white/10 backdrop-blur-lg rounded-2xl p-8 hover:bg-white/20 transition-all duration-300 border border-white/20 group disabled:opacity-50 disabled:cursor-not-allowed"
+              className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 md:p-8 hover:bg-white/20 transition-all duration-300 border border-white/20 group disabled:opacity-50 disabled:cursor-not-allowed mobile-btn mobile-touch-manipulation"
             >
-              <Shuffle className="w-12 h-12 text-purple-300 mx-auto mb-4 group-hover:scale-110 transition-transform" />
-              <h3 className="text-2xl font-semibold text-white mb-2">Rastgele Mod</h3>
-              <p className="text-green-200">Sorular karışık gelir</p>
+              <Shuffle className="w-10 h-10 md:w-12 md:h-12 text-purple-300 mx-auto mb-3 md:mb-4 group-hover:scale-110 transition-transform" />
+              <h3 className="text-xl md:text-2xl font-semibold text-white mb-2 mobile-text-xl">Rastgele Mod</h3>
+              <p className="text-green-200 mobile-text-sm">Sorular karışık gelir</p>
             </button>
           </div>
 
@@ -587,7 +595,7 @@ const QuizHost: React.FC<QuizHostProps> = ({ onBack }) => {
 
   if (waitingForPlayers) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-green-900 via-blue-900 to-purple-900 p-4">
+      <div translate="no" className="min-h-screen bg-gradient-to-br from-green-900 via-blue-900 to-purple-900 p-4">
         <div className="max-w-4xl mx-auto">
           {/* Header */}
           <div className="flex items-center justify-between mb-8">
@@ -701,7 +709,7 @@ const QuizHost: React.FC<QuizHostProps> = ({ onBack }) => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-900 via-blue-900 to-purple-900 p-4">
+    <div translate="no" className="min-h-screen bg-gradient-to-br from-green-900 via-blue-900 to-purple-900 p-4">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
@@ -712,6 +720,19 @@ const QuizHost: React.FC<QuizHostProps> = ({ onBack }) => {
             <ArrowLeft className="w-5 h-5 mr-2" />
             Ana Menü
           </button>
+          
+          {/* Sonraki Soru Butonu - Orta */}
+          {showResult && (
+            <div className="flex justify-center">
+              <button
+                onClick={nextQuestion}
+                disabled={currentQuestionIndex >= questions.length - 1}
+                className="bg-purple-600 text-white px-6 py-3 rounded-lg hover:bg-purple-700 transition-colors font-medium disabled:bg-gray-500 disabled:cursor-not-allowed"
+              >
+                Sonraki Soru
+              </button>
+            </div>
+          )}
           
           <div className="flex items-center space-x-4">
             <ConnectionIndicator />
@@ -795,7 +816,7 @@ const QuizHost: React.FC<QuizHostProps> = ({ onBack }) => {
                       <p className="text-white text-3xl sm:text-4xl md:text-6xl font-bold">{gameResult?.correct}</p>
                     </div>
                     
-                    <div className="bg-blue-600/20 rounded-lg p-6 relative overflow-hidden">
+                    <div className="bg-gradient-to-r from-blue-500/20 to-purple-500/20 border border-blue-500/30 rounded-lg p-6 relative overflow-hidden">
                       <h4 className="text-blue-300 font-semibold mb-4">🎯 Doğru veya En Yakın Cevap Veren</h4>
                       <div className="relative">
                         {/* Kazanan isimlerini göster */}
@@ -851,12 +872,14 @@ const QuizHost: React.FC<QuizHostProps> = ({ onBack }) => {
                         <div className="space-y-2">
                           {gameResult.allAnswers.map((answer, index) => (
                             <div key={index} className={`flex justify-between items-center p-2 rounded-lg ${
+                              !answer.hasAnswered ? 'bg-red-600/20 border border-red-500/30' :
                               answer.isCorrect ? 'bg-green-600/20 border border-green-500/30' : 
                               answer.difference <= 5 ? 'bg-yellow-600/20 border border-yellow-500/30' :
                               'bg-gray-600/20 border border-gray-500/30'
                             }`}>
                               <div className="flex items-center">
                                 <span className={`text-sm font-bold mr-2 ${
+                                  !answer.hasAnswered ? 'text-red-300' :
                                   answer.isCorrect ? 'text-green-300' : 
                                   answer.difference <= 5 ? 'text-yellow-300' : 'text-gray-300'
                                 }`}>
@@ -865,9 +888,15 @@ const QuizHost: React.FC<QuizHostProps> = ({ onBack }) => {
                                 <span className="text-white font-medium">{answer.playerName}</span>
                               </div>
                               <div className="flex items-center space-x-2">
-                                <span className="text-white font-bold">{answer.answer}</span>
-                                {answer.isCorrect && <span className="text-green-300 text-xs">✅</span>}
-                                {!answer.isCorrect && answer.difference <= 5 && <span className="text-yellow-300 text-xs">🎯</span>}
+                                {!answer.hasAnswered ? (
+                                  <span className="text-red-300 font-bold">Cevap yok</span>
+                                ) : (
+                                  <>
+                                    <span className="text-white font-bold">{answer.answer}</span>
+                                    {answer.isCorrect && <span className="text-green-300 text-xs">✓</span>}
+                                    {!answer.isCorrect && gameResult.allAnswers && answer.difference === Math.min(...gameResult.allAnswers.filter(a => a.hasAnswered).map(a => a.difference)) && <span className="text-yellow-300 text-xs">🎯</span>}
+                                  </>
+                                )}
                               </div>
                             </div>
                           ))}
@@ -879,18 +908,6 @@ const QuizHost: React.FC<QuizHostProps> = ({ onBack }) => {
               </div>
             )}
 
-            {/* Sonraki Soru Butonu - En Üstte */}
-            {showResult && (
-              <div className="flex justify-center mb-6">
-                <button
-                  onClick={nextQuestion}
-                  disabled={currentQuestionIndex >= questions.length - 1}
-                  className="bg-purple-600 text-white px-8 py-4 rounded-lg hover:bg-purple-700 transition-colors font-medium disabled:bg-gray-500 disabled:cursor-not-allowed text-lg"
-                >
-                  Sonraki Soru
-                </button>
-              </div>
-            )}
 
             {/* Oyunu Bitir Butonu */}
             <div className="flex justify-center">

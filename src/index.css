@@ -7,6 +7,20 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Prevent automatic translation */
+* {
+  -webkit-translate: no;
+  -moz-translate: no;
+  -ms-translate: no;
+  -o-translate: no;
+  translate: no;
+}
+
+html, body, div, span, h1, h2, h3, h4, h5, h6, p, a, button, input, textarea, select, label {
+  translate: no !important;
+}
+
+
 @keyframes heartbeat {
   0% {
     transform: scale(1);
@@ -101,12 +115,44 @@
 }
 
 @keyframes glow {
-  0%, 100% {
-    text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+  0% { text-shadow: 0 0 5px rgba(255, 255, 255, 0.5); }
+  50% { text-shadow: 0 0 20px rgba(255, 255, 255, 0.8), 0 0 30px rgba(255, 255, 255, 0.6); }
+  100% { text-shadow: 0 0 5px rgba(255, 255, 255, 0.5); }
+}
+
+@keyframes fireworks {
+  0% {
+    transform: scale(0) rotate(0deg);
+    opacity: 1;
   }
   50% {
-    text-shadow: 0 0 20px rgba(255, 255, 255, 0.8), 0 0 30px rgba(255, 255, 255, 0.6);
+    transform: scale(1.2) rotate(180deg);
+    opacity: 0.8;
   }
+  100% {
+    transform: scale(0.8) rotate(360deg);
+    opacity: 0;
+  }
+}
+
+@keyframes sparkle {
+  0%, 100% {
+    opacity: 0;
+    transform: scale(0);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Animation Classes */
+.animate-fireworks {
+  animation: fireworks 2s ease-out infinite;
+}
+
+.animate-sparkle {
+  animation: sparkle 1.5s ease-in-out infinite;
 }
 
 @keyframes slideInRight {
@@ -129,4 +175,131 @@
     opacity: 0;
     transform: translateX(100%);
   }
+}
+
+/* Mobile Responsive Styles */
+@media (max-width: 768px) {
+  /* Base mobile styles */
+  body {
+    font-size: 14px;
+    line-height: 1.4;
+  }
+  
+  /* Mobile container adjustments */
+  .mobile-container {
+    padding: 1rem;
+    margin: 0;
+  }
+  
+  /* Mobile text sizes */
+  .mobile-text-xs { font-size: 0.75rem; }
+  .mobile-text-sm { font-size: 0.875rem; }
+  .mobile-text-base { font-size: 1rem; }
+  .mobile-text-lg { font-size: 1.125rem; }
+  .mobile-text-xl { font-size: 1.25rem; }
+  .mobile-text-2xl { font-size: 1.5rem; }
+  .mobile-text-3xl { font-size: 1.875rem; }
+  .mobile-text-4xl { font-size: 2.25rem; }
+  
+  /* Mobile button styles */
+  .mobile-btn {
+    min-height: 44px; /* iOS touch target minimum */
+    padding: 12px 16px;
+    font-size: 16px; /* Prevents zoom on iOS */
+    border-radius: 8px;
+    touch-action: manipulation;
+  }
+  
+  /* Mobile input styles */
+  .mobile-input {
+    min-height: 44px;
+    font-size: 16px; /* Prevents zoom on iOS */
+    padding: 12px 16px;
+    border-radius: 8px;
+  }
+  
+  /* Mobile grid adjustments */
+  .mobile-grid-1 { grid-template-columns: 1fr; }
+  .mobile-grid-2 { grid-template-columns: repeat(2, 1fr); }
+  .mobile-grid-3 { grid-template-columns: repeat(3, 1fr); }
+  
+  /* Mobile spacing */
+  .mobile-p-2 { padding: 0.5rem; }
+  .mobile-p-4 { padding: 1rem; }
+  .mobile-p-6 { padding: 1.5rem; }
+  .mobile-m-2 { margin: 0.5rem; }
+  .mobile-m-4 { margin: 1rem; }
+  .mobile-m-6 { margin: 1.5rem; }
+  
+  /* Mobile flex adjustments */
+  .mobile-flex-col { flex-direction: column; }
+  .mobile-flex-row { flex-direction: row; }
+  .mobile-items-center { align-items: center; }
+  .mobile-justify-center { justify-content: center; }
+  .mobile-justify-between { justify-content: space-between; }
+  
+  /* Mobile width adjustments */
+  .mobile-w-full { width: 100%; }
+  .mobile-w-auto { width: auto; }
+  .mobile-max-w-sm { max-width: 24rem; }
+  .mobile-max-w-md { max-width: 28rem; }
+  .mobile-max-w-lg { max-width: 32rem; }
+  
+  /* Mobile height adjustments */
+  .mobile-h-auto { height: auto; }
+  .mobile-min-h-screen { min-height: 100vh; }
+  .mobile-min-h-96 { min-height: 24rem; }
+  
+  /* Mobile overflow handling */
+  .mobile-overflow-hidden { overflow: hidden; }
+  .mobile-overflow-x-auto { overflow-x: auto; }
+  .mobile-overflow-y-auto { overflow-y: auto; }
+  
+  /* Mobile scrollbar styling */
+  .mobile-scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(156, 163, 175, 0.5) transparent;
+  }
+  
+  .mobile-scrollbar-thin::-webkit-scrollbar {
+    width: 4px;
+  }
+  
+  .mobile-scrollbar-thin::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  
+  .mobile-scrollbar-thin::-webkit-scrollbar-thumb {
+    background-color: rgba(156, 163, 175, 0.5);
+    border-radius: 2px;
+  }
+  
+  /* Mobile touch improvements */
+  .mobile-touch-none { touch-action: none; }
+  .mobile-touch-pan-x { touch-action: pan-x; }
+  .mobile-touch-pan-y { touch-action: pan-y; }
+  .mobile-touch-manipulation { touch-action: manipulation; }
+  
+  /* Mobile safe area support */
+  .mobile-safe-top { padding-top: env(safe-area-inset-top); }
+  .mobile-safe-bottom { padding-bottom: env(safe-area-inset-bottom); }
+  .mobile-safe-left { padding-left: env(safe-area-inset-left); }
+  .mobile-safe-right { padding-right: env(safe-area-inset-right); }
+  
+  /* Mobile landscape adjustments */
+  @media (orientation: landscape) and (max-height: 500px) {
+    .mobile-landscape-hide { display: none; }
+    .mobile-landscape-compact { padding: 0.5rem; }
+    .mobile-landscape-text-sm { font-size: 0.875rem; }
+  }
+}
+
+/* Tablet responsive styles */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .tablet-text-lg { font-size: 1.125rem; }
+  .tablet-text-xl { font-size: 1.25rem; }
+  .tablet-text-2xl { font-size: 1.5rem; }
+  .tablet-text-3xl { font-size: 1.875rem; }
+  .tablet-p-6 { padding: 1.5rem; }
+  .tablet-p-8 { padding: 2rem; }
 }

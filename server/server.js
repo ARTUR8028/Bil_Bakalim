@@ -15,34 +15,33 @@ const app = express();
 const server = createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: ["http://localhost:5173", "http://127.0.0.1:5173", "http://0.0.0.0:5173"],
+    origin: NODE_ENV === 'production' 
+      ? ["https://your-domain.com", "https://www.your-domain.com"] 
+      : ["http://localhost:5173", "http://127.0.0.1:5173", "http://0.0.0.0:5173"],
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     credentials: true,
     allowedHeaders: ["Origin", "X-Requested-With", "Content-Type", "Accept", "Authorization"]
   },
   transports: ['websocket', 'polling'],
   allowEIO3: true,
-  pingTimeout: 120000, // 2 dakika
-  pingInterval: 25000,  // 25 saniye
+  pingTimeout: 60000,
+  pingInterval: 25000,
   // İyileştirilmiş bağlantı ayarları
   maxHttpBufferSize: 1e6,
   compression: true,
   serveClient: false,
   // Bağlantı stabilitesi için
   connectionStateRecovery: {
-    maxDisconnectionDuration: 5 * 60 * 1000, // 5 dakika
+    maxDisconnectionDuration: 2 * 60 * 1000, // 2 dakika
     skipMiddlewares: true,
-  },
-  // Ek stabilite ayarları
-  allowUpgrades: true,
-  upgradeTimeout: 10000,
-  maxDisconnectionDuration: 5 * 60 * 1000
+  }
 });
 
 const PORT = process.env.PORT || 3001;
+const NODE_ENV = process.env.NODE_ENV || 'development';
 
 console.log('\n🚀 ================================');
-console.log('🎮 Quiz Sunucusu Başlatılıyor...');
+console.log(`🎮 Quiz Sunucusu Başlatılıyor... (${NODE_ENV === 'production' ? 'Production' : 'Nodemon ile'})`);
 console.log('🚀 ================================');
 
 // CORS middleware - Daha kapsamlı
@@ -51,6 +50,11 @@ app.use((req, res, next) => {
   res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
   res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
   
+  // Otomatik çeviriyi engelle
+  res.header('X-Content-Type-Options', 'nosniff');
+  res.header('X-Frame-Options', 'DENY');
+  res.header('Content-Language', 'tr');
+  
   if (req.method === 'OPTIONS') {
     res.sendStatus(200);
     return;
@@ -58,7 +62,13 @@ app.use((req, res, next) => {
   next();
 });
 
-app.use(express.static('public'));
+// Production'da build edilmiş dosyaları serve et
+if (NODE_ENV === 'production') {
+  app.use(express.static(path.join(__dirname, '../dist')));
+} else {
+  app.use(express.static('public'));
+}
+
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
@@ -121,6 +131,7 @@ let questions = [];
 let players = {};
 let currentAnswer = null;
 let answers = {};
+let globalScores = {}; // Global puan sistemi - oyuncular çıksa bile puanları korunur
 let gameState = {
   isActive: false,
   currentQuestion: null,
@@ -132,6 +143,19 @@ let gameState = {
 // Başlangıç işlemleri
 async function initializeServer() {
   await createDirectories();
+  
+  // Server başladığında tüm oyuncuları temizle
+  players = {};
+  answers = {};
+  currentAnswer = null;
+  gameState = {
+    isActive: false,
+    currentQuestion: null,
+    questionStartTime: null,
+    totalQuestions: 0,
+    currentQuestionIndex: 0
+  };
+  console.log('🧹 Server başladı, tüm oyuncular ve oyun durumu temizlendi');
   
   // Soruları yükle
   try {
@@ -487,27 +511,58 @@ io.on('connection', (socket) => {
       timestamp: new Date().toISOString()
     });
     
-    if (name && name.trim()) {
-      const playerName = name.trim();
+    if (name && typeof name === 'string' && name.trim()) {
+      // Türkçe karakterleri koruyarak büyük harfe çevir
+      const playerName = name.trim()
+        .replace(/ı/g, 'I')
+        .replace(/i/g, 'İ')
+        .replace(/ğ/g, 'Ğ')
+        .replace(/ü/g, 'Ü')
+        .replace(/ş/g, 'Ş')
+        .replace(/ö/g, 'Ö')
+        .replace(/ç/g, 'Ç')
+        .toUpperCase();
       
-      // Aynı isimde oyuncu var mı kontrol et
-      const existingPlayer = Object.values(players).find(p => p.name === playerName);
+      // KESIN ÇÖZÜM: Büyük küçük harf duyarsız kontrol
+      const existingPlayer = Object.values(players).find(p => 
+        p.name.toLowerCase() === playerName.toLowerCase()
+      );
+      
       if (existingPlayer) {
-        console.log('❌ Aynı isimde oyuncu mevcut:', playerName);
-        socket.emit('joinError', { message: 'Bu isimde bir oyuncu zaten var!' });
+        console.log('❌ Aynı isimde oyuncu mevcut (büyük küçük harf duyarsız):', playerName, 'Mevcut:', existingPlayer.name);
+        socket.emit('joinError', { 
+          message: `"${existingPlayer.name}" isimli bir oyuncu zaten var! Lütfen farklı bir isim seçin.` 
+        });
         return;
       }
       
-      players[socket.id] = { 
-        name: playerName, 
-        score: 0,
-        joinTime: Date.now(),
-        socketId: socket.id,
-        lastActivity: Date.now()
-      };
+      // Global puan kontrolü - oyuncu daha önce oynamış mı?
+      const existingGlobalScore = globalScores[playerName] || 0;
+      console.log(`🔍 ${playerName} global puanı: ${existingGlobalScore}`);
+      
+      // Socket ID kontrolü - eğer aynı socket ID'ye sahip oyuncu varsa, güncelle
+      if (players[socket.id]) {
+        console.log('🔄 Mevcut oyuncu güncelleniyor:', socket.id, players[socket.id].name);
+        // Mevcut oyuncuyu güncelle
+        players[socket.id].name = playerName;
+        players[socket.id].score = existingGlobalScore; // Global puandan devam et
+        players[socket.id].lastActivity = Date.now();
+        console.log(`✅ ${playerName} oyuncu bilgileri güncellendi (${socket.id}) - Puan: ${existingGlobalScore}`);
+      } else {
+        // Yeni oyuncu ekle
+        players[socket.id] = { 
+          name: playerName, 
+          score: existingGlobalScore, // Global puandan devam et
+          joinTime: Date.now(),
+          socketId: socket.id,
+          lastActivity: Date.now()
+        };
+        console.log(`✅ ${playerName} yeni oyuncu olarak eklendi (${socket.id}) - Puan: ${existingGlobalScore}`);
+      }
       
       console.log(`✅ ${playerName} oyuna katıldı (${socket.id})`);
       console.log('👥 Aktif oyuncular:', Object.keys(players).length);
+      console.log('👥 Oyuncu detayları:', players[socket.id]);
       
       // Katılım onayı gönder
       socket.emit('joinConfirmed', { 
@@ -525,7 +580,9 @@ io.on('connection', (socket) => {
       socket.broadcast.emit('playerJoined', playerName);
       
       // Mevcut tüm katılımcıları host'a gönder
-      io.emit('allParticipants', Object.values(players).map(p => p.name));
+      const participantNames = Object.values(players).map(p => p.name);
+      console.log('📤 allParticipants gönderiliyor:', participantNames);
+      io.emit('allParticipants', participantNames);
       
       updatePlayerCount();
     } else {
@@ -541,6 +598,22 @@ io.on('connection', (socket) => {
       socketId: socket.id,
       timestamp: new Date().toISOString()
     });
+    
+    // Cevap değeri kontrolü
+    if (value === null || value === undefined || value === '') {
+      console.log('❌ Geçersiz cevap değeri:', value);
+      socket.emit('answerError', { message: 'Geçerli bir cevap girin' });
+      return;
+    }
+    
+    // Oyuncu yoksa hata ver
+    if (!players[socket.id]) {
+      console.log('❌ Geçersiz cevap veya oyuncu bulunamadı');
+      socket.emit('answerError', { 
+        message: 'Oyuncu bulunamadı! Lütfen oyuna tekrar katılın.' 
+      });
+      return;
+    }
     
     // Zamanlayıcı doğrulaması - KRİTİK DÜZELTME
     const currentTime = Date.now();
@@ -575,18 +648,30 @@ io.on('connection', (socket) => {
         playerId: socket.id
       };
       
-      console.log(`✅ ${players[socket.id].name} cevap verdi: ${numericValue}`);
+      // Cevap verme süresini hesapla (saniye cinsinden)
+      const answerTime = gameState.questionStartTime ? 
+        Math.round((currentTime - gameState.questionStartTime) / 1000) : 0;
+      
+      // Diğer oyunculara bu oyuncunun cevap verdiğini bildir
+      socket.broadcast.emit('playerAnswered', {
+        playerName: players[socket.id].name,
+        timestamp: currentTime,
+        answerTime: answerTime
+      });
+      
+      console.log(`✅ ${players[socket.id].name} cevap verdi: ${answerValue}`);
       console.log('📊 Toplam cevap:', Object.keys(answers).length);
       
       // Cevap doğruluğunu kontrol et
-      if (!isNaN(numericValue)) {
-        const diff = Math.abs(numericValue - currentAnswer);
-        console.log(`🔍 Cevap doğrulama: ${numericValue} vs ${currentAnswer} (fark: ${diff})`);
+      if (typeof answerValue === 'number' && typeof currentAnswer === 'number') {
+        const diff = Math.abs(answerValue - currentAnswer);
+        console.log(`🔍 Cevap doğrulama: ${answerValue} vs ${currentAnswer} (fark: ${diff})`);
         
         // Eğer cevap doğruysa anında puan ver
         if (diff < 0.001) { // Küçük bir epsilon değeri ile karşılaştırma
           players[socket.id].score += 10;
-          console.log(`🏆 ${players[socket.id].name} anında 10 puan kazandı! (Toplam: ${players[socket.id].score})`);
+          globalScores[players[socket.id].name] = (globalScores[players[socket.id].name] || 0) + 10; // Global puanı güncelle
+          console.log(`🏆 ${players[socket.id].name} anında 10 puan kazandı! (Toplam: ${players[socket.id].score}, Global: ${globalScores[players[socket.id].name]})`);
           io.emit('correctAnswer', {
             playerName: players[socket.id].name,
             score: players[socket.id].score,
@@ -600,7 +685,7 @@ io.on('connection', (socket) => {
         Math.max(0, questionDuration - (currentTime - gameState.questionStartTime)) : 0;
       
       socket.emit('answerConfirmed', {
-        value: numericValue,
+        value: answerValue,
         timestamp: currentTime,
         message: 'Cevabınız alındı!',
         timeRemaining: Math.round(timeRemaining / 1000), // saniye cinsinden
@@ -635,14 +720,21 @@ io.on('connection', (socket) => {
       io.emit('newQuestion', questionObj.question);
       updatePlayerCount();
 
-      // 30 saniye sonra sonuçları göster
-      setTimeout(() => {
-        console.log('⏰ Süre doldu, sonuçlar hesaplanıyor...');
-        const result = calculateResults();
-        io.emit('showResult', result);
-        console.log('📊 Sonuçlar gönderildi:', result);
-        gameState.isActive = false;
-      }, 30000);
+      // Gerçek zamanlı süre güncellemeleri gönder - daha sık güncelleme
+      let timeLeft = 30;
+      const timerInterval = setInterval(() => {
+        timeLeft--;
+        io.emit('timerUpdate', { timeLeft });
+        
+        if (timeLeft <= 0) {
+          clearInterval(timerInterval);
+          console.log('⏰ Süre doldu, sonuçlar hesaplanıyor...');
+          const result = calculateResults();
+          io.emit('showResult', result);
+          console.log('📊 Sonuçlar gönderildi:', result);
+          gameState.isActive = false;
+        }
+      }, 1000); // 1 saniye aralıklarla güncelle
     } else {
       console.log('❌ Geçersiz soru objesi:', questionObj);
     }
@@ -656,19 +748,56 @@ io.on('connection', (socket) => {
       timestamp: new Date().toISOString()
     });
     
-      if (players[socket.id]) {
-        const playerName = players[socket.id].name;
-        console.log(`👋 ${playerName} ayrıldı`);
-        delete players[socket.id];
-        
-        // Tüm host'lara oyuncunun ayrıldığını bildir
-        socket.broadcast.emit('playerLeft', playerName);
-        
-        // Mevcut tüm katılımcıları host'a gönder
-        io.emit('allParticipants', Object.values(players).map(p => p.name));
-      }
-      delete answers[socket.id];
-    updatePlayerCount();
+    // Oyuncu varsa sil - ama hemen değil, daha uzun bir gecikme ile
+    if (players[socket.id]) {
+      const playerName = players[socket.id].name;
+      console.log(`👋 ${playerName} ayrıldı - 5 saniye bekleniyor...`);
+      
+      // Daha uzun bir gecikme ile oyuncuyu sil (yeniden bağlanma ihtimali için)
+      setTimeout(() => {
+        if (players[socket.id]) {
+          console.log(`🗑️ ${playerName} kalıcı olarak siliniyor`);
+          delete players[socket.id];
+          
+          // Tüm host'lara oyuncunun ayrıldığını bildir
+          socket.broadcast.emit('playerLeft', playerName);
+          
+          // Mevcut tüm katılımcıları host'a gönder
+          io.emit('allParticipants', Object.values(players).map(p => p.name));
+          
+          updatePlayerCount();
+        } else {
+          console.log(`✅ ${playerName} yeniden bağlandı, silinmedi`);
+        }
+      }, 5000); // 5 saniye gecikme - yeniden bağlanma için daha fazla zaman
+    }
+    
+    // Cevabı sil
+    delete answers[socket.id];
+  });
+
+  // Manuel oyuncu çıkışı (Ana Menü ile çıkış)
+  socket.on('leave', (playerName) => {
+    console.log('👋 Manuel oyuncu çıkışı:', { 
+      playerName,
+      socketId: socket.id,
+      timestamp: new Date().toISOString()
+    });
+    
+    if (players[socket.id]) {
+      const actualPlayerName = players[socket.id].name;
+      console.log(`👋 ${actualPlayerName} manuel olarak ayrıldı`);
+      
+      delete players[socket.id];
+      
+      // Tüm host'lara oyuncunun ayrıldığını bildir
+      socket.broadcast.emit('playerLeft', actualPlayerName);
+      
+      // Mevcut tüm katılımcıları host'a gönder
+      io.emit('allParticipants', Object.values(players).map(p => p.name));
+      
+      updatePlayerCount();
+    }
   });
 
   socket.on('addQuestion', async ({ question, answer }, callback) => {
@@ -730,15 +859,14 @@ io.on('connection', (socket) => {
       scores[players[id].name] = players[id].score;
     }
     console.log('🏆 Skorlar istendi:', scores);
+    console.log('🌍 Global skorlar:', globalScores);
     io.emit('updateScores', scores);
   });
 
   socket.on('endGame', () => {
-    const finalScores = {};
-    for (const id in players) {
-      finalScores[players[id].name] = players[id].score;
-    }
-    console.log('🏁 Oyun bitti. Final skorları:', finalScores);
+    // Global puanları kullan - oyuncular çıksa bile puanları korunur
+    const finalScores = { ...globalScores };
+    console.log('🏁 Oyun bitti. Final skorları (Global):', finalScores);
     io.emit('gameEnded', finalScores);
     
     // Oyun verilerini sıfırla
@@ -754,6 +882,27 @@ io.on('connection', (socket) => {
     };
   });
 
+  socket.on('startNewGame', () => {
+    console.log('🆕 Yeni oyun başlatılıyor - tüm veriler temizleniyor...');
+    
+    // Tüm oyuncuları ve global puanları temizle
+    players = {};
+    globalScores = {};
+    answers = {};
+    currentAnswer = null;
+    gameState = {
+      isActive: false,
+      currentQuestion: null,
+      questionStartTime: null,
+      totalQuestions: questions.length,
+      currentQuestionIndex: 0
+    };
+    
+    // Tüm client'lara boş oyuncu listesi gönder
+    io.emit('allParticipants', []);
+    console.log('✅ Yeni oyun için tüm veriler temizlendi');
+  });
+
   // Ping-pong mekanizması
   socket.on('ping', (data) => {
     console.log('🏓 Ping alındı:', data);
@@ -765,9 +914,23 @@ io.on('connection', (socket) => {
     });
   });
 
+  // Mevcut katılımcıları iste (sadece host'lar için)
+  socket.on('getParticipants', () => {
+    console.log('📋 Mevcut katılımcılar istendi:', Object.keys(players).length);
+    console.log('👥 Aktif oyuncular:', Object.values(players).map(p => p.name));
+    const participantNames = Object.values(players).map(p => p.name);
+    console.log('📤 allParticipants gönderiliyor:', participantNames);
+    socket.emit('allParticipants', participantNames);
+  });
+
   // Hata yakalama
   socket.on('error', (error) => {
-    console.error('❌ Socket hatası:', error);
+    console.error('❌ Socket hatası:', {
+      error: error.message || error,
+      socketId: socket.id,
+      player: players[socket.id]?.name || 'Bilinmeyen',
+      timestamp: new Date().toISOString()
+    });
   });
 });
 
@@ -818,35 +981,77 @@ function calculateResults() {
 
   // En yakın cevabı veren tüm oyuncuları bul
   if (closest !== null) {
-    winners = allWinnersByAnswer[closest] ? allWinnersByAnswer[closest].players : [];
-    console.log('🏆 Kazananlar listesi:', winners);
+    // Sadece en yakın cevabı değil, aynı mesafedeki TÜM cevapları bul
+    winners = [];
+    for (const [answer, data] of Object.entries(allWinnersByAnswer)) {
+      if (data.diff === minDiff) {
+        winners = winners.concat(data.players);
+        console.log(`🏆 Eşit mesafedeki cevap: ${answer} (mesafe: ${data.diff}), oyuncular:`, data.players);
+      }
+    }
+    console.log('🏆 Tüm kazananlar listesi:', winners);
+    console.log('🏆 En yakın mesafe:', minDiff);
   }
 
   // Puanları güncelle (en yakın cevabı veren TÜM oyunculara puan ver)
-  if (closest !== null && winners.length > 0) {
+  if (winners.length > 0) {
     for (const [id, answerObj] of Object.entries(answers)) {
       const num = parseFloat(answerObj.value);
-      // En yakın cevabı veren tüm oyunculara puan ver
-      if (num === closest && players[id]) {
+      const diff = Math.abs(num - currentAnswer);
+      // En yakın mesafedeki tüm oyunculara puan ver
+      if (diff === minDiff && players[id]) {
         players[id].score += 10;
-        console.log(`🏆 ${players[id].name} 10 puan kazandı! (Cevap: ${num}, Toplam: ${players[id].score})`);
+        globalScores[players[id].name] = (globalScores[players[id].name] || 0) + 10; // Global puanı güncelle
+        console.log(`🏆 ${players[id].name} 10 puan kazandı! (Cevap: ${num}, Mesafe: ${diff}, Toplam: ${players[id].score}, Global: ${globalScores[players[id].name]})`);
       }
     }
   }
 
   // Kazanan isimlerini birleştir
   const winnerNames = winners.length > 0 ? winners.join(', ') : 'Kimse';
-  const winnerDisplay = winners.length > 1 ? 
-    `${winnerNames} (${closest !== null ? closest : 'Cevap yok'})` :
-    `${winnerNames} (${closest !== null ? closest : 'Cevap yok'})`;
+  
+  // Doğru cevap veren varsa "Doğru", yoksa "En yakın" yaz
+  let winnerDisplay;
+  if (winners.length > 0) {
+    if (minDiff === 0) {
+      // Doğru cevap veren var
+      winnerDisplay = winners.length > 1 ? 
+        `${winnerNames} (Doğru)` :
+        `${winnerNames} (Doğru)`;
+    } else {
+      // En yakın cevap veren var
+      winnerDisplay = winners.length > 1 ? 
+        `${winnerNames} (En yakın mesafe: ${minDiff})` :
+        `${winnerNames} (En yakın)`;
+    }
+  } else {
+    winnerDisplay = 'Kimse (Cevap yok)';
+  }
 
-  // Tüm cevapları sırala (en yakından en uzağa)
+  // Tüm cevapları sırala (en yakından en uzağa) + cevap vermeyen oyuncular
   const allAnswers = Object.values(answers).map(answerObj => ({
     playerName: answerObj.playerName,
     answer: parseFloat(answerObj.value),
     difference: Math.abs(parseFloat(answerObj.value) - currentAnswer),
-    isCorrect: Math.abs(parseFloat(answerObj.value) - currentAnswer) === 0
+    isCorrect: Math.abs(parseFloat(answerObj.value) - currentAnswer) === 0,
+    hasAnswered: true
   })).sort((a, b) => a.difference - b.difference);
+
+  // Cevap vermeyen oyuncuları ekle
+  const answeredPlayerNames = Object.values(answers).map(a => a.playerName);
+  const allPlayerNames = Object.values(players).map(p => p.name);
+  const noAnswerPlayers = allPlayerNames.filter(name => !answeredPlayerNames.includes(name));
+  
+  // Cevap vermeyen oyuncuları listeye ekle (en altta)
+  noAnswerPlayers.forEach(playerName => {
+    allAnswers.push({
+      playerName: playerName,
+      answer: null,
+      difference: Infinity, // En altta görünmesi için
+      isCorrect: false,
+      hasAnswered: false
+    });
+  });
 
   const result = {
     correct: currentAnswer,
@@ -869,7 +1074,7 @@ function calculateResults() {
 app.use((error, req, res, next) => {
   console.error('❌ Express error:', error);
   res.status(500).json({ 
-    error: 'Sunucu hatası: ' + error.message,
+    error: 'Sunucu hatası: ' + (error.message || 'Bilinmeyen hata'),
     timestamp: new Date().toISOString(),
     success: false
   });
@@ -902,6 +1107,13 @@ process.on('unhandledRejection', (reason, promise) => {
   console.error('🚫 İşlenmemiş promise reddi:', reason);
 });
 
+// Production için SPA fallback route
+if (NODE_ENV === 'production') {
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, '../dist/index.html'));
+  });
+}
+
 // Sunucuyu başlat
 initializeServer().then(() => {
   server.listen(PORT, '0.0.0.0', () => {
@@ -909,11 +1121,17 @@ initializeServer().then(() => {
     console.log('🎮 Quiz Sunucusu Başlatıldı!');
     console.log('🚀 ================================');
     console.log(`🌐 Ana Sunucu: http://localhost:${PORT}`);
-    console.log(`📱 Yarışmacı: http://localhost:5173/#player`);
-    console.log(`🖥️  TV Ana Sayfa: http://localhost:5173`);
+    if (NODE_ENV === 'development') {
+      console.log(`📱 Yarışmacı: http://localhost:5173/#player`);
+      console.log(`🖥️  TV Ana Sayfa: http://localhost:5173`);
+    }
     console.log(`📊 Sistem Durumu: http://localhost:${PORT}/api/health`);
     console.log(`📁 Soru Sayısı: ${questions.length}`);
     console.log('🚀 ================================\n');
+    
+    // Server başladığında tüm client'lara oyuncu listesinin temizlendiğini bildir
+    io.emit('allParticipants', []);
+    console.log('📤 Server başladı, tüm client\'lara boş oyuncu listesi gönderildi');
   });
 }).catch(err => {
   console.error('❌ Sunucu başlatılamadı:', err);

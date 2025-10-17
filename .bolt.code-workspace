@@ -1,0 +1,28 @@
+{
+	"folders": [
+		{
+			"path": ".bolt"
+		},
+		{
+			"path": ".vs"
+		},
+		{
+			"path": "data"
+		},
+		{
+			"path": "node_modules"
+		},
+		{
+			"path": "public"
+		},
+		{
+			"path": "server"
+		},
+		{
+			"path": "src"
+		},
+		{
+			"path": "uploads"
+		}
+	]
+}

@@ -6,11 +6,12 @@
   "scripts": {
     "dev": "concurrently \"npm run server\" \"npm run frontend\"",
     "frontend": "vite --port 5173",
-    "server": "node server/server.js",
+    "server": "nodemon server/server.js",
     "build": "vite build",
     "preview": "vite preview",
     "start": "npm run build && concurrently \"npm run server\" \"npm run serve-build\"",
-    "serve-build": "vite preview --port 5173"
+    "serve-build": "vite preview --port 5173",
+    "start:prod": "node server/server.js"
   },
   "dependencies": {
     "concurrently": "^8.2.2",
@@ -35,6 +36,7 @@
     "eslint-plugin-react-hooks": "^5.1.0-rc.0",
     "eslint-plugin-react-refresh": "^0.4.11",
     "globals": "^15.9.0",
+    "nodemon": "^3.1.10",
     "postcss": "^8.4.35",
     "tailwindcss": "^3.4.1",
     "typescript": "^5.5.3",
