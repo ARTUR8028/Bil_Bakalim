@@ -13,5 +13,4 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "BilBakalimTV"
-include ':app'
+rootProject.name = "android-studio-guide"
