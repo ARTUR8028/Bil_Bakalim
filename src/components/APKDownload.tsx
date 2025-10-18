@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Download, Smartphone, ArrowLeft } from 'lucide-react';
+import QRCode from 'qrcode';
 
 interface APKDownloadProps {
   onBack: () => void;
@@ -9,6 +10,29 @@ const APKDownload: React.FC<APKDownloadProps> = ({ onBack }) => {
   const apkUrl = '/apps/BilBakalimTV.apk';
   const apkSize = '15.2 MB'; // APK boyutunu buraya yazın
   const version = '1.0.0'; // Versiyon numarasını buraya yazın
+  const [qrCodeUrl, setQrCodeUrl] = useState('');
+  const fullApkUrl = `${window.location.origin}${apkUrl}`;
+
+  // QR kod oluştur
+  useEffect(() => {
+    const generateQRCode = async () => {
+      try {
+        const qrCodeDataURL = await QRCode.toDataURL(fullApkUrl, {
+          width: 300,
+          margin: 2,
+          color: {
+            dark: '#1A1A2E',
+            light: '#FFFFFF'
+          }
+        });
+        setQrCodeUrl(qrCodeDataURL);
+      } catch (error) {
+        console.error('❌ QR kod oluşturma hatası:', error);
+      }
+    };
+
+    generateQRCode();
+  }, [fullApkUrl]);
 
   const handleDownload = () => {
     const link = document.createElement('a');
@@ -70,19 +94,39 @@ const APKDownload: React.FC<APKDownloadProps> = ({ onBack }) => {
           </div>
 
           {/* Download Section */}
-          <div className="bg-white/10 backdrop-blur-lg rounded-3xl p-8 border border-white/20 mb-8">
-            <h2 className="text-3xl font-bold text-white mb-6">📥 İndirme</h2>
-            <p className="text-lg text-gray-300 mb-8">
-              Google TV cihazınızda quiz oyununu oynayın. APK dosyasını indirip yükleyin.
-            </p>
-            
-            <button
-              onClick={handleDownload}
-              className="bg-green-600 hover:bg-green-700 text-white text-2xl px-12 py-6 rounded-2xl transition-colors flex items-center mx-auto shadow-lg hover:shadow-xl transform hover:scale-105"
-            >
-              <Download className="w-8 h-8 mr-3" />
-              APK İndir
-            </button>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+            {/* Direct Download */}
+            <div className="bg-white/10 backdrop-blur-lg rounded-3xl p-8 border border-white/20">
+              <h2 className="text-3xl font-bold text-white mb-6">📥 Direkt İndirme</h2>
+              <p className="text-lg text-gray-300 mb-8">
+                APK dosyasını direkt olarak indirin ve Google TV cihazınıza yükleyin.
+              </p>
+              
+              <button
+                onClick={handleDownload}
+                className="bg-green-600 hover:bg-green-700 text-white text-2xl px-12 py-6 rounded-2xl transition-colors flex items-center mx-auto shadow-lg hover:shadow-xl transform hover:scale-105"
+              >
+                <Download className="w-8 h-8 mr-3" />
+                APK İndir
+              </button>
+            </div>
+
+            {/* QR Code Download */}
+            <div className="bg-white/10 backdrop-blur-lg rounded-3xl p-8 border border-white/20">
+              <h2 className="text-3xl font-bold text-white mb-6">📱 QR Kod İndirme</h2>
+              <p className="text-lg text-gray-300 mb-6">
+                QR kodu telefonunuzla okutarak APK dosyasını indirin.
+              </p>
+              
+              {qrCodeUrl && (
+                <div className="text-center">
+                  <img src={qrCodeUrl} alt="APK Download QR Code" className="mx-auto mb-4 rounded-lg shadow-lg" />
+                  <p className="text-sm text-gray-400">
+                    QR kodu okutarak indirin
+                  </p>
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Features */}
