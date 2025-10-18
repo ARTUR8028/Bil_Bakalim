@@ -1,4 +1,4 @@
-# 🎯 ÖZELLİK LİSTESİ - BİL BAKALIM QUIZ UYGULAMASI
+Pa# 🎯 ÖZELLİK LİSTESİ - BİL BAKALIM QUIZ UYGULAMASI
 
 ## 🎮 QUIZ SİSTEMİ ÖZELLİKLERİ
 
