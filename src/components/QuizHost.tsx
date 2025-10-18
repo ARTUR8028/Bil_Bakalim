@@ -868,6 +868,24 @@ const QuizHost: React.FC<QuizHostProps> = ({ onBack }) => {
                   {questions[currentQuestionIndex]?.question}
                 </h3>
 
+                {/* Cevap Verenler Listesi */}
+                {!showResult && (
+                  <div className="bg-white/5 rounded-lg p-6 mb-8">
+                    <h4 className="text-blue-300 font-semibold mb-4 text-center">📝 Cevap Verenler</h4>
+                    <div className="text-center">
+                      <div className="text-3xl font-bold text-green-400 mb-2">
+                        {playerCount.answered} / {playerCount.total}
+                      </div>
+                      <p className="text-gray-300">
+                        {playerCount.answered === playerCount.total 
+                          ? '🎉 Tüm oyuncular cevap verdi!' 
+                          : `${playerCount.total - playerCount.answered} oyuncu daha cevap bekleniyor...`
+                        }
+                      </p>
+                    </div>
+                  </div>
+                )}
+
                 {showResult && (
                   <div className="space-y-4">
                     <div className="bg-green-600/20 rounded-lg p-4">
