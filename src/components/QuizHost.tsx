@@ -66,7 +66,7 @@ const QuizHost: React.FC<QuizHostProps> = ({ onBack }) => {
     console.log('🔌 Quiz Host socket bağlantısı kuruluyor...');
     
     // Optimize edilmiş socket konfigürasyonu
-    const socketConnection = io(import.meta.env.VITE_SERVER_URL || 'http://localhost:3001', {
+    const socketConnection = io(import.meta.env.VITE_SERVER_URL || 'https://bil-bakalim.onrender.com', {
       transports: ['websocket', 'polling'], // WebSocket öncelikli, polling fallback
       upgrade: true, // WebSocket'e upgrade et
       timeout: 10000, // Daha kısa timeout

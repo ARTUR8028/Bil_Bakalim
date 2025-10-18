@@ -32,7 +32,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onBack }) => {
   const checkServerHealth = useCallback(async () => {
     try {
       console.log('🏥 Sunucu durumu kontrol ediliyor...');
-      const response = await fetch(`${import.meta.env.VITE_SERVER_URL || 'http://localhost:3001'}/api/health`, {
+      const response = await fetch(`${import.meta.env.VITE_SERVER_URL || 'https://bil-bakalim.onrender.com'}/api/health`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -56,7 +56,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onBack }) => {
     console.log('🔌 Admin Panel socket bağlantısı kuruluyor...');
     
     // Optimize edilmiş socket konfigürasyonu
-    const socketConnection = io(import.meta.env.VITE_SERVER_URL || 'http://localhost:3001', {
+    const socketConnection = io(import.meta.env.VITE_SERVER_URL || 'https://bil-bakalim.onrender.com', {
       transports: ['websocket', 'polling'], // WebSocket öncelikli, polling fallback
       upgrade: true, // WebSocket'e upgrade et
       timeout: 30000,
@@ -229,7 +229,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onBack }) => {
     setMessage(null);
 
     try {
-      const response = await fetch(`${import.meta.env.VITE_SERVER_URL || 'http://localhost:3001'}/api/change-password`, {
+      const response = await fetch(`${import.meta.env.VITE_SERVER_URL || 'https://bil-bakalim.onrender.com'}/api/change-password`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -265,7 +265,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onBack }) => {
     setMessage(null);
 
     try {
-      const response = await fetch(`${import.meta.env.VITE_SERVER_URL || 'http://localhost:3001'}/api/delete-all-questions`, {
+      const response = await fetch(`${import.meta.env.VITE_SERVER_URL || 'https://bil-bakalim.onrender.com'}/api/delete-all-questions`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
