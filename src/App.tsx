@@ -6,39 +6,60 @@ import PlayerView from './components/PlayerView';
 import TVHost from './components/TVHost';
 import APKDownload from './components/APKDownload';
 import ErrorBoundary from './components/ErrorBoundary';
+import { detectDeviceType, getOptimalView, canAccessPlayerView, canAccessTVHost, getDeviceInfo } from './utils/deviceDetection';
 
 type ViewMode = 'home' | 'admin' | 'host' | 'player' | 'tv' | 'apk';
 
 function App() {
-  // İlk yüklemede hash'i kontrol et
+  // İlk yüklemede hash'i kontrol et ve cihaz tipine göre yönlendir
   const getInitialView = (): ViewMode => {
     const hash = window.location.hash.slice(1);
-    if (hash === 'player') {
+    const deviceType = detectDeviceType();
+    
+    // Hash varsa ve erişim izni varsa hash'i kullan
+    if (hash === 'player' && canAccessPlayerView(deviceType)) {
       return 'player';
+    } else if (hash === 'tv' && canAccessTVHost(deviceType)) {
+      return 'tv';
+    } else if (hash === 'host') {
+      return 'host';
+    } else if (hash === 'admin') {
+      return 'admin';
+    } else if (hash === 'apk') {
+      return 'apk';
     }
-    return 'home';
+    
+    // Hash yoksa cihaz tipine göre otomatik yönlendir
+    const optimalView = getOptimalView(deviceType) as ViewMode;
+    return optimalView;
   };
 
   const [currentView, setCurrentView] = useState<ViewMode>(getInitialView);
+  const deviceInfo = getDeviceInfo();
 
   // URL hash'e göre view'ı ayarla
   useEffect(() => {
     const handleHashChange = () => {
       const hash = window.location.hash.slice(1); // # işaretini kaldır
-      if (hash === 'player') {  
+      const deviceType = detectDeviceType();
+      
+      // Erişim izni kontrolü ile hash değişikliklerini işle
+      if (hash === 'player' && canAccessPlayerView(deviceType)) {  
         setCurrentView('player');
       } else if (hash === 'admin') {
         setCurrentView('admin');
       } else if (hash === 'host') {
         setCurrentView('host');
-      } else if (hash === 'tv') {
+      } else if (hash === 'tv' && canAccessTVHost(deviceType)) {
         setCurrentView('tv');
       } else if (hash === 'apk') {
         setCurrentView('apk');
       } else {
-        setCurrentView('home');
+        // Hash geçersizse veya erişim izni yoksa optimal view'a yönlendir
+        const optimalView = getOptimalView(deviceType) as ViewMode;
+        setCurrentView(optimalView);
       }
-    };                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      
+    };                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      
 
     // Sayfa yüklendiğinde hash'i kontrol et
     handleHashChange();                                                                                                                                                                                                                                                                                                                                        
@@ -98,14 +119,29 @@ function App() {
                   <p className="text-blue-200 text-sm mobile-text-sm">Quiz oyununu başlatın ve yönetin</p>
                 </div>
 
-                <div 
-                  onClick={() => setCurrentView('tv')}
-                  className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 md:p-8 cursor-pointer transform hover:scale-105 transition-all duration-300 hover:bg-white/20 border border-white/20 mobile-btn mobile-touch-manipulation tv-focusable"
-                >
-                  <Tv className="w-10 h-10 md:w-12 md:h-12 text-purple-300 mx-auto mb-3 md:mb-4" />
-                  <h3 className="text-lg md:text-xl font-semibold text-white mb-2 mobile-text-lg">📺 Google TV</h3>
-                  <p className="text-blue-200 text-sm mobile-text-sm">TV ekranında soruları yayınlayın</p>
-                </div>
+                {/* TV butonu sadece TV cihazında görünür */}
+                {canAccessTVHost(deviceInfo.type) && (
+                  <div 
+                    onClick={() => setCurrentView('tv')}
+                    className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 md:p-8 cursor-pointer transform hover:scale-105 transition-all duration-300 hover:bg-white/20 border border-white/20 mobile-btn mobile-touch-manipulation tv-focusable"
+                  >
+                    <Tv className="w-10 h-10 md:w-12 md:h-12 text-purple-300 mx-auto mb-3 md:mb-4" />
+                    <h3 className="text-lg md:text-xl font-semibold text-white mb-2 mobile-text-lg">📺 Google TV</h3>
+                    <p className="text-blue-200 text-sm mobile-text-sm">TV ekranında soruları yayınlayın</p>
+                  </div>
+                )}
+
+                {/* Player butonu sadece mobil/tablet/PC'de görünür */}
+                {canAccessPlayerView(deviceInfo.type) && (
+                  <div 
+                    onClick={() => setCurrentView('player')}
+                    className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 md:p-8 cursor-pointer transform hover:scale-105 transition-all duration-300 hover:bg-white/20 border border-white/20 mobile-btn mobile-touch-manipulation tv-focusable"
+                  >
+                    <Trophy className="w-10 h-10 md:w-12 md:h-12 text-yellow-300 mx-auto mb-3 md:mb-4" />
+                    <h3 className="text-lg md:text-xl font-semibold text-white mb-2 mobile-text-lg">🎮 Oyuncu</h3>
+                    <p className="text-blue-200 text-sm mobile-text-sm">Quiz oyununa katılın</p>
+                  </div>
+                )}
 
                 <div 
                   onClick={() => setCurrentView('apk')}

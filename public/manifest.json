@@ -2,9 +2,9 @@
   "name": "Bil Bakalım TV",
   "short_name": "BilBakalimTV",
   "description": "Google TV için interaktif quiz uygulaması",
-  "start_url": "/#host",
+  "start_url": "/",
   "display": "fullscreen",
-  "orientation": "landscape",
+  "orientation": "any",
   "theme_color": "#1a1a2e",
   "background_color": "#16213e",
   "icons": [

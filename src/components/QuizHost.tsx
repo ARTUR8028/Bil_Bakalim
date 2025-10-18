@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { ArrowLeft, Play, Users, Trophy, RotateCcw, Shuffle, QrCode, Copy, CheckCircle, Wifi, WifiOff } from 'lucide-react';
 import { io, Socket } from 'socket.io-client';
 import QRCode from 'qrcode';
+import { getDeviceInfo } from '../utils/deviceDetection';
 
 interface QuizHostProps {
   onBack: () => void;
@@ -33,6 +34,7 @@ interface GameResult {
 const QuizHost: React.FC<QuizHostProps> = ({ onBack }) => {
   const [socket, setSocket] = useState<Socket | null>(null);
   const [gameMode, setGameMode] = useState<'sequential' | 'random' | null>(null);
+  const deviceInfo = getDeviceInfo();
   const [questions, setQuestions] = useState<Question[]>([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [playerCount, setPlayerCount] = useState<PlayerCount>({ total: 0, answered: 0 });
@@ -580,8 +582,16 @@ const QuizHost: React.FC<QuizHostProps> = ({ onBack }) => {
             <ConnectionIndicator />
           </div>
 
-          <h1 className="text-3xl md:text-5xl font-bold text-white mb-6 md:mb-8 mobile-text-3xl">🎮 MODERN QUIZ</h1>
-          <p className="text-lg md:text-xl text-green-200 mb-8 md:mb-12 mobile-text-lg">Oyun modunu seçin ve başlayın</p>
+          <h1 className={`font-bold text-white mb-6 md:mb-8 ${
+            deviceInfo.isMobile ? 'text-2xl mobile-text-2xl' : 
+            deviceInfo.isTablet ? 'text-3xl mobile-text-3xl' : 
+            'text-3xl md:text-5xl mobile-text-3xl'
+          }`}>🎮 MODERN QUIZ</h1>
+          <p className={`text-green-200 mb-8 md:mb-12 ${
+            deviceInfo.isMobile ? 'text-base mobile-text-base' : 
+            deviceInfo.isTablet ? 'text-lg mobile-text-lg' : 
+            'text-lg md:text-xl mobile-text-lg'
+          }`}>Oyun modunu seçin ve başlayın</p>
 
           {questions.length === 0 && (
             <div className="mb-6 md:mb-8 p-3 md:p-4 bg-yellow-100 border border-yellow-200 rounded-lg text-yellow-800 mobile-text-sm">
@@ -589,24 +599,52 @@ const QuizHost: React.FC<QuizHostProps> = ({ onBack }) => {
             </div>
           )}
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mobile-grid-1">
+          <div className={`grid gap-4 md:gap-6 ${
+            deviceInfo.isMobile ? 'grid-cols-1 mobile-grid-1' : 
+            deviceInfo.isTablet ? 'grid-cols-1 mobile-grid-1' : 
+            'grid-cols-1 md:grid-cols-2 mobile-grid-1'
+          }`}>
             <button
               onClick={() => startGame('sequential')}
               disabled={questions.length === 0 || connectionStatus !== 'connected'}
-              className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 md:p-8 hover:bg-white/20 transition-all duration-300 border border-white/20 group disabled:opacity-50 disabled:cursor-not-allowed mobile-btn mobile-touch-manipulation"
+              className={`bg-white/10 backdrop-blur-lg rounded-2xl hover:bg-white/20 transition-all duration-300 border border-white/20 group disabled:opacity-50 disabled:cursor-not-allowed mobile-btn mobile-touch-manipulation ${
+                deviceInfo.isMobile ? 'p-4' : 
+                deviceInfo.isTablet ? 'p-6' : 
+                'p-6 md:p-8'
+              }`}
             >
-              <RotateCcw className="w-10 h-10 md:w-12 md:h-12 text-blue-300 mx-auto mb-3 md:mb-4 group-hover:scale-110 transition-transform" />
-              <h3 className="text-xl md:text-2xl font-semibold text-white mb-2 mobile-text-xl">Sıralı Mod</h3>
+              <RotateCcw className={`text-blue-300 mx-auto mb-3 md:mb-4 group-hover:scale-110 transition-transform ${
+                deviceInfo.isMobile ? 'w-8 h-8' : 
+                deviceInfo.isTablet ? 'w-10 h-10' : 
+                'w-10 h-10 md:w-12 md:h-12'
+              }`} />
+              <h3 className={`font-semibold text-white mb-2 ${
+                deviceInfo.isMobile ? 'text-lg mobile-text-lg' : 
+                deviceInfo.isTablet ? 'text-xl mobile-text-xl' : 
+                'text-xl md:text-2xl mobile-text-xl'
+              }`}>Sıralı Mod</h3>
               <p className="text-green-200 mobile-text-sm">Sorular sırasıyla gelir</p>
             </button>
 
             <button
               onClick={() => startGame('random')}
               disabled={questions.length === 0 || connectionStatus !== 'connected'}
-              className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 md:p-8 hover:bg-white/20 transition-all duration-300 border border-white/20 group disabled:opacity-50 disabled:cursor-not-allowed mobile-btn mobile-touch-manipulation"
+              className={`bg-white/10 backdrop-blur-lg rounded-2xl hover:bg-white/20 transition-all duration-300 border border-white/20 group disabled:opacity-50 disabled:cursor-not-allowed mobile-btn mobile-touch-manipulation ${
+                deviceInfo.isMobile ? 'p-4' : 
+                deviceInfo.isTablet ? 'p-6' : 
+                'p-6 md:p-8'
+              }`}
             >
-              <Shuffle className="w-10 h-10 md:w-12 md:h-12 text-purple-300 mx-auto mb-3 md:mb-4 group-hover:scale-110 transition-transform" />
-              <h3 className="text-xl md:text-2xl font-semibold text-white mb-2 mobile-text-xl">Rastgele Mod</h3>
+              <Shuffle className={`text-purple-300 mx-auto mb-3 md:mb-4 group-hover:scale-110 transition-transform ${
+                deviceInfo.isMobile ? 'w-8 h-8' : 
+                deviceInfo.isTablet ? 'w-10 h-10' : 
+                'w-10 h-10 md:w-12 md:h-12'
+              }`} />
+              <h3 className={`font-semibold text-white mb-2 ${
+                deviceInfo.isMobile ? 'text-lg mobile-text-lg' : 
+                deviceInfo.isTablet ? 'text-xl mobile-text-xl' : 
+                'text-xl md:text-2xl mobile-text-xl'
+              }`}>Rastgele Mod</h3>
               <p className="text-green-200 mobile-text-sm">Sorular karışık gelir</p>
             </button>
           </div>
@@ -745,17 +783,15 @@ const QuizHost: React.FC<QuizHostProps> = ({ onBack }) => {
           </button>
           
           {/* Sonraki Soru Butonu - Orta */}
-          {showResult && (
-            <div className="flex justify-center">
-              <button
-                onClick={nextQuestion}
-                disabled={currentQuestionIndex >= questions.length - 1}
-                className="bg-purple-600 text-white px-6 py-3 rounded-lg hover:bg-purple-700 transition-colors font-medium disabled:bg-gray-500 disabled:cursor-not-allowed"
-              >
-                Sonraki Soru
-              </button>
-            </div>
-          )}
+          <div className="flex justify-center">
+            <button
+              onClick={nextQuestion}
+              disabled={currentQuestionIndex >= questions.length - 1}
+              className="bg-purple-600 text-white px-6 py-3 rounded-lg hover:bg-purple-700 transition-colors font-medium disabled:bg-gray-500 disabled:cursor-not-allowed"
+            >
+              Sonraki Soru
+            </button>
+          </div>
           
           <div className="flex items-center space-x-4">
             <ConnectionIndicator />

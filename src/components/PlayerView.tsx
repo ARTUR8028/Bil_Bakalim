@@ -222,9 +222,11 @@ const PlayerView: React.FC<PlayerViewProps> = ({ onBack }) => {
       setJoinError(error.message);
     });
 
-    socketConnection.on('newQuestion', (question: string) => {
-      console.log('📝 Yeni soru alındı:', question);
-      setCurrentQuestion(question);
+    socketConnection.on('newQuestion', (questionObj: any) => {
+      console.log('📝 Yeni soru alındı:', questionObj);
+      // Question objesi ise question property'sini al, string ise direkt kullan
+      const questionText = typeof questionObj === 'string' ? questionObj : questionObj.question;
+      setCurrentQuestion(questionText);
       setAnswer('');
       setHasAnswered(false);
       setAnswerError('');
