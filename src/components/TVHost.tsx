@@ -217,6 +217,7 @@ const TVHost: React.FC<TVHostProps> = ({ onBack }) => {
       setShowFinalRankings(true);
     });
 
+
     return () => {
       socketConnection.disconnect();
     };
@@ -314,6 +315,7 @@ const TVHost: React.FC<TVHostProps> = ({ onBack }) => {
         setTimer(30);
         setShowResult(false);
         setGameResult(null);
+        setCurrentQuestion(question); // TV'de soruyu göster
         
         socket.emit('startQuestion', question);
         // Süre sayacını oyunculara gönder
@@ -330,14 +332,43 @@ const TVHost: React.FC<TVHostProps> = ({ onBack }) => {
   };
 
   const nextQuestion = () => {
-    if (socket) {
-      socket.emit('nextQuestion');
-    }
+    console.log('➡️ TV Sonraki soruya geçiliyor...');
+    setCurrentQuestionIndex(prev => prev + 1);
+    setShowResult(false);
+    setGameResult(null);
+    
+    // Sonraki soruyu otomatik başlat
+    setTimeout(() => {
+      if (currentQuestionIndex + 1 < questions.length && socket) {
+        const question = questions[currentQuestionIndex + 1];
+        console.log('📝 TV Sonraki soru otomatik başlatılıyor:', question);
+        
+        setCurrentQuestion(question); // TV'de yeni soruyu göster
+        setTimer(30);
+        
+        socket.emit('startQuestion', question);
+        socket.emit('startTimer', { duration: 30 });
+      }
+    }, 500);
   };
 
   const endGame = () => {
     if (socket) {
       socket.emit('endGame');
+    }
+  };
+
+  const restartGame = () => {
+    console.log('🔄 TV Oyun yeniden başlatılıyor...');
+    setCurrentQuestionIndex(0);
+    setShowResult(false);
+    setGameResult(null);
+    setTimer(30);
+    setScores({});
+    setShowFinalRankings(false);
+    
+    if (socket) {
+      socket.emit('restartGame');
     }
   };
 
@@ -359,6 +390,8 @@ const TVHost: React.FC<TVHostProps> = ({ onBack }) => {
     setShowFinalRankings(false);
     setParticipantNames([]);
     setPlayerCount({ total: 0, answered: 0 });
+    setCurrentQuestionIndex(0); // Soru index'ini sıfırla
+    setCurrentQuestion(null); // Mevcut soruyu temizle
   };
 
   // Oyuncu listesi componenti
@@ -475,7 +508,11 @@ const TVHost: React.FC<TVHostProps> = ({ onBack }) => {
                       <span className="text-2xl font-bold text-yellow-400">
                         {index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : `${index + 1}.`}
                       </span>
-                      <span className="text-xl text-white">{playerName}</span>
+                      <span className="text-xl text-white flex items-center">
+                        {index === 0 && <Trophy className="w-6 h-6 text-yellow-400 mr-3" />}
+                        {playerName}
+                        {index === 0 && <span className="ml-3 text-yellow-400 font-bold text-xl">👑</span>}
+                      </span>
                     </div>
                     <span className="text-2xl font-bold text-green-400">{score} puan</span>
                   </div>
@@ -483,12 +520,21 @@ const TVHost: React.FC<TVHostProps> = ({ onBack }) => {
               </div>
             </div>
             
-            <button
-              onClick={goBackToModeSelection}
-              className="bg-blue-600 hover:bg-blue-700 text-white text-xl px-8 py-4 rounded-xl transition-colors"
-            >
-              🔄 Yeni Oyun
-            </button>
+            <div className="flex justify-center space-x-4">
+              <button
+                onClick={restartGame}
+                className="bg-green-600 hover:bg-green-700 text-white text-xl px-8 py-4 rounded-xl transition-colors flex items-center"
+              >
+                <RotateCcw className="w-6 h-6 mr-2" />
+                🔄 Yeniden Başlat
+              </button>
+              <button
+                onClick={goBackToModeSelection}
+                className="bg-blue-600 hover:bg-blue-700 text-white text-xl px-8 py-4 rounded-xl transition-colors"
+              >
+                🏠 Ana Menü
+              </button>
+            </div>
           </div>
         </div>
         <ToastContainer />
@@ -547,7 +593,10 @@ const TVHost: React.FC<TVHostProps> = ({ onBack }) => {
                 {/* QR Kod ve Link */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
                   <div className="text-center">
-                    <h3 className="text-xl font-bold text-white mb-4">📱 QR Kod</h3>
+                    <div className="flex items-center justify-center mb-4">
+                      <QrCode className="w-8 h-8 text-blue-300 mr-3" />
+                      <h3 className="text-xl font-bold text-white">📱 QR Kod</h3>
+                    </div>
                     {qrCodeUrl && (
                       <img src={qrCodeUrl} alt="QR Code" className="mx-auto mb-4 rounded-lg shadow-lg" />
                     )}
@@ -603,6 +652,18 @@ const TVHost: React.FC<TVHostProps> = ({ onBack }) => {
                   <div className="text-6xl font-bold text-yellow-400 mb-4">⏰ {timer}</div>
                   <p className="text-xl text-gray-300">Soru {currentQuestionIndex + 1} / {questions.length}</p>
                 </div>
+                
+                {/* Soru Gösterimi */}
+                {currentQuestion && (
+                  <div className="text-center mb-8">
+                    <h3 className="text-4xl font-bold text-white mb-6 leading-relaxed">
+                      {currentQuestion.question}
+                    </h3>
+                    <p className="text-2xl text-blue-300">
+                      Oyuncular cevaplarını gönderiyor...
+                    </p>
+                  </div>
+                )}
                 
                 {showResult && gameResult ? (
                   <div className="text-center">
