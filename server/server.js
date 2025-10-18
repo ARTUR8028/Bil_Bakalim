@@ -1039,6 +1039,24 @@ io.on('connection', (socket) => {
     console.log('✅ Yeni oyun için tüm veriler temizlendi');
   });
 
+  // TV Host için startGame event'i
+  socket.on('startGame', () => {
+    console.log('📺 TV Host oyunu başlattı');
+    
+    // Oyun durumunu aktif yap
+    gameState.isActive = true;
+    gameState.totalQuestions = questions.length;
+    gameState.currentQuestionIndex = 0;
+    
+    // Cevapları temizle
+    answers = {};
+    
+    // Tüm oyunculara oyun başladığını bildir
+    io.emit('gameStarted');
+    
+    console.log('✅ TV Oyun başlatıldı');
+  });
+
   // Ping-pong mekanizması
   socket.on('ping', (data) => {
     console.log('🏓 Ping alındı:', data);
