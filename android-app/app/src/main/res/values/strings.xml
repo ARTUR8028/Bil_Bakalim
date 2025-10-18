@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <string name="app_name">Bil Bakalım TV</string>
-    <string name="app_description">Google TV için interaktif quiz uygulaması</string>
-    <string name="tv_banner">TV Banner</string>
-    <string name="loading_message">📺 Bil Bakalım TV Yükleniyor...</string>
-</resources>
