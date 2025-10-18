@@ -185,7 +185,7 @@ const TVHost: React.FC<TVHostProps> = ({ onBack }) => {
     }
   };
 
-  const startQuizGame = () => {
+  const startQuizGame = async () => {
     console.log('🚀 TV Quiz oyunu başlatılıyor...');
     console.log('📊 Mevcut durum:', { 
       questionsLength: questions.length, 
@@ -196,20 +196,28 @@ const TVHost: React.FC<TVHostProps> = ({ onBack }) => {
     
     setWaitingForPlayers(false);
     
-    // Sorular yüklenmemişse yükle
-    if (questions.length === 0) {
+    // Soruları yükle
+    try {
       console.log('📝 Sorular yükleniyor...');
-      if (socket) {
-        socket.emit('getQuestions');
+      const response = await fetch('/api/questions');
+      if (response.ok) {
+        const questionsData = await response.json();
+        console.log('📋 Sorular yüklendi:', questionsData.length);
+        setQuestions(questionsData);
+        
+        if (socket) {
+          console.log('📤 startGame event gönderiliyor...');
+          socket.emit('startGame');
+        } else {
+          console.error('❌ Socket bağlantısı yok!');
+        }
+      } else {
+        console.error('❌ Sorular yüklenemedi:', response.status);
+        addToast('❌ Sorular yüklenemedi', 'warning');
       }
-      return;
-    }
-    
-    if (socket) {
-      console.log('📤 startGame event gönderiliyor...');
-      socket.emit('startGame');
-    } else {
-      console.error('❌ Socket bağlantısı yok!');
+    } catch (error) {
+      console.error('❌ Soru yükleme hatası:', error);
+      addToast('❌ Soru yükleme hatası', 'warning');
     }
   };
 
@@ -260,7 +268,7 @@ const TVHost: React.FC<TVHostProps> = ({ onBack }) => {
       {/* Main Content */}
       <div className="flex-1 flex flex-col items-center justify-center p-8">
         {!gameActive && !waitingForPlayers ? (
-          /* Game Mode Selection Screen */
+          /* Game Start Screen - Direct Start */
           <div className="text-center">
             <h1 className="text-6xl font-bold text-white mb-8 animate-pulse">
               📺 BİL BAKALIM TV
@@ -269,24 +277,16 @@ const TVHost: React.FC<TVHostProps> = ({ onBack }) => {
               Google TV için Interaktif Quiz
             </p>
             
-            {/* Game Mode Selection */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-              <button
-                onClick={() => startGame('sequential')}
-                className="bg-blue-600 hover:bg-blue-700 text-white text-xl px-8 py-6 rounded-2xl transition-colors tv-focusable"
-              >
-                📋 Sıralı Oyun
-              </button>
-              <button
-                onClick={() => startGame('random')}
-                className="bg-purple-600 hover:bg-purple-700 text-white text-xl px-8 py-6 rounded-2xl transition-colors tv-focusable"
-              >
-                🔀 Rastgele Oyun
-              </button>
-            </div>
+            {/* Direct Start Button */}
+            <button
+              onClick={() => startQuizGame()}
+              className="bg-green-600 hover:bg-green-700 text-white text-2xl px-12 py-6 rounded-2xl transition-colors tv-focusable"
+            >
+              🎮 Oyunu Başlat
+            </button>
             
-            <p className="text-blue-300 text-xl">
-              ✅ Oyun modunu seçin
+            <p className="text-blue-300 text-xl mt-4">
+              ✅ Oyunu başlatmak için butona tıklayın
             </p>
           </div>
         ) : waitingForPlayers ? (
