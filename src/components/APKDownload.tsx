@@ -65,14 +65,8 @@ const APKDownload: React.FC<APKDownloadProps> = ({ onBack }) => {
                 📺 Bil Bakalım TV
               </h1>
               <p className="text-2xl text-gray-300 mb-8">
-                Google TV için PWA Uygulaması
+                Google TV için Android Uygulaması
               </p>
-              <div className="bg-red-900/20 border border-red-500/30 rounded-lg p-4 mb-6">
-                <p className="text-red-200 text-lg">
-                  ⚠️ <strong>APK Sorunu:</strong> APK dosyası ayrıştırma hatası veriyor. 
-                  Bu sorunu çözmek için PWA kullanmanızı öneriyoruz.
-                </p>
-              </div>
             </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -81,26 +75,26 @@ const APKDownload: React.FC<APKDownloadProps> = ({ onBack }) => {
               <div className="text-center">
                 <QrCode className="w-16 h-16 text-blue-300 mx-auto mb-4" />
                 <h3 className="text-2xl font-bold text-white mb-4">
-                  📱 PWA Olarak Yükle
+                  📱 APK İndir
                 </h3>
                 <p className="text-gray-300 mb-6">
-                  Google TV tarayıcısından uygulamayı ana ekrana ekleyin
+                  Android TV cihazınız için APK dosyasını indirin
                 </p>
                 
                 <div className="bg-blue-900/20 border border-blue-500/30 rounded-lg p-4 mb-6">
-                  <h4 className="text-lg font-semibold text-blue-300 mb-3">📋 PWA Kurulum Adımları:</h4>
+                  <h4 className="text-lg font-semibold text-blue-300 mb-3">📋 APK Kurulum Adımları:</h4>
                   <ol className="text-sm text-blue-200 space-y-2 text-left">
-                    <li>1. Google TV'de Chrome tarayıcısını açın</li>
-                    <li>2. <code className="bg-blue-800/50 px-2 py-1 rounded">bil-bakalim.onrender.com/#tv</code> adresine gidin</li>
-                    <li>3. Sağ üst köşedeki "..." menüsüne tıklayın</li>
-                    <li>4. "Ana ekrana ekle" seçeneğini seçin</li>
-                    <li>5. Uygulama ana ekranda görünecek!</li>
+                    <li>1. QR kodu tarayın veya direkt indirin</li>
+                    <li>2. APK dosyasını Android TV'ye aktarın</li>
+                    <li>3. "Bilinmeyen kaynaklardan kurulum" izni verin</li>
+                    <li>4. APK dosyasını yükleyin</li>
+                    <li>5. Uygulamayı başlatın!</li>
                   </ol>
                   
                   <div className="mt-4 p-3 bg-green-900/20 border border-green-500/30 rounded-lg">
                     <p className="text-green-200 text-sm">
-                      ✅ <strong>Avantajlar:</strong> Otomatik güncelleme, güvenli, hızlı yükleme, 
-                      APK imzalama sorunu yok!
+                      ✅ <strong>Avantajlar:</strong> Tam Android uygulaması, hızlı çalışma, 
+                      Google TV uyumlu!
                     </p>
                   </div>
                 </div>
@@ -142,17 +136,11 @@ const APKDownload: React.FC<APKDownloadProps> = ({ onBack }) => {
                 <button
                   onClick={handleDownload}
                   disabled={!downloadUrl || loading}
-                  className="bg-red-600 hover:bg-red-700 disabled:bg-gray-500 text-white text-xl px-8 py-4 rounded-2xl transition-colors tv-focusable w-full"
+                  className="bg-green-600 hover:bg-green-700 disabled:bg-gray-500 text-white text-xl px-8 py-4 rounded-2xl transition-colors tv-focusable w-full"
                 >
-                  {loading ? 'Yükleniyor...' : '⚠️ APK İndir (Sorunlu)'}
+                  {loading ? 'Yükleniyor...' : '📱 APK İndir'}
                 </button>
                 
-                <div className="mt-4 p-3 bg-red-900/20 border border-red-500/30 rounded-lg">
-                  <p className="text-red-200 text-sm">
-                    ❌ <strong>Uyarı:</strong> APK dosyası ayrıştırma hatası veriyor. 
-                    PWA kullanımı daha güvenli ve sorunsuzdur.
-                  </p>
-                </div>
                 
                 {downloadUrl && (
                   <div className="mt-4 p-4 bg-white/5 rounded-lg">
