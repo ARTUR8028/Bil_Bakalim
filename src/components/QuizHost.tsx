@@ -683,20 +683,14 @@ const QuizHost: React.FC<QuizHostProps> = ({ onBack }) => {
               <div className="flex flex-col items-center">
                 <button
                   onClick={startQuizGame}
-                  disabled={playerCount.total === 0 || connectionStatus !== 'connected'}
-                  className="bg-green-600 text-white px-12 py-4 rounded-xl hover:bg-green-700 transition-colors font-semibold text-xl disabled:bg-gray-500 disabled:cursor-not-allowed flex items-center"
+                  disabled={false}
+                  className="bg-green-600 text-white px-12 py-4 rounded-xl hover:bg-green-700 transition-colors font-semibold text-xl flex items-center"
                 >
                   <Play className="w-6 h-6 mr-3" />
                   Oyunu Başlat
                 </button>
                 
-                {playerCount.total === 0 && (
-                  <p className="text-yellow-300 mt-3 text-base">⚠️ En az 1 oyuncu katılması gerekiyor</p>
-                )}
-                
-                {connectionStatus !== 'connected' && (
-                  <p className="text-red-300 mt-3 text-base">❌ Sunucu bağlantısı gerekli</p>
-                )}
+                <p className="text-blue-300 mt-3 text-base">✅ Oyunu başlatmak için butona tıklayın</p>
               </div>
             </div>
           </div>
