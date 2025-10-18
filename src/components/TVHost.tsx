@@ -1,48 +1,53 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { ArrowLeft, Play, Users, Trophy, RotateCcw, Shuffle, QrCode, Copy, CheckCircle, Wifi, WifiOff } from 'lucide-react';
 import { io, Socket } from 'socket.io-client';
 import QRCode from 'qrcode';
 
-// Types
+interface TVHostProps {
+  onBack: () => void;
+}
+
+interface Question {
+  question: string;
+  answer: string;
+}
+
 interface PlayerCount {
   total: number;
   answered: number;
 }
 
 interface GameResult {
-  question: string;
-  correctAnswer: string;
-  answers: Record<string, string>;
-  scores: Record<string, number>;
-}
-
-interface TVHostProps {
-  onBack: () => void;
+  correct: number;
+  closest: string;
+  winners?: string[];
+  allAnswers?: Array<{
+    playerName: string;
+    answer: number;
+    difference: number;
+    isCorrect: boolean;
+    hasAnswered: boolean;
+  }>;
 }
 
 const TVHost: React.FC<TVHostProps> = ({ onBack }) => {
   const [socket, setSocket] = useState<Socket | null>(null);
-  const [currentQuestion, setCurrentQuestion] = useState<any>(null);
-  const [gameActive, setGameActive] = useState(false);
-  const [showResults, setShowResults] = useState(false);
-  const [gameResult, setGameResult] = useState<any>(null);
-  const [questions, setQuestions] = useState<any[]>([]);
-  const [currentQuestionIndex] = useState(0);
   const [gameMode, setGameMode] = useState<'sequential' | 'random' | null>(null);
+  const [questions, setQuestions] = useState<Question[]>([]);
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  const [playerCount, setPlayerCount] = useState<PlayerCount>({ total: 0, answered: 0 });
+  const [participantNames, setParticipantNames] = useState<string[]>([]);
+  const [timer, setTimer] = useState(30);
+  const [showResult, setShowResult] = useState(false);
+  const [gameResult, setGameResult] = useState<GameResult | null>(null);
+  const [scores, setScores] = useState<Record<string, number>>({});
   const [qrCodeUrl, setQrCodeUrl] = useState('');
   const [linkCopied, setLinkCopied] = useState(false);
   const [waitingForPlayers, setWaitingForPlayers] = useState(false);
   const [showFinalRankings, setShowFinalRankings] = useState(false);
-  const [scores, setScores] = useState<Record<string, number>>({});
-  const [playerCount, setPlayerCount] = useState({ total: 0, answered: 0 });
-  const [participantNames, setParticipantNames] = useState<string[]>([]);
-  const [timer, setTimer] = useState(30);
-  const [showResult, setShowResult] = useState(false);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
   const [connectionStatus, setConnectionStatus] = useState<'connecting' | 'connected' | 'disconnected'>('connecting');
   const [toasts, setToasts] = useState<Array<{id: string, message: string, type: 'success' | 'info' | 'warning'}>>([]);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
-  
-  // Participants array for display
-  const participants = participantNames.map(name => ({ name }));
 
   const joinLink = `${window.location.origin}/#player`;
 
@@ -72,7 +77,7 @@ const TVHost: React.FC<TVHostProps> = ({ onBack }) => {
       reconnectionDelayMax: 10000, // Daha uzun maksimum gecikme
       autoConnect: true
     });
-
+    
     setSocket(socketConnection);
 
     // Bağlantı durumu takibi
@@ -96,12 +101,15 @@ const TVHost: React.FC<TVHostProps> = ({ onBack }) => {
     });
 
     socketConnection.on('disconnect', (reason) => {
-      console.log('❌ TV Host Socket bağlantısı kesildi:', reason);
+      console.log('❌ TV Host socket bağlantısı kesildi:', reason);
       setConnectionStatus('disconnected');
+      // Bağlantı kesildiğinde oyuncu listesini temizle
+      setParticipantNames([]);
+      console.log('🧹 Bağlantı kesildi, oyuncu listesi temizlendi');
     });
 
     socketConnection.on('connect_error', (error) => {
-      console.error('❌ TV Host Bağlantı hatası:', error);
+      console.error('❌ TV Host bağlantı hatası:', error);
       setConnectionStatus('disconnected');
       
       // Polling ile yeniden dene
@@ -111,11 +119,6 @@ const TVHost: React.FC<TVHostProps> = ({ onBack }) => {
           socketConnection.connect();
         }
       }, 3000);
-    });
-
-    // Test bağlantısı
-    socketConnection.on('connectionTest', (data) => {
-      console.log('🏓 TV Host Bağlantı testi başarılı:', data);
     });
 
     // Soruları yükle
@@ -214,50 +217,6 @@ const TVHost: React.FC<TVHostProps> = ({ onBack }) => {
       setShowFinalRankings(true);
     });
 
-    // Oyun eventleri
-    socketConnection.on('gameStarted', () => {
-      console.log('🎮 TV Oyun başladı');
-      setGameActive(true);
-      setWaitingForPlayers(false);
-    });
-
-    socketConnection.on('newQuestion', (questionObj) => {
-      console.log('📺 TV Yeni soru:', questionObj);
-      setCurrentQuestion(questionObj);
-      setShowResults(false);
-      setGameResult(null);
-      setShowResult(false);
-      setTimer(30);
-    });
-
-    socketConnection.on('results', (results) => {
-      console.log('📊 TV Sonuçlar:', results);
-      setGameResult(results);
-      setShowResults(true);
-      setShowResult(true);
-    });
-
-    // QR kod oluştur
-    const generateQRCode = async () => {
-      try {
-        const qrCodeDataURL = await import('qrcode').then(QRCode => 
-          QRCode.toDataURL(joinLink, {
-            width: 300,
-            margin: 2,
-            color: {
-              dark: '#1A1A2E',
-              light: '#FFFFFF'
-            }
-          })
-        );
-        setQrCodeUrl(qrCodeDataURL);
-      } catch (error) {
-        console.error('❌ QR kod oluşturma hatası:', error);
-      }
-    };
-
-    generateQRCode();
-
     return () => {
       socketConnection.disconnect();
     };
@@ -308,8 +267,10 @@ const TVHost: React.FC<TVHostProps> = ({ onBack }) => {
     }
   };
 
+  // Client-side timer kaldırıldı - sadece server'dan gelen timer kullanılıyor
+
   const startGame = (mode: 'sequential' | 'random') => {
-    console.log('🎮 TV Oyun modu seçildi:', mode);
+    console.log('🎮 Oyun modu seçildi:', mode);
     setGameMode(mode);
     setWaitingForPlayers(true);
     if (mode === 'random') {
@@ -318,9 +279,8 @@ const TVHost: React.FC<TVHostProps> = ({ onBack }) => {
     }
   };
 
-
-  const startQuizGame = async () => {
-    console.log('🚀 TV Quiz oyunu başlatılıyor...');
+  const startQuizGame = () => {
+    console.log('🚀 Quiz oyunu başlatılıyor...');
     console.log('📊 Mevcut durum:', { 
       questionsLength: questions.length, 
       currentQuestionIndex, 
@@ -333,37 +293,8 @@ const TVHost: React.FC<TVHostProps> = ({ onBack }) => {
     // Sorular yüklenmemişse yükle
     if (questions.length === 0) {
       console.log('📝 Sorular yükleniyor...');
-      try {
-        const response = await fetch('/api/questions');
-        if (response.ok) {
-          const questionsData = await response.json();
-          console.log('📋 Sorular yüklendi:', questionsData.length);
-          setQuestions(questionsData);
-          
-          // Sorular yüklendikten sonra oyunu başlat
-          if (socket) {
-            console.log('📤 startGame event gönderiliyor...');
-            socket.emit('startGame');
-            
-            // İlk soruyu gönder
-            setTimeout(() => {
-              if (questionsData.length > 0) {
-                const firstQuestion = questionsData[0];
-                console.log('📝 İlk soru gönderiliyor:', firstQuestion);
-                socket.emit('startQuestion', firstQuestion);
-                socket.emit('startTimer', { duration: 30 });
-                setCurrentQuestion(firstQuestion);
-                setGameActive(true);
-              }
-            }, 1000);
-          }
-        } else {
-          console.error('❌ Sorular yüklenemedi:', response.status);
-          addToast('❌ Sorular yüklenemedi', 'warning');
-        }
-      } catch (error) {
-        console.error('❌ Soru yükleme hatası:', error);
-        addToast('❌ Soru yükleme hatası', 'warning');
+      if (socket) {
+        socket.emit('getQuestions');
       }
       return;
     }
@@ -374,21 +305,28 @@ const TVHost: React.FC<TVHostProps> = ({ onBack }) => {
       return;
     }
     
-    // Oyunu başlat
-    console.log('📤 startGame event gönderiliyor...');
-    socket.emit('startGame');
-    
-    // İlk soruyu gönder
+    // Oyun başladığında ilk soruyu otomatik başlat
     setTimeout(() => {
-      if (questions.length > 0) {
-        const firstQuestion = questions[0];
-        console.log('📝 İlk soru gönderiliyor:', firstQuestion);
-        socket.emit('startQuestion', firstQuestion);
+      if (currentQuestionIndex < questions.length && socket) {
+        const question = questions[currentQuestionIndex];
+        console.log('📝 İlk soru otomatik başlatılıyor:', question);
+        
+        setTimer(30);
+        setShowResult(false);
+        setGameResult(null);
+        
+        socket.emit('startQuestion', question);
+        // Süre sayacını oyunculara gönder
         socket.emit('startTimer', { duration: 30 });
-        setCurrentQuestion(firstQuestion);
-        setGameActive(true);
       }
     }, 1000);
+    
+    if (socket) {
+      console.log('📤 startGame event gönderiliyor...');
+      socket.emit('startGame');
+    } else {
+      console.error('❌ Socket bağlantısı yok!');
+    }
   };
 
   const nextQuestion = () => {
@@ -415,286 +353,316 @@ const TVHost: React.FC<TVHostProps> = ({ onBack }) => {
     }
   };
 
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 flex flex-col">
-      {/* Header */}
-      <div className="flex justify-between items-center p-6 bg-black/20 backdrop-blur-lg">
-        <button
-          onClick={onBack}
-          className="flex items-center text-white hover:text-yellow-300 transition-colors text-lg"
-        >
-          ← Ana Menü
-        </button>
-        <div className="flex items-center space-x-4">
-          <div className={`px-4 py-2 rounded-lg ${
-            connectionStatus === 'connected' ? 'bg-green-600' : 
-            connectionStatus === 'connecting' ? 'bg-yellow-600' : 'bg-red-600'
-          } text-white`}>
-            {connectionStatus === 'connected' ? '📺 TV Bağlı' : 
-             connectionStatus === 'connecting' ? '📺 Bağlanıyor...' : '📺 TV Bağlantısı Yok'}
-          </div>
-          <div className="text-white text-lg">
-            👥 {participants.length} Oyuncu
+  const goBackToModeSelection = () => {
+    setGameMode(null);
+    setWaitingForPlayers(false);
+    setShowFinalRankings(false);
+    setParticipantNames([]);
+    setPlayerCount({ total: 0, answered: 0 });
+  };
+
+  // Oyuncu listesi componenti
+  const PlayerList = () => {
+    if (participantNames.length === 0) {
+      return (
+        <div className="text-center py-8">
+          <div className="animate-pulse">
+            <div className="w-16 h-16 bg-green-600/20 rounded-full mx-auto mb-4"></div>
+            <p className="text-green-200">Oyuncular bekleniyor...</p>
           </div>
         </div>
-      </div>
+      );
+    }
 
-      {/* Main Content */}
-      <div className="flex-1 flex flex-col items-center justify-center p-8">
-        {!gameActive && !waitingForPlayers ? (
-          /* Game Mode Selection Screen - Like QuizHost */
-          <div className="text-center">
-            <h1 className="text-6xl font-bold text-white mb-8 animate-pulse">
-              📺 BİL BAKALIM TV
-            </h1>
-            <p className="text-2xl text-gray-300 mb-8">
-              Google TV için Interaktif Quiz
-            </p>
-            
-            {/* Game Mode Selection - Like QuizHost */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-              <button
-                onClick={() => startGame('sequential')}
-                className="bg-blue-600 hover:bg-blue-700 text-white text-xl px-8 py-6 rounded-2xl transition-colors tv-focusable"
-              >
-                📋 Sıralı Oyun
-              </button>
-              <button
-                onClick={() => startGame('random')}
-                className="bg-purple-600 hover:bg-purple-700 text-white text-xl px-8 py-6 rounded-2xl transition-colors tv-focusable"
-              >
-                🔀 Rastgele Oyun
-              </button>
-            </div>
-            
-            <p className="text-blue-300 text-xl">
-              ✅ Oyun modunu seçin ({gameMode || 'Seçilmedi'})
-            </p>
+    return (
+      <div className="space-y-1 max-h-80 overflow-y-auto">
+        {participantNames.map((name, index) => (
+          <div
+            key={`${name}-${index}`}
+            className="text-white text-lg py-2 px-3 hover:bg-white/10 rounded transition-colors duration-200"
+            style={{
+              animation: `slideInFromRight 0.6s ease-out forwards`,
+              animationDelay: `${index * 0.15}s`,
+              transform: 'translateX(100%)',
+              opacity: 0
+            }}
+          >
+            <span className="font-medium">{name}</span>
           </div>
-        ) : waitingForPlayers ? (
-          /* Waiting for Players Screen */
+        ))}
+      </div>
+    );
+  };
+
+  // Toast Component
+  const ToastContainer = () => (
+    <div className="fixed top-4 right-2 md:right-4 z-50 space-y-2 mobile-safe-top">
+      {toasts.map((toast) => (
+        <div
+          key={toast.id}
+          className={`px-4 md:px-6 py-2 md:py-3 rounded-lg shadow-lg backdrop-blur-lg border animate-slideInRight mobile-btn ${
+            toast.type === 'success' 
+              ? 'bg-green-600/90 text-white border-green-500/30' 
+              : toast.type === 'warning'
+              ? 'bg-yellow-600/90 text-white border-yellow-500/30'
+              : 'bg-blue-600/90 text-white border-blue-500/30'
+          }`}
+          style={{
+            animation: 'slideInRight 0.3s ease-out, fadeOut 0.3s ease-in 3.7s forwards'
+          }}
+        >
+          <div className="flex items-center mobile-flex-row mobile-items-center">
+            {toast.type === 'success' && '🎉'}
+            {toast.type === 'warning' && '⚠️'}
+            {toast.type === 'info' && 'ℹ️'}
+            <span className="ml-2 font-medium mobile-text-sm">{toast.message}</span>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+
+  // Bağlantı durumu göstergesi
+  const ConnectionIndicator = () => (
+    <div className={`flex items-center space-x-2 px-2 md:px-3 py-1 rounded-full text-xs md:text-sm mobile-text-xs ${
+      connectionStatus === 'connected' 
+        ? 'bg-green-100 text-green-800' 
+        : connectionStatus === 'connecting'
+        ? 'bg-yellow-100 text-yellow-800'
+        : 'bg-red-100 text-red-800'
+    }`}>
+      {connectionStatus === 'connected' ? (
+        <Wifi className="w-3 h-3 md:w-4 md:h-4" />
+      ) : connectionStatus === 'connecting' ? (
+        <div className="w-3 h-3 md:w-4 md:h-4 border-2 border-yellow-600 border-t-transparent rounded-full animate-spin"></div>
+      ) : (
+        <WifiOff className="w-3 h-3 md:w-4 md:h-4" />
+      )}
+      <span className="mobile-text-xs">
+        {connectionStatus === 'connected' && 'Sunucu Bağlı'}
+        {connectionStatus === 'connecting' && 'Bağlanıyor...'}
+        {connectionStatus === 'disconnected' && 'Sunucu Bağlantısı Yok'}
+      </span>
+    </div>
+  );
+
+  if (showFinalRankings) {
+    const sortedScores = Object.entries(scores).sort(([,a], [,b]) => b - a);
+    
+    return (
+      <div translate="no" className="min-h-screen bg-gradient-to-br from-green-900 via-blue-900 to-purple-900 p-4">
+        <div className="max-w-4xl mx-auto">
+          <div className="flex justify-between items-center mb-8">
+            <button
+              onClick={goBackToModeSelection}
+              className="flex items-center text-white hover:text-green-300 transition-colors"
+            >
+              <ArrowLeft className="w-5 h-5 mr-2" />
+              Ana Menü
+            </button>
+            <ConnectionIndicator />
+          </div>
+
           <div className="text-center">
-            <h1 className="text-6xl font-bold text-white mb-8 animate-pulse">
-              📺 BİL BAKALIM TV
-            </h1>
-            <p className="text-2xl text-gray-300 mb-8">
-              Oyuncular bekleniyor...
-            </p>
-            
-            {/* QR Code and Link */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-              <div className="bg-white/10 backdrop-blur-lg rounded-3xl p-8 border border-white/20">
-                <div className="text-center">
-                  <h3 className="text-2xl font-bold text-white mb-4">📱 QR Kod</h3>
-                  {qrCodeUrl && (
-                    <img src={qrCodeUrl} alt="QR Code" className="mx-auto mb-4" />
-                  )}
-                  <p className="text-blue-200 text-sm">
-                    Oyuncular bu QR kodu okutarak katılabilir
-                  </p>
-                </div>
-              </div>
+            <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-8 mb-8 relative overflow-hidden">
+              <h1 className="text-4xl font-bold text-white mb-6">🏆 Oyun Bitti! 🏆</h1>
+              <p className="text-xl text-gray-300 mb-8">Final Sıralaması</p>
               
-              <div className="bg-white/10 backdrop-blur-lg rounded-3xl p-8 border border-white/20">
-                <div className="text-center">
-                  <h3 className="text-2xl font-bold text-white mb-4">🔗 Katılım Linki</h3>
-                  <div className="bg-white/10 rounded-lg p-4 mb-4">
-                    <p className="text-blue-200 font-mono text-sm break-all">{joinLink}</p>
+              <div className="space-y-4">
+                {sortedScores.map(([playerName, score], index) => (
+                  <div key={playerName} className="flex justify-between items-center bg-white/5 rounded-lg p-4">
+                    <div className="flex items-center space-x-4">
+                      <span className="text-2xl font-bold text-yellow-400">
+                        {index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : `${index + 1}.`}
+                      </span>
+                      <span className="text-xl text-white">{playerName}</span>
+                    </div>
+                    <span className="text-2xl font-bold text-green-400">{score} puan</span>
                   </div>
+                ))}
+              </div>
+            </div>
+            
             <button
-                    onClick={copyLink}
-                    className="bg-green-600 text-white px-8 py-3 rounded-lg hover:bg-green-700 transition-colors flex items-center mx-auto"
+              onClick={goBackToModeSelection}
+              className="bg-blue-600 hover:bg-blue-700 text-white text-xl px-8 py-4 rounded-xl transition-colors"
             >
-                    {linkCopied ? '✅ Kopyalandı!' : '📋 Linki Kopyala'}
+              🔄 Yeni Oyun
             </button>
+          </div>
+        </div>
+        <ToastContainer />
+      </div>
+    );
+  }
+
+  return (
+    <div translate="no" className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 p-4">
+      <div className="max-w-6xl mx-auto">
+        {/* Header */}
+        <div className="flex justify-between items-center mb-8">
+          <button
+            onClick={onBack}
+            className="flex items-center text-white hover:text-yellow-300 transition-colors"
+          >
+            <ArrowLeft className="w-5 h-5 mr-2" />
+            Ana Menü
+          </button>
+          <ConnectionIndicator />
+        </div>
+
+        {/* Main Content */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Sol Panel - Oyun Kontrolü */}
+          <div className="lg:col-span-2 space-y-6">
+            {!gameMode ? (
+              /* Oyun Modu Seçimi */
+              <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-8 border border-white/20">
+                <h1 className="text-4xl font-bold text-white mb-6 text-center">📺 BİL BAKALIM TV</h1>
+                <p className="text-xl text-gray-300 mb-8 text-center">Google TV için Interaktif Quiz</p>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <button
+                    onClick={() => startGame('sequential')}
+                    className="bg-blue-600 hover:bg-blue-700 text-white text-xl px-8 py-6 rounded-2xl transition-colors flex items-center justify-center space-x-3"
+                  >
+                    <Play className="w-6 h-6" />
+                    <span>📋 Sıralı Oyun</span>
+                  </button>
+                  
+                  <button
+                    onClick={() => startGame('random')}
+                    className="bg-purple-600 hover:bg-purple-700 text-white text-xl px-8 py-6 rounded-2xl transition-colors flex items-center justify-center space-x-3"
+                  >
+                    <Shuffle className="w-6 h-6" />
+                    <span>🔀 Rastgele Oyun</span>
+                  </button>
                 </div>
               </div>
-            </div>
-            
-            {/* Player Count */}
-            <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 border border-white/20 mb-8">
-              <h3 className="text-2xl font-bold text-white mb-4">👥 Oyuncular</h3>
-              <div className="text-4xl font-bold text-green-400 mb-2">
-                {playerCount.total}
-              </div>
-              <p className="text-blue-200">
-                {playerCount.total > 0 ? 'Oyuncular hazır!' : 'Oyuncu bekleniyor...'}
-              </p>
-            </div>
-            
-            {/* Start Game Button */}
-            <button
-              onClick={startQuizGame}
-              disabled={playerCount.total === 0}
-              className={`text-2xl px-12 py-6 rounded-2xl transition-colors ${
-                playerCount.total > 0
-                  ? 'bg-green-600 hover:bg-green-700 text-white'
-                  : 'bg-gray-600 text-gray-400 cursor-not-allowed'
-              }`}
-            >
-              {playerCount.total > 0 ? '🎮 Oyunu Başlat' : '⏳ Oyuncu Bekleniyor...'}
-            </button>
-          </div>
-        ) : showFinalRankings ? (
-          /* Final Rankings Screen */
-          <div className="w-full max-w-4xl">
-            <div className="text-center mb-8">
-              <h1 className="text-6xl font-bold text-white mb-4">🏆 Oyun Bitti! 🏆</h1>
-              <p className="text-2xl text-gray-300">Final Sıralaması</p>
-            </div>
-            
-            <div className="bg-white/10 backdrop-blur-lg rounded-3xl p-8 border border-white/20">
-              <div className="space-y-4">
-                {Object.entries(scores)
-                  .sort(([,a], [,b]) => b - a)
-                  .map(([playerName, score], index) => (
-                    <div key={playerName} className="flex justify-between items-center bg-white/5 rounded-lg p-4">
-                      <div className="flex items-center space-x-4">
-                        <span className="text-2xl font-bold text-yellow-400">
-                          {index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : `${index + 1}.`}
-                        </span>
-                        <span className="text-xl text-white">{playerName}</span>
-                      </div>
-                      <span className="text-2xl font-bold text-green-400">{score} puan</span>
-                    </div>
-                  ))}
-              </div>
-            </div>
-            
-            <div className="flex justify-center mt-8">
-              <button
-                onClick={() => {
-                  setShowFinalRankings(false);
-                  setGameActive(false);
-                  setWaitingForPlayers(false);
-                  setGameMode(null);
-                }}
-                className="bg-blue-600 hover:bg-blue-700 text-white text-xl px-8 py-4 rounded-xl transition-colors"
-              >
-                🔄 Yeni Oyun
-              </button>
-            </div>
-          </div>
-        ) : (
-          /* Game Active Screen */
-          <div className="w-full max-w-6xl">
-            {currentQuestion && !showResults ? (
-              /* Question Display */
-              <div className="bg-white/10 backdrop-blur-lg rounded-3xl p-12 border border-white/20">
-                <div className="text-center mb-8">
-                  <div className="text-4xl font-bold text-white mb-4">
-                    ⏰ {timer} SANİYE
+            ) : waitingForPlayers ? (
+              /* Oyuncu Bekleme Ekranı */
+              <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-8 border border-white/20">
+                <h2 className="text-3xl font-bold text-white mb-6 text-center">👥 Oyuncular Bekleniyor</h2>
+                
+                {/* QR Kod ve Link */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                  <div className="text-center">
+                    <h3 className="text-xl font-bold text-white mb-4">📱 QR Kod</h3>
+                    {qrCodeUrl && (
+                      <img src={qrCodeUrl} alt="QR Code" className="mx-auto mb-4 rounded-lg shadow-lg" />
+                    )}
+                    <p className="text-gray-300 text-sm">Oyuncular bu QR kodu okutarak katılabilir</p>
                   </div>
-                  <div className="text-2xl text-gray-300">
-                    Soru {currentQuestionIndex + 1}
+                  
+                  <div className="text-center">
+                    <h3 className="text-xl font-bold text-white mb-4">🔗 Katılım Linki</h3>
+                    <div className="bg-white/10 rounded-lg p-4 mb-4">
+                      <p className="text-blue-200 font-mono text-sm break-all">{joinLink}</p>
+                    </div>
+                    <button
+                      onClick={copyLink}
+                      className="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition-colors flex items-center mx-auto"
+                    >
+                      {linkCopied ? <CheckCircle className="w-4 h-4 mr-2" /> : <Copy className="w-4 h-4 mr-2" />}
+                      {linkCopied ? 'Kopyalandı!' : 'Linki Kopyala'}
+                    </button>
                   </div>
                 </div>
                 
+                {/* Oyuncu Sayısı */}
+                <div className="text-center mb-8">
+                  <div className="bg-white/10 rounded-2xl p-6">
+                    <h3 className="text-2xl font-bold text-white mb-2">👥 Oyuncular</h3>
+                    <div className="text-4xl font-bold text-green-400 mb-2">{playerCount.total}</div>
+                    <p className="text-gray-300">
+                      {playerCount.total > 0 ? 'Oyuncular hazır!' : 'Oyuncu bekleniyor...'}
+                    </p>
+                  </div>
+                </div>
+                
+                {/* Oyunu Başlat Butonu */}
                 <div className="text-center">
-                  <h2 className="text-5xl font-bold text-white mb-8 leading-relaxed">
-                    {currentQuestion.question}
-                  </h2>
-                </div>
-
-                <div className="text-center mt-8">
-                  <div className="text-2xl text-gray-300">
-                    👥 {participants.length} Oyuncu Aktif
-                  </div>
-                </div>
-              </div>
-            ) : (showResults || showResult) && gameResult ? (
-              /* Results Display */
-              <div className="bg-white/10 backdrop-blur-lg rounded-3xl p-12 border border-white/20">
-                <div className="text-center mb-8">
-                  <h2 className="text-4xl font-bold text-white mb-4">
-                    🏆 SONUÇLAR
-                  </h2>
-                </div>
-
-                <div className="text-center mb-8">
-                  <div className="text-3xl font-bold text-green-400 mb-2">
-                    Doğru Cevap: {gameResult.correctAnswer}
-                  </div>
-                  <div className="text-2xl text-yellow-400">
-                    {gameResult.winnerDisplay}
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4 mb-8">
-                  <div className="bg-white/10 rounded-2xl p-6">
-                    <h3 className="text-2xl font-bold text-white mb-4">📊 Tüm Cevaplar</h3>
-                    <div className="space-y-2">
-                      {gameResult.allAnswers.map((answer: any, index: number) => (
-                        <div key={index} className="flex justify-between items-center bg-white/5 rounded-lg p-3">
-                          <span className="text-white">{answer.playerName}</span>
-                          <span className="text-yellow-300">{answer.value}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                  
-                  <div className="bg-white/10 rounded-2xl p-6">
-                    <h3 className="text-2xl font-bold text-white mb-4">👥 Aktif Oyuncular</h3>
-                    <div className="space-y-2">
-                      {participants.map((participant, index) => (
-                        <div key={index} className="flex justify-between items-center bg-white/5 rounded-lg p-3">
-                          <span className="text-white">{participant.name}</span>
-                          <span className="text-green-300">0 puan</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex justify-center space-x-4">
                   <button
-                    onClick={nextQuestion}
-                    className="bg-blue-600 hover:bg-blue-700 text-white text-xl px-8 py-4 rounded-xl transition-colors"
+                    onClick={startQuizGame}
+                    disabled={playerCount.total === 0}
+                    className={`text-2xl px-12 py-6 rounded-2xl transition-colors ${
+                      playerCount.total > 0
+                        ? 'bg-green-600 hover:bg-green-700 text-white'
+                        : 'bg-gray-600 text-gray-400 cursor-not-allowed'
+                    }`}
                   >
-                    ➡️ Sonraki Soru
-                  </button>
-                  <button
-                    onClick={endGame}
-                    className="bg-red-600 hover:bg-red-700 text-white text-xl px-8 py-4 rounded-xl transition-colors"
-                  >
-                    🏁 Oyunu Bitir
+                    {playerCount.total > 0 ? '🎮 Oyunu Başlat' : '⏳ Oyuncu Bekleniyor...'}
                   </button>
                 </div>
               </div>
             ) : (
-              /* Waiting Screen */
-              <div className="text-center">
-                <h2 className="text-4xl font-bold text-white mb-8">
-                  ⏳ Soru Yükleniyor...
-                </h2>
+              /* Oyun Aktif Ekranı */
+              <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-8 border border-white/20">
+                <div className="text-center mb-8">
+                  <h2 className="text-3xl font-bold text-white mb-4">🎮 Oyun Aktif</h2>
+                  <div className="text-6xl font-bold text-yellow-400 mb-4">⏰ {timer}</div>
+                  <p className="text-xl text-gray-300">Soru {currentQuestionIndex + 1} / {questions.length}</p>
+                </div>
+                
+                {showResult && gameResult ? (
+                  <div className="text-center">
+                    <h3 className="text-2xl font-bold text-white mb-4">🏆 Sonuçlar</h3>
+                    <div className="text-3xl font-bold text-green-400 mb-4">
+                      Doğru Cevap: {gameResult.correct}
+                    </div>
+                    <div className="text-xl text-yellow-400 mb-6">
+                      {gameResult.winners && gameResult.winners.length > 0 
+                        ? `🏆 Kazanan: ${gameResult.winners.join(', ')}`
+                        : `🎯 En Yakın: ${gameResult.closest}`
+                      }
+                    </div>
+                    
+                    <div className="flex justify-center space-x-4">
+                      <button
+                        onClick={nextQuestion}
+                        className="bg-blue-600 hover:bg-blue-700 text-white text-xl px-8 py-4 rounded-xl transition-colors"
+                      >
+                        ➡️ Sonraki Soru
+                      </button>
+                      <button
+                        onClick={endGame}
+                        className="bg-red-600 hover:bg-red-700 text-white text-xl px-8 py-4 rounded-xl transition-colors"
+                      >
+                        🏁 Oyunu Bitir
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="text-center">
+                    <div className="text-2xl text-white mb-4">Soru yanıtlanıyor...</div>
+                    <div className="text-lg text-gray-300">
+                      {playerCount.answered} / {playerCount.total} oyuncu cevapladı
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </div>
-        )}
-      </div>
-      
-      {/* Toast Notifications */}
-      <div className="fixed top-4 right-4 z-50 space-y-2">
-        {toasts.map((toast) => (
-          <div
-            key={toast.id}
-            className={`px-4 py-3 rounded-lg shadow-lg backdrop-blur-lg border ${
-              toast.type === 'success' 
-                ? 'bg-green-600/90 text-white border-green-500/30' 
-                : toast.type === 'warning'
-                ? 'bg-yellow-600/90 text-white border-yellow-500/30'
-                : 'bg-blue-600/90 text-white border-blue-500/30'
-            }`}
-          >
-            <div className="flex items-center">
-              {toast.type === 'success' && '🎉'}
-              {toast.type === 'warning' && '⚠️'}
-              {toast.type === 'info' && 'ℹ️'}
-              <span className="ml-2 font-medium">{toast.message}</span>
+
+          {/* Sağ Panel - Oyuncu Listesi */}
+          <div className="lg:col-span-1">
+            <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 border border-white/20">
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-xl font-bold text-white flex items-center">
+                  <Users className="w-5 h-5 mr-2" />
+                  Oyuncular
+                </h3>
+                <div className="bg-blue-600 text-white px-3 py-1 rounded-full text-sm">
+                  {participantNames.length}
+                </div>
+              </div>
+              <PlayerList />
             </div>
           </div>
-        ))}
+        </div>
       </div>
+      
+      <ToastContainer />
     </div>
   );
 };
