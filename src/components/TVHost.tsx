@@ -18,7 +18,15 @@ const TVHost: React.FC<TVHostProps> = ({ onBack }) => {
   useEffect(() => {
     // Socket.IO bağlantısı
     const newSocket = io('https://bil-bakalim.onrender.com', {
-      transports: ['websocket', 'polling']
+      transports: ['polling', 'websocket'], // Polling öncelikli
+      upgrade: true,
+      timeout: 30000,
+      forceNew: true,
+      reconnection: true,
+      reconnectionAttempts: 20,
+      reconnectionDelay: 2000,
+      reconnectionDelayMax: 10000,
+      autoConnect: true
     });
 
     newSocket.on('connect', () => {
@@ -117,16 +125,14 @@ const TVHost: React.FC<TVHostProps> = ({ onBack }) => {
             </p>
             <button
               onClick={startGame}
-              disabled={!connected || participants.length === 0}
-              className="bg-green-600 hover:bg-green-700 disabled:bg-gray-500 text-white text-2xl px-12 py-6 rounded-2xl transition-colors"
+              disabled={false}
+              className="bg-green-600 hover:bg-green-700 text-white text-2xl px-12 py-6 rounded-2xl transition-colors"
             >
               🎮 Oyunu Başlat
             </button>
-            {participants.length === 0 && (
-              <p className="text-yellow-300 text-xl mt-4">
-                ⚠️ Oyuncular bekleniyor...
-              </p>
-            )}
+            <p className="text-blue-300 text-xl mt-4">
+              ✅ Oyunu başlatmak için butona tıklayın
+            </p>
           </div>
         ) : (
           /* Game Active Screen */
