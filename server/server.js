@@ -853,7 +853,7 @@ io.on('connection', (socket) => {
       console.log(`📢 Yeni soru yayınlanıyor: ${questionObj.question}`);
       console.log(`🎯 Doğru cevap: ${currentAnswer}`);
       
-      io.emit('newQuestion', questionObj.question);
+      io.emit('newQuestion', questionObj);
       updatePlayerCount();
 
       // Gerçek zamanlı süre güncellemeleri gönder - daha sık güncelleme

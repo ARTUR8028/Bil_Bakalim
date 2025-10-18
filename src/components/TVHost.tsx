@@ -221,9 +221,9 @@ const TVHost: React.FC<TVHostProps> = ({ onBack }) => {
       setWaitingForPlayers(false);
     });
 
-    socketConnection.on('newQuestion', (question) => {
-      console.log('📺 TV Yeni soru:', question);
-      setCurrentQuestion(question);
+    socketConnection.on('newQuestion', (questionObj) => {
+      console.log('📺 TV Yeni soru:', questionObj);
+      setCurrentQuestion(questionObj);
       setShowResults(false);
       setGameResult(null);
       setShowResult(false);
