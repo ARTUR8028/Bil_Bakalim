@@ -11,11 +11,11 @@ export default defineConfig({
     host: '0.0.0.0',
     proxy: {
       '/api': {
-        target: 'http://localhost:3001',
+        target: 'https://bil-bakalim.onrender.com',
         changeOrigin: true
       },
       '/socket.io': {
-        target: 'http://localhost:3001',
+        target: 'https://bil-bakalim.onrender.com',
         changeOrigin: true,
         ws: true
       }
