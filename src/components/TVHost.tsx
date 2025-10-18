@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { io, Socket } from 'socket.io-client';
-import { ArrowLeft, Tv, Wifi, WifiOff } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import QRCode from 'qrcode';
 
 // Types
@@ -22,15 +22,12 @@ interface TVHostProps {
 
 const TVHost: React.FC<TVHostProps> = ({ onBack }) => {
   const [socket, setSocket] = useState<Socket | null>(null);
-  const [connected, setConnected] = useState(false);
   const [currentQuestion, setCurrentQuestion] = useState<any>(null);
-  const [timeLeft, setTimeLeft] = useState(0);
-  const [participants, setParticipants] = useState<any[]>([]);
   const [gameActive, setGameActive] = useState(false);
   const [showResults, setShowResults] = useState(false);
   const [gameResult, setGameResult] = useState<any>(null);
   const [questions, setQuestions] = useState<any[]>([]);
-  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  const [currentQuestionIndex] = useState(0);
   const [gameMode, setGameMode] = useState<'sequential' | 'random' | null>(null);
   const [qrCodeUrl, setQrCodeUrl] = useState('');
   const [linkCopied, setLinkCopied] = useState(false);
@@ -44,6 +41,9 @@ const TVHost: React.FC<TVHostProps> = ({ onBack }) => {
   const [connectionStatus, setConnectionStatus] = useState<'connecting' | 'connected' | 'disconnected'>('connecting');
   const [toasts, setToasts] = useState<Array<{id: string, message: string, type: 'success' | 'info' | 'warning'}>>([]);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  
+  // Participants array for display
+  const participants = participantNames.map(name => ({ name }));
 
   const joinLink = `${window.location.origin}/#player`;
 
@@ -80,7 +80,6 @@ const TVHost: React.FC<TVHostProps> = ({ onBack }) => {
     socketConnection.on('connect', () => {
       console.log('✅ TV Host socket bağlantısı kuruldu:', socketConnection.id);
       setConnectionStatus('connected');
-      setConnected(true);
       
       // Bağlantı kurulduğunda hemen ping gönder
       socketConnection.emit('ping', { timestamp: Date.now(), source: 'tvhost' });
@@ -100,13 +99,11 @@ const TVHost: React.FC<TVHostProps> = ({ onBack }) => {
     socketConnection.on('disconnect', (reason) => {
       console.log('❌ TV Host Socket bağlantısı kesildi:', reason);
       setConnectionStatus('disconnected');
-      setConnected(false);
     });
 
     socketConnection.on('connect_error', (error) => {
       console.error('❌ TV Host Bağlantı hatası:', error);
       setConnectionStatus('disconnected');
-      setConnected(false);
       
       // Polling ile yeniden dene
       setTimeout(() => {
@@ -322,18 +319,6 @@ const TVHost: React.FC<TVHostProps> = ({ onBack }) => {
     }
   };
 
-  const goBackToModeSelection = () => {
-    setGameMode(null);
-    setWaitingForPlayers(false);
-    setGameActive(false);
-    setShowFinalRankings(false);
-    setCurrentQuestion(null);
-    setShowResults(false);
-    setGameResult(null);
-    setScores({});
-    setParticipantNames([]);
-    setPlayerCount({ total: 0, answered: 0 });
-  };
 
   const startQuizGame = () => {
     console.log('🚀 TV Quiz oyunu başlatılıyor...');
@@ -420,8 +405,12 @@ const TVHost: React.FC<TVHostProps> = ({ onBack }) => {
           ← Ana Menü
         </button>
         <div className="flex items-center space-x-4">
-          <div className={`px-4 py-2 rounded-lg ${connected ? 'bg-green-600' : 'bg-red-600'} text-white`}>
-            {connected ? '📺 TV Bağlı' : '📺 TV Bağlantısı Yok'}
+          <div className={`px-4 py-2 rounded-lg ${
+            connectionStatus === 'connected' ? 'bg-green-600' : 
+            connectionStatus === 'connecting' ? 'bg-yellow-600' : 'bg-red-600'
+          } text-white`}>
+            {connectionStatus === 'connected' ? '📺 TV Bağlı' : 
+             connectionStatus === 'connecting' ? '📺 Bağlanıyor...' : '📺 TV Bağlantısı Yok'}
           </div>
           <div className="text-white text-lg">
             👥 {participants.length} Oyuncu
@@ -458,7 +447,7 @@ const TVHost: React.FC<TVHostProps> = ({ onBack }) => {
             </div>
             
             <p className="text-blue-300 text-xl">
-              ✅ Oyun modunu seçin
+              ✅ Oyun modunu seçin ({gameMode || 'Seçilmedi'})
             </p>
           </div>
         ) : waitingForPlayers ? (
@@ -525,6 +514,46 @@ const TVHost: React.FC<TVHostProps> = ({ onBack }) => {
               {playerCount.total > 0 ? '🎮 Oyunu Başlat' : '⏳ Oyuncu Bekleniyor...'}
             </button>
           </div>
+        ) : showFinalRankings ? (
+          /* Final Rankings Screen */
+          <div className="w-full max-w-4xl">
+            <div className="text-center mb-8">
+              <h1 className="text-6xl font-bold text-white mb-4">🏆 Oyun Bitti! 🏆</h1>
+              <p className="text-2xl text-gray-300">Final Sıralaması</p>
+            </div>
+            
+            <div className="bg-white/10 backdrop-blur-lg rounded-3xl p-8 border border-white/20">
+              <div className="space-y-4">
+                {Object.entries(scores)
+                  .sort(([,a], [,b]) => b - a)
+                  .map(([playerName, score], index) => (
+                    <div key={playerName} className="flex justify-between items-center bg-white/5 rounded-lg p-4">
+                      <div className="flex items-center space-x-4">
+                        <span className="text-2xl font-bold text-yellow-400">
+                          {index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : `${index + 1}.`}
+                        </span>
+                        <span className="text-xl text-white">{playerName}</span>
+                      </div>
+                      <span className="text-2xl font-bold text-green-400">{score} puan</span>
+                    </div>
+                  ))}
+              </div>
+            </div>
+            
+            <div className="flex justify-center mt-8">
+              <button
+                onClick={() => {
+                  setShowFinalRankings(false);
+                  setGameActive(false);
+                  setWaitingForPlayers(false);
+                  setGameMode(null);
+                }}
+                className="bg-blue-600 hover:bg-blue-700 text-white text-xl px-8 py-4 rounded-xl transition-colors"
+              >
+                🔄 Yeni Oyun
+              </button>
+            </div>
+          </div>
         ) : (
           /* Game Active Screen */
           <div className="w-full max-w-6xl">
@@ -533,10 +562,10 @@ const TVHost: React.FC<TVHostProps> = ({ onBack }) => {
               <div className="bg-white/10 backdrop-blur-lg rounded-3xl p-12 border border-white/20">
                 <div className="text-center mb-8">
                   <div className="text-4xl font-bold text-white mb-4">
-                    ⏰ {timeLeft} SANİYE
+                    ⏰ {timer} SANİYE
                   </div>
                   <div className="text-2xl text-gray-300">
-                    Soru {currentQuestion.index + 1}
+                    Soru {currentQuestionIndex + 1}
                   </div>
                 </div>
                 
@@ -552,7 +581,7 @@ const TVHost: React.FC<TVHostProps> = ({ onBack }) => {
                   </div>
                 </div>
               </div>
-            ) : showResults && gameResult ? (
+            ) : (showResults || showResult) && gameResult ? (
               /* Results Display */
               <div className="bg-white/10 backdrop-blur-lg rounded-3xl p-12 border border-white/20">
                 <div className="text-center mb-8">
@@ -589,7 +618,7 @@ const TVHost: React.FC<TVHostProps> = ({ onBack }) => {
                       {participants.map((participant, index) => (
                         <div key={index} className="flex justify-between items-center bg-white/5 rounded-lg p-3">
                           <span className="text-white">{participant.name}</span>
-                          <span className="text-green-300">{participant.score} puan</span>
+                          <span className="text-green-300">0 puan</span>
                         </div>
                       ))}
                     </div>
@@ -621,6 +650,29 @@ const TVHost: React.FC<TVHostProps> = ({ onBack }) => {
             )}
           </div>
         )}
+      </div>
+      
+      {/* Toast Notifications */}
+      <div className="fixed top-4 right-4 z-50 space-y-2">
+        {toasts.map((toast) => (
+          <div
+            key={toast.id}
+            className={`px-4 py-3 rounded-lg shadow-lg backdrop-blur-lg border ${
+              toast.type === 'success' 
+                ? 'bg-green-600/90 text-white border-green-500/30' 
+                : toast.type === 'warning'
+                ? 'bg-yellow-600/90 text-white border-yellow-500/30'
+                : 'bg-blue-600/90 text-white border-blue-500/30'
+            }`}
+          >
+            <div className="flex items-center">
+              {toast.type === 'success' && '🎉'}
+              {toast.type === 'warning' && '⚠️'}
+              {toast.type === 'info' && 'ℹ️'}
+              <span className="ml-2 font-medium">{toast.message}</span>
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   );
