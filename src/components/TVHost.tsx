@@ -72,7 +72,7 @@ const TVHost: React.FC<TVHostProps> = ({ onBack }) => {
       reconnectionDelayMax: 10000, // Daha uzun maksimum gecikme
       autoConnect: true
     });
-    
+
     setSocket(socketConnection);
 
     // Bağlantı durumu takibi
@@ -319,7 +319,7 @@ const TVHost: React.FC<TVHostProps> = ({ onBack }) => {
   };
 
 
-  const startQuizGame = () => {
+  const startQuizGame = async () => {
     console.log('🚀 TV Quiz oyunu başlatılıyor...');
     console.log('📊 Mevcut durum:', { 
       questionsLength: questions.length, 
@@ -333,8 +333,25 @@ const TVHost: React.FC<TVHostProps> = ({ onBack }) => {
     // Sorular yüklenmemişse yükle
     if (questions.length === 0) {
       console.log('📝 Sorular yükleniyor...');
-      if (socket) {
-        socket.emit('getQuestions');
+      try {
+        const response = await fetch('/api/questions');
+        if (response.ok) {
+          const questionsData = await response.json();
+          console.log('📋 Sorular yüklendi:', questionsData.length);
+          setQuestions(questionsData);
+          
+          // Sorular yüklendikten sonra oyunu başlat
+          if (socket) {
+            console.log('📤 startGame event gönderiliyor...');
+            socket.emit('startGame');
+          }
+        } else {
+          console.error('❌ Sorular yüklenemedi:', response.status);
+          addToast('❌ Sorular yüklenemedi', 'warning');
+        }
+      } catch (error) {
+        console.error('❌ Soru yükleme hatası:', error);
+        addToast('❌ Soru yükleme hatası', 'warning');
       }
       return;
     }
@@ -345,28 +362,9 @@ const TVHost: React.FC<TVHostProps> = ({ onBack }) => {
       return;
     }
     
-    // Oyun başladığında ilk soruyu otomatik başlat
-    setTimeout(() => {
-      if (currentQuestionIndex < questions.length && socket) {
-        const question = questions[currentQuestionIndex];
-        console.log('📝 İlk soru otomatik başlatılıyor:', question);
-        
-        setTimer(30);
-        setShowResult(false);
-        setGameResult(null);
-        
-        socket.emit('startQuestion', question);
-        // Süre sayacını oyunculara gönder
-        socket.emit('startTimer', { duration: 30 });
-      }
-    }, 1000);
-    
-    if (socket) {
-      console.log('📤 startGame event gönderiliyor...');
-      socket.emit('startGame');
-    } else {
-      console.error('❌ Socket bağlantısı yok!');
-    }
+    // Oyunu başlat
+    console.log('📤 startGame event gönderiliyor...');
+    socket.emit('startGame');
   };
 
   const nextQuestion = () => {
