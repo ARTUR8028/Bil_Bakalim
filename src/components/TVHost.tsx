@@ -35,6 +35,7 @@ const TVHost: React.FC<TVHostProps> = ({ onBack }) => {
   const [gameMode, setGameMode] = useState<'sequential' | 'random' | null>(null);
   const [questions, setQuestions] = useState<Question[]>([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  const [currentQuestion, setCurrentQuestion] = useState<Question | null>(null);
   const [playerCount, setPlayerCount] = useState<PlayerCount>({ total: 0, answered: 0 });
   const [participantNames, setParticipantNames] = useState<string[]>([]);
   const [timer, setTimer] = useState(30);
