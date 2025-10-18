@@ -341,10 +341,10 @@ const TVHost: React.FC<TVHostProps> = ({ onBack }) => {
           setQuestions(questionsData);
           
           // Sorular yüklendikten sonra oyunu başlat
-          if (socket) {
+    if (socket) {
             console.log('📤 startGame event gönderiliyor...');
-            socket.emit('startGame');
-          }
+      socket.emit('startGame');
+    }
         } else {
           console.error('❌ Sorular yüklenemedi:', response.status);
           addToast('❌ Sorular yüklenemedi', 'warning');
@@ -477,12 +477,12 @@ const TVHost: React.FC<TVHostProps> = ({ onBack }) => {
                   <div className="bg-white/10 rounded-lg p-4 mb-4">
                     <p className="text-blue-200 font-mono text-sm break-all">{joinLink}</p>
                   </div>
-                  <button
+            <button
                     onClick={copyLink}
                     className="bg-green-600 text-white px-8 py-3 rounded-lg hover:bg-green-700 transition-colors flex items-center mx-auto"
-                  >
+            >
                     {linkCopied ? '✅ Kopyalandı!' : '📋 Linki Kopyala'}
-                  </button>
+            </button>
                 </div>
               </div>
             </div>
