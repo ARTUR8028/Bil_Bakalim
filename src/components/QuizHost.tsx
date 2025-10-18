@@ -281,7 +281,30 @@ const QuizHost: React.FC<QuizHostProps> = ({ onBack }) => {
 
   const startQuizGame = () => {
     console.log('🚀 Quiz oyunu başlatılıyor...');
+    console.log('📊 Mevcut durum:', { 
+      questionsLength: questions.length, 
+      currentQuestionIndex, 
+      socketConnected: socket?.connected,
+      playerCount: playerCount.total 
+    });
+    
     setWaitingForPlayers(false);
+    
+    // Sorular yüklenmemişse yükle
+    if (questions.length === 0) {
+      console.log('📝 Sorular yükleniyor...');
+      if (socket) {
+        socket.emit('getQuestions');
+      }
+      return;
+    }
+    
+    // Socket bağlantısı yoksa uyar
+    if (!socket) {
+      console.log('❌ Socket bağlantısı yok');
+      return;
+    }
+    
     // Oyun başladığında ilk soruyu otomatik başlat
     setTimeout(() => {
       if (currentQuestionIndex < questions.length && socket) {
@@ -295,6 +318,12 @@ const QuizHost: React.FC<QuizHostProps> = ({ onBack }) => {
         socket.emit('startQuestion', question);
         // Süre sayacını oyunculara gönder
         socket.emit('timerUpdate', { timeLeft: 30 });
+      } else {
+        console.log('❌ Soru başlatılamadı:', { 
+          currentQuestionIndex, 
+          questionsLength: questions.length,
+          socketConnected: socket?.connected 
+        });
       }
     }, 1000); // 1 saniye bekle, sonra soruyu başlat
   };
