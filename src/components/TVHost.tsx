@@ -341,10 +341,22 @@ const TVHost: React.FC<TVHostProps> = ({ onBack }) => {
           setQuestions(questionsData);
           
           // Sorular yüklendikten sonra oyunu başlat
-    if (socket) {
+          if (socket) {
             console.log('📤 startGame event gönderiliyor...');
-      socket.emit('startGame');
-    }
+            socket.emit('startGame');
+            
+            // İlk soruyu gönder
+            setTimeout(() => {
+              if (questionsData.length > 0) {
+                const firstQuestion = questionsData[0];
+                console.log('📝 İlk soru gönderiliyor:', firstQuestion);
+                socket.emit('startQuestion', firstQuestion);
+                socket.emit('startTimer', { duration: 30 });
+                setCurrentQuestion(firstQuestion);
+                setGameActive(true);
+              }
+            }, 1000);
+          }
         } else {
           console.error('❌ Sorular yüklenemedi:', response.status);
           addToast('❌ Sorular yüklenemedi', 'warning');
@@ -365,6 +377,18 @@ const TVHost: React.FC<TVHostProps> = ({ onBack }) => {
     // Oyunu başlat
     console.log('📤 startGame event gönderiliyor...');
     socket.emit('startGame');
+    
+    // İlk soruyu gönder
+    setTimeout(() => {
+      if (questions.length > 0) {
+        const firstQuestion = questions[0];
+        console.log('📝 İlk soru gönderiliyor:', firstQuestion);
+        socket.emit('startQuestion', firstQuestion);
+        socket.emit('startTimer', { duration: 30 });
+        setCurrentQuestion(firstQuestion);
+        setGameActive(true);
+      }
+    }, 1000);
   };
 
   const nextQuestion = () => {
