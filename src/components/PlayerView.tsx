@@ -141,14 +141,14 @@ const PlayerView: React.FC<PlayerViewProps> = ({ onBack }) => {
     
     // Optimize edilmiş socket konfigürasyonu
     const socketConnection = io(import.meta.env.VITE_SERVER_URL || 'https://bil-bakalim.onrender.com', {
-      transports: ['websocket', 'polling'], // WebSocket öncelikli, polling fallback
+      transports: ['polling', 'websocket'], // Polling öncelikli
       upgrade: true, // WebSocket'e upgrade et
-      timeout: 10000, // Daha kısa timeout
+      timeout: 30000, // Daha uzun timeout
       forceNew: true,
       reconnection: true,
-      reconnectionAttempts: 10, // Daha fazla deneme
-      reconnectionDelay: 1000, // Daha hızlı yeniden bağlanma
-      reconnectionDelayMax: 5000, // Daha kısa maksimum gecikme
+      reconnectionAttempts: 20, // Daha fazla deneme
+      reconnectionDelay: 2000, // Daha uzun gecikme
+      reconnectionDelayMax: 10000, // Daha uzun maksimum gecikme
       autoConnect: true
     });
     

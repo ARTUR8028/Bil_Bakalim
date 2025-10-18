@@ -57,12 +57,12 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onBack }) => {
     
     // Optimize edilmiş socket konfigürasyonu
     const socketConnection = io(import.meta.env.VITE_SERVER_URL || 'https://bil-bakalim.onrender.com', {
-      transports: ['websocket', 'polling'], // WebSocket öncelikli, polling fallback
+      transports: ['polling', 'websocket'], // Polling öncelikli
       upgrade: true, // WebSocket'e upgrade et
       timeout: 30000,
       forceNew: true,
       reconnection: true,
-      reconnectionAttempts: 5,
+      reconnectionAttempts: 20, // Daha fazla deneme
       reconnectionDelay: 2000,
       reconnectionDelayMax: 10000,
       autoConnect: true
