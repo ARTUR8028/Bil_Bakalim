@@ -1,5 +1,20 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { io, Socket } from 'socket.io-client';
+import { ArrowLeft, Tv, Wifi, WifiOff } from 'lucide-react';
+import QRCode from 'qrcode';
+
+// Types
+interface PlayerCount {
+  total: number;
+  answered: number;
+}
+
+interface GameResult {
+  question: string;
+  correctAnswer: string;
+  answers: Record<string, string>;
+  scores: Record<string, number>;
+}
 
 interface TVHostProps {
   onBack: () => void;
@@ -107,18 +122,107 @@ const TVHost: React.FC<TVHostProps> = ({ onBack }) => {
       console.log('🏓 TV Host Bağlantı testi başarılı:', data);
     });
 
+    // Soruları yükle
+    const loadQuestions = async () => {
+      try {
+        const response = await fetch('/api/health');
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const data = await response.json();
+        console.log('📋 Sunucu durumu alındı:', data);
+        
+        // Sunucudan soru sayısını al, soru listesini de yükle
+        if (data.questions > 0) {
+          const questionsResponse = await fetch('/api/questions');
+          if (questionsResponse.ok) {
+            const questionsData = await questionsResponse.json();
+            console.log('📋 Sorular yüklendi:', questionsData.length);
+            setQuestions(questionsData);
+          }
+        }
+      } catch (err) {
+        console.error('❌ Sorular yüklenemedi:', err);
+        setQuestions([]);
+      }
+    };
+
+    loadQuestions();
+
+    // QR kod oluştur
+    QRCode.toDataURL(joinLink, { width: 300, margin: 2 })
+      .then(url => {
+        console.log('📱 QR kod oluşturuldu');
+        setQrCodeUrl(url);
+      })
+      .catch(err => console.error('❌ QR kod oluşturulamadı:', err));
+
+    // Socket eventleri
+    socketConnection.on('playerCount', (count: PlayerCount) => {
+      console.log('👥 Oyuncu sayısı güncellendi:', count);
+      setPlayerCount(count);
+    });
+
+    socketConnection.on('playerJoined', (playerName: string) => {
+      console.log('👤 Oyuncu katıldı:', playerName);
+      addToast(`🎉 ${playerName} oyuna katıldı!`, 'success');
+    });
+
+    socketConnection.on('playerLeft', (playerName: string) => {
+      console.log('👋 Oyuncu ayrıldı:', playerName);
+      addToast(`👋 ${playerName} oyundan ayrıldı!`, 'info');
+    });
+
+    // Tüm katılımcıları al
+    socketConnection.on('allParticipants', (participants: string[]) => {
+      console.log('👥 Tüm katılımcılar alındı:', participants);
+      console.log('👥 Katılımcı sayısı:', participants.length);
+      console.log('👥 Socket bağlantı durumu:', socketConnection.connected);
+      
+      if (Array.isArray(participants)) {
+        // Katılımcıları ters sırada göster (son katılan üstte)
+        const reversedParticipants = [...participants].reverse();
+        setParticipantNames(reversedParticipants);
+        console.log('✅ Katılımcılar güncellendi:', reversedParticipants);
+      } else {
+        console.error('❌ Geçersiz katılımcı verisi:', participants);
+        setParticipantNames([]);
+      }
+    });
+
+    socketConnection.on('timerUpdate', (data: { timeLeft: number }) => {
+      console.log('⏰ Host süre güncellendi:', data.timeLeft);
+      setTimer(data.timeLeft);
+      
+      // Son 5 saniyede ses efekti çal
+      if (data.timeLeft <= 5 && data.timeLeft > 0) {
+        playSound('tick');
+      } else if (data.timeLeft === 0) {
+        playSound('final');
+      }
+    });
+
+    socketConnection.on('showResult', (result: GameResult) => {
+      console.log('📊 Sonuç alındı:', result);
+      setGameResult(result);
+      setShowResult(true);
+      setTimer(0);
+    });
+
+    socketConnection.on('updateScores', (newScores: Record<string, number>) => {
+      console.log('🏆 Skorlar güncellendi:', newScores);
+      setScores(newScores);
+    });
+
+    socketConnection.on('gameEnded', (finalScores: Record<string, number>) => {
+      console.log('🏁 Oyun bitti, final skorları:', finalScores);
+      setScores(finalScores);
+      setShowFinalRankings(true);
+    });
+
     // Oyun eventleri
     socketConnection.on('gameStarted', () => {
       console.log('🎮 TV Oyun başladı');
       setGameActive(true);
       setWaitingForPlayers(false);
-    });
-
-    socketConnection.on('gameEnded', (finalScores) => {
-      console.log('🏁 TV Oyun bitti');
-      setGameActive(false);
-      setShowFinalRankings(true);
-      setScores(finalScores || {});
     });
 
     socketConnection.on('newQuestion', (question) => {
@@ -128,18 +232,6 @@ const TVHost: React.FC<TVHostProps> = ({ onBack }) => {
       setGameResult(null);
       setShowResult(false);
       setTimer(30);
-    });
-
-    socketConnection.on('timerUpdate', (data: { timeLeft: number }) => {
-      setTimeLeft(data.timeLeft);
-      setTimer(data.timeLeft);
-    });
-
-    socketConnection.on('allParticipants', (participants) => {
-      console.log('👥 TV Katılımcılar güncellendi:', participants);
-      setParticipants(participants);
-      setParticipantNames(participants.map((p: any) => p.name));
-      setPlayerCount({ total: participants.length, answered: 0 });
     });
 
     socketConnection.on('results', (results) => {
@@ -171,9 +263,54 @@ const TVHost: React.FC<TVHostProps> = ({ onBack }) => {
     generateQRCode();
 
     return () => {
-      socketConnection.close();
+      socketConnection.disconnect();
     };
   }, [joinLink]);
+
+  // Ses çalma fonksiyonu
+  const playSound = (type: 'tick' | 'final') => {
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+    }
+    
+    if (type === 'tick') {
+      // Basit tick sesi - Web Audio API ile oluşturulmuş
+      const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+      const oscillator = audioContext.createOscillator();
+      const gainNode = audioContext.createGain();
+      
+      oscillator.connect(gainNode);
+      gainNode.connect(audioContext.destination);
+      
+      oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
+      oscillator.type = 'sine';
+      
+      gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
+      
+      oscillator.start(audioContext.currentTime);
+      oscillator.stop(audioContext.currentTime + 0.1);
+    } else if (type === 'final') {
+      // Final sesi
+      const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+      const oscillator = audioContext.createOscillator();
+      const gainNode = audioContext.createGain();
+      
+      oscillator.connect(gainNode);
+      gainNode.connect(audioContext.destination);
+      
+      oscillator.frequency.setValueAtTime(600, audioContext.currentTime);
+      oscillator.frequency.exponentialRampToValueAtTime(1200, audioContext.currentTime + 0.5);
+      oscillator.type = 'sine';
+      
+      gainNode.gain.setValueAtTime(0.5, audioContext.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+      
+      oscillator.start(audioContext.currentTime);
+      oscillator.stop(audioContext.currentTime + 0.5);
+    }
+  };
 
   const startGame = (mode: 'sequential' | 'random') => {
     console.log('🎮 TV Oyun modu seçildi:', mode);
@@ -185,7 +322,20 @@ const TVHost: React.FC<TVHostProps> = ({ onBack }) => {
     }
   };
 
-  const startQuizGame = async () => {
+  const goBackToModeSelection = () => {
+    setGameMode(null);
+    setWaitingForPlayers(false);
+    setGameActive(false);
+    setShowFinalRankings(false);
+    setCurrentQuestion(null);
+    setShowResults(false);
+    setGameResult(null);
+    setScores({});
+    setParticipantNames([]);
+    setPlayerCount({ total: 0, answered: 0 });
+  };
+
+  const startQuizGame = () => {
     console.log('🚀 TV Quiz oyunu başlatılıyor...');
     console.log('📊 Mevcut durum:', { 
       questionsLength: questions.length, 
@@ -196,28 +346,42 @@ const TVHost: React.FC<TVHostProps> = ({ onBack }) => {
     
     setWaitingForPlayers(false);
     
-    // Soruları yükle
-    try {
+    // Sorular yüklenmemişse yükle
+    if (questions.length === 0) {
       console.log('📝 Sorular yükleniyor...');
-      const response = await fetch('/api/questions');
-      if (response.ok) {
-        const questionsData = await response.json();
-        console.log('📋 Sorular yüklendi:', questionsData.length);
-        setQuestions(questionsData);
-        
-        if (socket) {
-          console.log('📤 startGame event gönderiliyor...');
-          socket.emit('startGame');
-        } else {
-          console.error('❌ Socket bağlantısı yok!');
-        }
-      } else {
-        console.error('❌ Sorular yüklenemedi:', response.status);
-        addToast('❌ Sorular yüklenemedi', 'warning');
+      if (socket) {
+        socket.emit('getQuestions');
       }
-    } catch (error) {
-      console.error('❌ Soru yükleme hatası:', error);
-      addToast('❌ Soru yükleme hatası', 'warning');
+      return;
+    }
+    
+    // Socket bağlantısı yoksa uyar
+    if (!socket) {
+      console.log('❌ Socket bağlantısı yok');
+      return;
+    }
+    
+    // Oyun başladığında ilk soruyu otomatik başlat
+    setTimeout(() => {
+      if (currentQuestionIndex < questions.length && socket) {
+        const question = questions[currentQuestionIndex];
+        console.log('📝 İlk soru otomatik başlatılıyor:', question);
+        
+        setTimer(30);
+        setShowResult(false);
+        setGameResult(null);
+        
+        socket.emit('startQuestion', question);
+        // Süre sayacını oyunculara gönder
+        socket.emit('startTimer', { duration: 30 });
+      }
+    }, 1000);
+    
+    if (socket) {
+      console.log('📤 startGame event gönderiliyor...');
+      socket.emit('startGame');
+    } else {
+      console.error('❌ Socket bağlantısı yok!');
     }
   };
 
@@ -268,7 +432,7 @@ const TVHost: React.FC<TVHostProps> = ({ onBack }) => {
       {/* Main Content */}
       <div className="flex-1 flex flex-col items-center justify-center p-8">
         {!gameActive && !waitingForPlayers ? (
-          /* Game Start Screen - Direct Start */
+          /* Game Mode Selection Screen - Like QuizHost */
           <div className="text-center">
             <h1 className="text-6xl font-bold text-white mb-8 animate-pulse">
               📺 BİL BAKALIM TV
@@ -277,16 +441,24 @@ const TVHost: React.FC<TVHostProps> = ({ onBack }) => {
               Google TV için Interaktif Quiz
             </p>
             
-            {/* Direct Start Button */}
-            <button
-              onClick={() => startQuizGame()}
-              className="bg-green-600 hover:bg-green-700 text-white text-2xl px-12 py-6 rounded-2xl transition-colors tv-focusable"
-            >
-              🎮 Oyunu Başlat
-            </button>
+            {/* Game Mode Selection - Like QuizHost */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+              <button
+                onClick={() => startGame('sequential')}
+                className="bg-blue-600 hover:bg-blue-700 text-white text-xl px-8 py-6 rounded-2xl transition-colors tv-focusable"
+              >
+                📋 Sıralı Oyun
+              </button>
+              <button
+                onClick={() => startGame('random')}
+                className="bg-purple-600 hover:bg-purple-700 text-white text-xl px-8 py-6 rounded-2xl transition-colors tv-focusable"
+              >
+                🔀 Rastgele Oyun
+              </button>
+            </div>
             
-            <p className="text-blue-300 text-xl mt-4">
-              ✅ Oyunu başlatmak için butona tıklayın
+            <p className="text-blue-300 text-xl">
+              ✅ Oyun modunu seçin
             </p>
           </div>
         ) : waitingForPlayers ? (
