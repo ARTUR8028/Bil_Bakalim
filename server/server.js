@@ -904,7 +904,7 @@ io.on('connection', (socket) => {
         if (p && p.isDisconnected && Date.now() - (p.disconnectedAt || 0) > 10 * 60 * 1000) {
           console.log(`🧹 ${p.name} 10 dk sonra hâlâ kopuk, kaydı temizleniyor.`);
           delete players[socket.id];
-          io.emit('allParticipants', Object.values(players).map(pp => pp.name));
+          io.emit('allParticipants', getActivePlayers().map(pp => pp.name));
           updatePlayerCount();
         }
       }, 10 * 60 * 1000);
@@ -1072,9 +1072,9 @@ io.on('connection', (socket) => {
 
   // Mevcut katılımcıları iste (sadece host'lar için)
   socket.on('getParticipants', () => {
-    console.log('📋 Mevcut katılımcılar istendi:', Object.keys(players).length);
-    console.log('👥 Aktif oyuncular:', Object.values(players).map(p => p.name));
-    const participantNames = Object.values(players).map(p => p.name);
+    console.log('📋 Mevcut katılımcılar istendi:', getActivePlayers().length);
+    console.log('👥 Aktif oyuncular:', getActivePlayers().map(p => p.name));
+    const participantNames = getActivePlayers().map(p => p.name);
     console.log('📤 allParticipants gönderiliyor:', participantNames);
     socket.emit('allParticipants', participantNames);
   });
@@ -1090,13 +1090,16 @@ io.on('connection', (socket) => {
   });
 });
 
+function getActivePlayers() {
+  return Object.values(players).filter(p => !p.isDisconnected);
+}
+
 function updatePlayerCount() {
   const count = {
-    total: Object.keys(players).length,
+    total: getActivePlayers().length,
     answered: Object.keys(answers).length,
     timestamp: Date.now()
   };
-  
   console.log('📊 Oyuncu durumu güncellendi:', count);
   io.emit('playerCount', count);
 }
