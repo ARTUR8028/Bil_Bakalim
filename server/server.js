@@ -791,12 +791,6 @@ io.on('connection', (socket) => {
       const answerTime = gameState.questionStartTime ? 
         Math.round((currentTime - gameState.questionStartTime) / 1000) : 0;
       
-      console.log(`⏱️ Cevap verme süresi hesaplandı:`, {
-        currentTime,
-        questionStartTime: gameState.questionStartTime,
-        difference: currentTime - gameState.questionStartTime,
-        answerTime
-      });
       
       // Tüm oyunculara (cevap veren dahil) bu oyuncunun cevap verdiğini bildir
       io.emit('playerAnswered', {
@@ -865,7 +859,6 @@ io.on('connection', (socket) => {
       
       console.log(`📢 Yeni soru yayınlanıyor: ${questionObj.question}`);
       console.log(`🎯 Doğru cevap: ${currentAnswer}`);
-      console.log(`⏰ Soru başlangıç zamanı set edildi: ${gameState.questionStartTime}`);
       
       io.emit('newQuestion', questionObj);
       updatePlayerCount();
@@ -894,9 +887,7 @@ io.on('connection', (socket) => {
   socket.on('startTimer', (data) => {
     console.log('⏰ Timer başlatılıyor:', data);
     if (data.duration) {
-      const newStartTime = Date.now();
-      gameState.questionStartTime = newStartTime;
-      console.log('📅 startTimer ile soru başlangıç zamanı set edildi:', newStartTime);
+      gameState.questionStartTime = Date.now();
     }
   });
 
@@ -935,7 +926,11 @@ io.on('connection', (socket) => {
     
     if (players[socket.id]) {
       const actualPlayerName = players[socket.id].name;
-      console.log(`👋 ${actualPlayerName} manuel olarak ayrıldı`);
+      const currentScore = players[socket.id].score || 0;
+      
+      // Oyuncunun mevcut puanını globalScores'a kaydet
+      globalScores[actualPlayerName] = currentScore;
+      console.log(`👋 ${actualPlayerName} manuel olarak ayrıldı - Puan kaydedildi: ${currentScore}`);
       
       delete players[socket.id];
       

@@ -283,13 +283,26 @@ const PlayerView: React.FC<PlayerViewProps> = ({ onBack }) => {
     socketConnection.on('playerAnswered', (data) => {
       console.log('👤 Oyuncu cevap verdi:', data);
       setAnsweredPlayers(prev => {
-        const newList = [...prev, {
-          playerName: data.playerName,
-          timestamp: data.timestamp,
-          answerTime: data.answerTime || 0
-        }];
-        // Zaman sırasına göre sırala (en hızlı cevap veren üstte)
-        return newList.sort((a, b) => a.timestamp - b.timestamp);
+        // Aynı oyuncu zaten varsa güncelle, yoksa ekle
+        const existingIndex = prev.findIndex(p => p.playerName === data.playerName);
+        if (existingIndex >= 0) {
+          // Mevcut oyuncuyu güncelle
+          const updated = [...prev];
+          updated[existingIndex] = {
+            playerName: data.playerName,
+            timestamp: data.timestamp,
+            answerTime: data.answerTime || 0
+          };
+          return updated.sort((a, b) => a.timestamp - b.timestamp);
+        } else {
+          // Yeni oyuncu ekle
+          const newList = [...prev, {
+            playerName: data.playerName,
+            timestamp: data.timestamp,
+            answerTime: data.answerTime || 0
+          }];
+          return newList.sort((a, b) => a.timestamp - b.timestamp);
+        }
       });
     });
 
