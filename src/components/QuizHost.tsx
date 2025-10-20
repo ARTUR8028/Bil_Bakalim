@@ -223,12 +223,17 @@ const QuizHost: React.FC<QuizHostProps> = ({ onBack }) => {
 
     socketConnection.on('playerAnswered', (data: {playerName: string, answerTime: number}) => {
       console.log('📝 Oyuncu cevap verdi:', data);
+      console.log('📝 Mevcut answeredPlayers:', answeredPlayers);
       setAnsweredPlayers(prev => {
         const existing = prev.find(p => p.name === data.playerName);
         if (existing) {
-          return prev.map(p => p.name === data.playerName ? {...p, answerTime: data.answerTime} : p);
+          const updated = prev.map(p => p.name === data.playerName ? {...p, answerTime: data.answerTime} : p);
+          console.log('📝 Güncellenmiş answeredPlayers:', updated);
+          return updated;
         } else {
-          return [...prev, {name: data.playerName, answerTime: data.answerTime}];
+          const newList = [...prev, {name: data.playerName, answerTime: data.answerTime}];
+          console.log('📝 Yeni answeredPlayers:', newList);
+          return newList;
         }
       });
     });
@@ -916,6 +921,18 @@ const QuizHost: React.FC<QuizHostProps> = ({ onBack }) => {
                           </div>
                         </div>
                       )}
+                      
+                      {/* Debug: answeredPlayers durumu */}
+                      <div className="mt-2 text-xs text-gray-400">
+                        Debug: answeredPlayers.length = {answeredPlayers.length}
+                        {answeredPlayers.length > 0 && (
+                          <div>
+                            {answeredPlayers.map((p, i) => (
+                              <div key={i}>{p.name} - {p.answerTime}s</div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </div>
                 )}
