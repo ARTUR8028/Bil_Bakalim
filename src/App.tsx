@@ -29,9 +29,8 @@ function App() {
       return 'apk';
     }
     
-    // Hash yoksa cihaz tipine göre otomatik yönlendir
-    const optimalView = getOptimalView(deviceType) as ViewMode;
-    return optimalView;
+    // Hash yoksa ana menüye git
+    return 'home';
   };
 
   const [currentView, setCurrentView] = useState<ViewMode>(getInitialView);
