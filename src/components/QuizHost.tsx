@@ -39,6 +39,7 @@ const QuizHost: React.FC<QuizHostProps> = ({ onBack }) => {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [playerCount, setPlayerCount] = useState<PlayerCount>({ total: 0, answered: 0 });
   const [participantNames, setParticipantNames] = useState<string[]>([]);
+  const [answeredPlayers, setAnsweredPlayers] = useState<Array<{name: string, answerTime: number}>>([]);
   const [timer, setTimer] = useState(30);
   const [showResult, setShowResult] = useState(false);
   const [gameResult, setGameResult] = useState<GameResult | null>(null);
@@ -220,6 +221,18 @@ const QuizHost: React.FC<QuizHostProps> = ({ onBack }) => {
       setShowFinalRankings(true);
     });
 
+    socketConnection.on('playerAnswered', (data: {playerName: string, answerTime: number}) => {
+      console.log('📝 Oyuncu cevap verdi:', data);
+      setAnsweredPlayers(prev => {
+        const existing = prev.find(p => p.name === data.playerName);
+        if (existing) {
+          return prev.map(p => p.name === data.playerName ? {...p, answerTime: data.answerTime} : p);
+        } else {
+          return [...prev, {name: data.playerName, answerTime: data.answerTime}];
+        }
+      });
+    });
+
     return () => {
       socketConnection.disconnect();
     };
@@ -336,6 +349,7 @@ const QuizHost: React.FC<QuizHostProps> = ({ onBack }) => {
     setCurrentQuestionIndex(prev => prev + 1);
     setShowResult(false);
     setGameResult(null);
+    setAnsweredPlayers([]); // Cevap verenler listesini temizle
     
     // Sonraki soruyu otomatik başlat
     setTimeout(() => {
@@ -877,13 +891,31 @@ const QuizHost: React.FC<QuizHostProps> = ({ onBack }) => {
                       <div className="text-3xl font-bold text-green-400 mb-2">
                         {playerCount.answered} / {playerCount.total}
                       </div>
-                      <p className="text-gray-300">
+                      <p className="text-gray-300 mb-4">
                         {playerCount.answered === playerCount.total 
                           ? '🎉 Tüm oyuncular cevap verdi!' 
                           : `${playerCount.total - playerCount.answered} oyuncu daha cevap bekleniyor...`
                         }
                       </p>
-                      {/* Debug kaldırıldı */}
+                      
+                      {/* Cevap Veren Oyuncular Listesi */}
+                      {answeredPlayers.length > 0 && (
+                        <div className="mt-4">
+                          <h5 className="text-blue-300 font-semibold mb-3">⚡ Cevap Verenler</h5>
+                          <div className="space-y-2">
+                            {answeredPlayers.map((player, index) => (
+                              <div key={player.name} className="flex justify-between items-center bg-white/10 rounded-lg p-3">
+                                <span className="text-white font-medium">
+                                  {index + 1}. {player.name}
+                                </span>
+                                <span className="text-yellow-400 font-bold">
+                                  {player.answerTime}s ⚡
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </div>
                 )}
