@@ -683,6 +683,8 @@ io.on('connection', (socket) => {
         players[socket.id].name = playerName;
         players[socket.id].score = existingGlobalScore; // Global puandan devam et
         players[socket.id].lastActivity = Date.now();
+        players[socket.id].isDisconnected = false;
+        players[socket.id].disconnectedAt = undefined;
         console.log(`✅ ${playerName} oyuncu bilgileri güncellendi (${socket.id}) - Puan: ${existingGlobalScore}`);
       } else {
         // Yeni oyuncu ekle
@@ -691,7 +693,8 @@ io.on('connection', (socket) => {
           score: existingGlobalScore, // Global puandan devam et
           joinTime: Date.now(),
           socketId: socket.id,
-          lastActivity: Date.now()
+          lastActivity: Date.now(),
+          isDisconnected: false
         };
         console.log(`✅ ${playerName} yeni oyuncu olarak eklendi (${socket.id}) - Puan: ${existingGlobalScore}`);
       }
@@ -887,28 +890,24 @@ io.on('connection', (socket) => {
       timestamp: new Date().toISOString()
     });
     
-    // Oyuncu varsa sil - ama hemen değil, daha uzun bir gecikme ile
+    // Oyuncu varsa "geçici ayrıldı" olarak işaretle; silme yok
     if (players[socket.id]) {
-      const playerName = players[socket.id].name;
-      console.log(`👋 ${playerName} ayrıldı - 5 saniye bekleniyor...`);
-      
-      // Daha uzun bir gecikme ile oyuncuyu sil (yeniden bağlanma ihtimali için)
+      const player = players[socket.id];
+      const playerName = player.name;
+      player.isDisconnected = true;
+      player.disconnectedAt = Date.now();
+      console.log(`👋 ${playerName} bağlantısı koptu (geçici). Oyuncu silinmeyecek, yeniden bağlanması bekleniyor.`);
+
+      // İsteğe bağlı temizlik: 10 dakika sonra hâlâ dönmediyse kaldır
       setTimeout(() => {
-        if (players[socket.id]) {
-          console.log(`🗑️ ${playerName} kalıcı olarak siliniyor`);
+        const p = players[socket.id];
+        if (p && p.isDisconnected && Date.now() - (p.disconnectedAt || 0) > 10 * 60 * 1000) {
+          console.log(`🧹 ${p.name} 10 dk sonra hâlâ kopuk, kaydı temizleniyor.`);
           delete players[socket.id];
-          
-          // Tüm host'lara oyuncunun ayrıldığını bildir
-          socket.broadcast.emit('playerLeft', playerName);
-          
-          // Mevcut tüm katılımcıları host'a gönder
-          io.emit('allParticipants', Object.values(players).map(p => p.name));
-          
+          io.emit('allParticipants', Object.values(players).map(pp => pp.name));
           updatePlayerCount();
-        } else {
-          console.log(`✅ ${playerName} yeniden bağlandı, silinmedi`);
         }
-      }, 5000); // 5 saniye gecikme - yeniden bağlanma için daha fazla zaman
+      }, 10 * 60 * 1000);
     }
     
     // Cevabı sil
