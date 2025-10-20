@@ -47,6 +47,9 @@ const PlayerView: React.FC<PlayerViewProps> = ({ onBack }) => {
       socket.emit('leave', playerName);
     }
     
+    // Yerel depolamayı temizle (manuel çıkış)
+    try { localStorage.removeItem('bb_player_name'); } catch {}
+    
     setPlayerName('');
     setIsJoined(false);
     setCurrentQuestion('');
@@ -160,20 +163,14 @@ const PlayerView: React.FC<PlayerViewProps> = ({ onBack }) => {
       setConnectionStatus('connected');
       setJoinError('');
       
-      // Bağlantı kurulduğunda oyuncu durumunu sıfırla
-      setPlayerName('');
-      setIsJoined(false);
-      setCurrentQuestion('');
-      setAnswer('');
-      setHasAnswered(false);
-      setGameEnded(false);
-      setFinalScores({});
-      setAllAnswers([]);
-      setShowFullResults(false);
-      setAnsweredPlayers([]);
-      setWinnerInfo(null);
-      setTimeLeft(0);
-      setGameResult(null);
+      // Otomatik yeniden katılma: daha önce katılmış oyuncu var ise yeniden kaydet
+      try {
+        const storedName = localStorage.getItem('bb_player_name');
+        if (storedName && storedName.trim() !== '') {
+          console.log('🔁 Önceki oyuncu yeniden katılıyor:', storedName);
+          socketConnection.emit('join', storedName);
+        }
+      } catch {}
       
       // Bağlantı kurulduğunda hemen ping gönder
       socketConnection.emit('ping', { timestamp: Date.now(), source: 'player' });
@@ -210,6 +207,9 @@ const PlayerView: React.FC<PlayerViewProps> = ({ onBack }) => {
       setPlayerName(data.name);
       setIsJoined(true);
       setJoinError('');
+      
+      // Oyuncu adını yerelde sakla; yeniden bağlandığında otomatik katılım için
+      try { localStorage.setItem('bb_player_name', data.name); } catch {}
       
       // Host'a katılım bildirimi gönder
       setTimeout(() => {
