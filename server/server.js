@@ -882,6 +882,15 @@ io.on('connection', (socket) => {
     }
   });
 
+  // Timer başlatma event'i
+  socket.on('startTimer', (data) => {
+    console.log('⏰ Timer başlatılıyor:', data);
+    if (data.duration) {
+      gameState.questionStartTime = Date.now();
+      console.log('📅 Soru başlangıç zamanı set edildi:', gameState.questionStartTime);
+    }
+  });
+
   socket.on('disconnect', (reason) => {
     console.log('🔌 Bağlantı kesildi:', { 
       socketId: socket.id, 
@@ -890,28 +899,21 @@ io.on('connection', (socket) => {
       timestamp: new Date().toISOString()
     });
     
-    // Oyuncu varsa "geçici ayrıldı" olarak işaretle; silme yok
+    // Oyuncu varsa sadece cevabını sil, oyuncuyu silme
     if (players[socket.id]) {
       const player = players[socket.id];
       const playerName = player.name;
-      player.isDisconnected = true;
-      player.disconnectedAt = Date.now();
-      console.log(`👋 ${playerName} bağlantısı koptu (geçici). Oyuncu silinmeyecek, yeniden bağlanması bekleniyor.`);
-
-      // İsteğe bağlı temizlik: 10 dakika sonra hâlâ dönmediyse kaldır
-      setTimeout(() => {
-        const p = players[socket.id];
-        if (p && p.isDisconnected && Date.now() - (p.disconnectedAt || 0) > 10 * 60 * 1000) {
-          console.log(`🧹 ${p.name} 10 dk sonra hâlâ kopuk, kaydı temizleniyor.`);
-          delete players[socket.id];
-          io.emit('allParticipants', getActivePlayers().map(pp => pp.name));
-          updatePlayerCount();
-        }
-      }, 10 * 60 * 1000);
+      console.log(`👋 ${playerName} bağlantısı koptu. Oyuncu kaydı korunuyor, yeniden bağlanabilir.`);
+      
+      // Sadece cevabını sil, oyuncuyu silme
+      delete answers[socket.id];
+      
+      // Oyuncu sayısını güncelle
+      updatePlayerCount();
+    } else {
+      // Oyuncu kaydı yoksa sadece cevabını sil
+      delete answers[socket.id];
     }
-    
-    // Cevabı sil
-    delete answers[socket.id];
   });
 
   // Manuel oyuncu çıkışı (Ana Menü ile çıkış)
@@ -1091,7 +1093,7 @@ io.on('connection', (socket) => {
 });
 
 function getActivePlayers() {
-  return Object.values(players).filter(p => !p.isDisconnected);
+  return Object.values(players); // Tüm oyuncuları döndür, isDisconnected kontrolü yok
 }
 
 function updatePlayerCount() {
