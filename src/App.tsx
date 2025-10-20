@@ -54,9 +54,8 @@ function App() {
       } else if (hash === 'apk') {
         setCurrentView('apk');
       } else {
-        // Hash geçersizse veya erişim izni yoksa optimal view'a yönlendir
-        const optimalView = getOptimalView(deviceType) as ViewMode;
-        setCurrentView(optimalView);
+        // Hash yoksa ana menüye git
+        setCurrentView('home');
       }
     };                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      
 
