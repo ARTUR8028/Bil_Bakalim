@@ -6,7 +6,7 @@ import PlayerView from './components/PlayerView';
 import TVHost from './components/TVHost';
 import APKDownload from './components/APKDownload';
 import ErrorBoundary from './components/ErrorBoundary';
-import { detectDeviceType, getOptimalView, canAccessPlayerView, canAccessTVHost, getDeviceInfo } from './utils/deviceDetection';
+import { detectDeviceType, canAccessPlayerView, canAccessTVHost, getDeviceInfo } from './utils/deviceDetection';
 
 type ViewMode = 'home' | 'admin' | 'host' | 'player' | 'tv' | 'apk';
 
