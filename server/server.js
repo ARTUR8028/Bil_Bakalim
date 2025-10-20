@@ -1096,6 +1096,8 @@ function updatePlayerCount() {
   };
   
   console.log('📊 Oyuncu durumu güncellendi:', count);
+  console.log('📊 Players:', Object.keys(players));
+  console.log('📊 Answers:', Object.keys(answers));
   io.emit('playerCount', count);
 }
 

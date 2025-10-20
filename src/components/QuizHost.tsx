@@ -159,7 +159,6 @@ const QuizHost: React.FC<QuizHostProps> = ({ onBack }) => {
     // Socket eventleri
     socketConnection.on('playerCount', (count: PlayerCount) => {
       console.log('👥 QuizHost Oyuncu sayısı güncellendi:', count);
-      console.log('👥 QuizHost Total:', count.total, 'Answered:', count.answered);
       setPlayerCount(count);
     });
 
@@ -882,10 +881,6 @@ const QuizHost: React.FC<QuizHostProps> = ({ onBack }) => {
                           ? '🎉 Tüm oyuncular cevap verdi!' 
                           : `${playerCount.total - playerCount.answered} oyuncu daha cevap bekleniyor...`
                         }
-                      </p>
-                      {/* Debug bilgisi */}
-                      <p className="text-xs text-gray-500 mt-2">
-                        Debug: Total={playerCount.total}, Answered={playerCount.answered}
                       </p>
                     </div>
                   </div>
