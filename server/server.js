@@ -791,8 +791,15 @@ io.on('connection', (socket) => {
       const answerTime = gameState.questionStartTime ? 
         Math.round((currentTime - gameState.questionStartTime) / 1000) : 0;
       
-      // Diğer oyunculara bu oyuncunun cevap verdiğini bildir
-      socket.broadcast.emit('playerAnswered', {
+      console.log(`⏱️ Cevap verme süresi hesaplandı:`, {
+        currentTime,
+        questionStartTime: gameState.questionStartTime,
+        difference: currentTime - gameState.questionStartTime,
+        answerTime
+      });
+      
+      // Tüm oyunculara (cevap veren dahil) bu oyuncunun cevap verdiğini bildir
+      io.emit('playerAnswered', {
         playerName: players[socket.id].name,
         timestamp: currentTime,
         answerTime: answerTime
@@ -858,6 +865,7 @@ io.on('connection', (socket) => {
       
       console.log(`📢 Yeni soru yayınlanıyor: ${questionObj.question}`);
       console.log(`🎯 Doğru cevap: ${currentAnswer}`);
+      console.log(`⏰ Soru başlangıç zamanı set edildi: ${gameState.questionStartTime}`);
       
       io.emit('newQuestion', questionObj);
       updatePlayerCount();
@@ -886,8 +894,9 @@ io.on('connection', (socket) => {
   socket.on('startTimer', (data) => {
     console.log('⏰ Timer başlatılıyor:', data);
     if (data.duration) {
-      gameState.questionStartTime = Date.now();
-      console.log('📅 Soru başlangıç zamanı set edildi:', gameState.questionStartTime);
+      const newStartTime = Date.now();
+      gameState.questionStartTime = newStartTime;
+      console.log('📅 startTimer ile soru başlangıç zamanı set edildi:', newStartTime);
     }
   });
 
