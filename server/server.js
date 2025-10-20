@@ -754,6 +754,15 @@ io.on('connection', (socket) => {
       return;
     }
     
+    // Aynı oyuncu daha önce cevap vermiş mi kontrol et
+    if (answers[socket.id]) {
+      console.log('⚠️ Oyuncu zaten cevap vermiş:', players[socket.id].name);
+      socket.emit('answerError', { 
+        message: 'Zaten cevap verdiniz! Tekrar cevap veremezsiniz.' 
+      });
+      return;
+    }
+    
     // Zamanlayıcı doğrulaması - KRİTİK DÜZELTME
     const currentTime = Date.now();
     const questionDuration = 30000; // 30 saniye

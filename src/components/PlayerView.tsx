@@ -293,6 +293,7 @@ const PlayerView: React.FC<PlayerViewProps> = ({ onBack }) => {
             timestamp: data.timestamp,
             answerTime: data.answerTime || 0
           };
+          console.log('🔄 Oyuncu güncellendi:', data.playerName);
           return updated.sort((a, b) => a.timestamp - b.timestamp);
         } else {
           // Yeni oyuncu ekle
@@ -301,6 +302,7 @@ const PlayerView: React.FC<PlayerViewProps> = ({ onBack }) => {
             timestamp: data.timestamp,
             answerTime: data.answerTime || 0
           }];
+          console.log('➕ Yeni oyuncu eklendi:', data.playerName);
           return newList.sort((a, b) => a.timestamp - b.timestamp);
         }
       });
