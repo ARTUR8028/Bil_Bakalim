@@ -78,7 +78,7 @@ const TVHost: React.FC<TVHostProps> = ({ onBack }) => {
       reconnectionDelayMax: 10000, // Daha uzun maksimum gecikme
       autoConnect: true
     });
-    
+
     setSocket(socketConnection);
 
     // Bağlantı durumu takibi
@@ -482,18 +482,18 @@ const TVHost: React.FC<TVHostProps> = ({ onBack }) => {
 
   if (showFinalRankings) {
     const sortedScores = Object.entries(scores).sort(([,a], [,b]) => b - a);
-    
-    return (
+
+  return (
       <div translate="no" className="min-h-screen bg-gradient-to-br from-green-900 via-blue-900 to-purple-900 p-4">
         <div className="max-w-4xl mx-auto">
           <div className="flex justify-between items-center mb-8">
-            <button
+        <button
               onClick={goBackToModeSelection}
               className="flex items-center text-white hover:text-green-300 transition-colors"
-            >
+        >
               <ArrowLeft className="w-5 h-5 mr-2" />
               Ana Menü
-            </button>
+        </button>
             <ConnectionIndicator />
           </div>
 
@@ -505,7 +505,7 @@ const TVHost: React.FC<TVHostProps> = ({ onBack }) => {
               <div className="space-y-4">
                 {sortedScores.map(([playerName, score], index) => (
                   <div key={playerName} className="flex justify-between items-center bg-white/5 rounded-lg p-4">
-                    <div className="flex items-center space-x-4">
+        <div className="flex items-center space-x-4">
                       <span className="text-2xl font-bold text-yellow-400">
                         {index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : `${index + 1}.`}
                       </span>
@@ -514,13 +514,13 @@ const TVHost: React.FC<TVHostProps> = ({ onBack }) => {
                         {playerName}
                         {index === 0 && <span className="ml-3 text-yellow-400 font-bold text-xl">👑</span>}
                       </span>
-                    </div>
+          </div>
                     <span className="text-2xl font-bold text-green-400">{score} puan</span>
-                  </div>
+          </div>
                 ))}
-              </div>
-            </div>
-            
+        </div>
+      </div>
+
             <div className="flex justify-center space-x-4">
               <button
                 onClick={restartGame}
@@ -529,15 +529,15 @@ const TVHost: React.FC<TVHostProps> = ({ onBack }) => {
                 <RotateCcw className="w-6 h-6 mr-2" />
                 🔄 Yeniden Başlat
               </button>
-              <button
+            <button
                 onClick={goBackToModeSelection}
                 className="bg-blue-600 hover:bg-blue-700 text-white text-xl px-8 py-4 rounded-xl transition-colors"
-              >
+            >
                 🏠 Ana Menü
-              </button>
-            </div>
-          </div>
-        </div>
+            </button>
+                  </div>
+                  </div>
+                </div>
         <ToastContainer />
       </div>
     );
@@ -556,7 +556,7 @@ const TVHost: React.FC<TVHostProps> = ({ onBack }) => {
             Ana Menü
           </button>
           <ConnectionIndicator />
-        </div>
+                </div>
 
         {/* Main Content */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -584,8 +584,8 @@ const TVHost: React.FC<TVHostProps> = ({ onBack }) => {
                     <Shuffle className="w-6 h-6" />
                     <span>🔀 Rastgele Oyun</span>
                   </button>
+                  </div>
                 </div>
-              </div>
             ) : waitingForPlayers ? (
               /* Oyuncu Bekleme Ekranı */
               <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-8 border border-white/20">
@@ -597,18 +597,18 @@ const TVHost: React.FC<TVHostProps> = ({ onBack }) => {
                     <div className="flex items-center justify-center mb-4">
                       <QrCode className="w-8 h-8 text-blue-300 mr-3" />
                       <h3 className="text-xl font-bold text-white">📱 QR Kod</h3>
-                    </div>
+              </div>
                     {qrCodeUrl && (
                       <img src={qrCodeUrl} alt="QR Code" className="mx-auto mb-4 rounded-lg shadow-lg" />
                     )}
                     <p className="text-gray-300 text-sm">Oyuncular bu QR kodu okutarak katılabilir</p>
-                  </div>
-                  
+                </div>
+
                   <div className="text-center">
                     <h3 className="text-xl font-bold text-white mb-4">🔗 Katılım Linki</h3>
                     <div className="bg-white/10 rounded-lg p-4 mb-4">
                       <p className="text-blue-200 font-mono text-sm break-all">{joinLink}</p>
-                    </div>
+                  </div>
                     <button
                       onClick={copyLink}
                       className="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition-colors flex items-center mx-auto"
@@ -618,7 +618,7 @@ const TVHost: React.FC<TVHostProps> = ({ onBack }) => {
                     </button>
                   </div>
                 </div>
-                
+
                 {/* Oyuncu Sayısı */}
                 <div className="text-center mb-8">
                   <div className="bg-white/10 rounded-2xl p-6">
@@ -627,9 +627,9 @@ const TVHost: React.FC<TVHostProps> = ({ onBack }) => {
                     <p className="text-gray-300">
                       {playerCount.total > 0 ? 'Oyuncular hazır!' : 'Oyuncu bekleniyor...'}
                     </p>
+                    </div>
                   </div>
-                </div>
-                
+                  
                 {/* Oyunu Başlat Butonu */}
                 <div className="text-center">
                   <button
@@ -673,12 +673,11 @@ const TVHost: React.FC<TVHostProps> = ({ onBack }) => {
                     <div className="text-center">
                       <div className="text-3xl font-bold text-green-400 mb-2">
                         {playerCount.answered} / {playerCount.total}
-                      </div>
+                        </div>
                       <p className="text-gray-300">
                         {playerCount.answered === playerCount.total 
                           ? '🎉 Tüm oyuncular cevap verdi!' 
-                          : `${playerCount.total - playerCount.answered} oyuncu daha cevap bekleniyor...`
-                        }
+                          : `${playerCount.total - playerCount.answered} oyuncu daha cevap bekleniyor...`}
                       </p>
                     </div>
                   </div>
@@ -695,34 +694,34 @@ const TVHost: React.FC<TVHostProps> = ({ onBack }) => {
                         ? `🏆 Kazanan: ${gameResult.winners.join(', ')}`
                         : `🎯 En Yakın: ${gameResult.closest}`
                       }
-                    </div>
-                    
-                    <div className="flex justify-center space-x-4">
-                      <button
-                        onClick={nextQuestion}
-                        className="bg-blue-600 hover:bg-blue-700 text-white text-xl px-8 py-4 rounded-xl transition-colors"
-                      >
-                        ➡️ Sonraki Soru
-                      </button>
-                      <button
-                        onClick={endGame}
-                        className="bg-red-600 hover:bg-red-700 text-white text-xl px-8 py-4 rounded-xl transition-colors"
-                      >
-                        🏁 Oyunu Bitir
-                      </button>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="text-center">
+                </div>
+
+                <div className="flex justify-center space-x-4">
+                  <button
+                    onClick={nextQuestion}
+                    className="bg-blue-600 hover:bg-blue-700 text-white text-xl px-8 py-4 rounded-xl transition-colors"
+                  >
+                    ➡️ Sonraki Soru
+                  </button>
+                  <button
+                    onClick={endGame}
+                    className="bg-red-600 hover:bg-red-700 text-white text-xl px-8 py-4 rounded-xl transition-colors"
+                  >
+                    🏁 Oyunu Bitir
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="text-center">
                     <div className="text-2xl text-white mb-4">Soru yanıtlanıyor...</div>
                     <div className="text-lg text-gray-300">
                       {playerCount.answered} / {playerCount.total} oyuncu cevapladı
                     </div>
-                  </div>
-                )}
               </div>
             )}
           </div>
+        )}
+      </div>
 
           {/* Sağ Panel - Oyuncu Listesi */}
           <div className="lg:col-span-1">

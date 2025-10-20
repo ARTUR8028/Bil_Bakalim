@@ -795,8 +795,11 @@ io.on('connection', (socket) => {
         answerTime: answerTime
       });
       
-      console.log(`✅ ${players[socket.id].name} cevap verdi: ${answerValue}`);
+      console.log(`✅ ${players[socket.id].name} cevap verdi: ${numericValue}`);
       console.log('📊 Toplam cevap:', Object.keys(answers).length);
+
+      // Cevap veren/Toplam oyuncu sayısını anlık güncelle
+      updatePlayerCount();
       
       // Cevap doğruluğunu kontrol et
       if (typeof answerValue === 'number' && typeof currentAnswer === 'number') {
@@ -1096,8 +1099,6 @@ function updatePlayerCount() {
   };
   
   console.log('📊 Oyuncu durumu güncellendi:', count);
-  console.log('📊 Players:', Object.keys(players));
-  console.log('📊 Answers:', Object.keys(answers));
   io.emit('playerCount', count);
 }
 
