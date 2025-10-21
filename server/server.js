@@ -1476,6 +1476,23 @@ function calculateResults(roomId) {
   } else {
     console.log('🧮 [GLOBAL] Global sonuçlar hesaplanıyor...');
   }
+  
+  // KRİTİK KONTROL: Doğru cevap var mı?
+  if (correctAnswerValue === null || correctAnswerValue === undefined) {
+    console.error('❌ HATA: Doğru cevap bulunamadı!', { roomId, room: !!room, correctAnswerValue });
+    console.error('❌ Room currentAnswer:', room?.currentAnswer);
+    console.error('❌ Global currentAnswer:', currentAnswer);
+    return { 
+      correct: 0, 
+      closest: 'Hata: Doğru cevap yok', 
+      winners: [], 
+      allAnswers: [],
+      totalAnswers: 0,
+      totalPlayers: 0
+    };
+  }
+  
+  console.log('✅ Doğru cevap bulundu:', correctAnswerValue);
 
   let closest = null;
   let minDiff = Infinity;

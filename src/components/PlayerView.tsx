@@ -319,6 +319,11 @@ const PlayerView: React.FC<PlayerViewProps> = ({ onBack }) => {
 
     socketConnection.on('showResult', (result) => {
       console.log('📊 Sonuç alındı:', result);
+      console.log('🎯 Doğru cevap (correct):', result.correct);
+      console.log('🏆 Closest:', result.closest);
+      console.log('📝 All answers:', result.allAnswers);
+      console.log('👥 Winners:', result.winners);
+      
       setGameResult(result); // GameResult state'ini güncelle
       
       if (result.allAnswers) {
