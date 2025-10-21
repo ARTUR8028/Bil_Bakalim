@@ -590,8 +590,16 @@ const TVHost: React.FC<TVHostProps> = ({ onBack }) => {
             <ArrowLeft className="w-5 h-5 mr-2" />
             Ana Menü
           </button>
-          <ConnectionIndicator />
-                </div>
+          
+          <div className="flex items-center gap-3">
+            <ConnectionIndicator />
+            {roomId && (
+              <div className="bg-white/10 backdrop-blur-lg rounded-lg px-4 py-2 flex items-center">
+                <span className="text-white font-medium text-lg">📍 Room: {roomId}</span>
+              </div>
+            )}
+          </div>
+        </div>
 
         {/* Main Content */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">

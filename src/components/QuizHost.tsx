@@ -820,7 +820,7 @@ const QuizHost: React.FC<QuizHostProps> = ({ onBack }) => {
             Ana Menü
           </button>
           
-          {/* Sonraki Soru Butonu ve Bağlantı Durumu - Orta */}
+          {/* Sonraki Soru Butonu, Bağlantı Durumu ve Room ID - Orta */}
           <div className="flex justify-center items-center gap-3">
             <button
               onClick={nextQuestion}
@@ -830,6 +830,11 @@ const QuizHost: React.FC<QuizHostProps> = ({ onBack }) => {
               Sonraki Soru
             </button>
             <ConnectionIndicator />
+            {roomId && (
+              <div className="bg-white/10 backdrop-blur-lg rounded-lg px-4 py-2 flex items-center">
+                <span className="text-white font-medium">📍 Room: {roomId}</span>
+              </div>
+            )}
           </div>
           
           <div className="flex items-center">
