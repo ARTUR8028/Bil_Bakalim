@@ -1062,7 +1062,8 @@ io.on('connection', (socket) => {
     const finalScores = { ...globalScores };
     
     // Aktif oyuncuları da ekle (eğer henüz skor almamışlarsa 0 puan ile)
-    Object.keys(players).forEach(playerName => {
+    Object.values(players).forEach(player => {
+      const playerName = player.name;
       if (!(playerName in finalScores)) {
         finalScores[playerName] = 0;
         console.log(`➕ Aktif oyuncu ${playerName} final sıralamasına 0 puan ile eklendi`);
