@@ -986,6 +986,18 @@ io.on('connection', (socket) => {
       
       if (totalAnswers === totalPlayers && totalPlayers > 0) {
         console.log('🎉 Tüm oyuncular cevap verdi! Sonuç ekranına geçiliyor...');
+        
+        // KRİTİK KONTROL: Doğru cevap set edilmiş mi?
+        const currentAnswerCheck = room ? room.currentAnswer : currentAnswer;
+        if (currentAnswerCheck === null || currentAnswerCheck === undefined) {
+          console.error('❌ HATA: Tüm oyuncular cevap verdi ama doğru cevap henüz set edilmemiş!');
+          console.error('❌ roomId:', roomId);
+          console.error('❌ room:', room ? 'var' : 'yok');
+          console.error('❌ room.currentAnswer:', room?.currentAnswer);
+          console.error('❌ global currentAnswer:', currentAnswer);
+          return; // Sonuçları gösterme, timer dolsun
+        }
+        
         // Kısa bir gecikme ile sonuçları göster
         setTimeout(() => {
           // Timer'ı durdur (room-aware)
