@@ -32,6 +32,7 @@ interface GameResult {
 
 const TVHost: React.FC<TVHostProps> = ({ onBack }) => {
   const [socket, setSocket] = useState<Socket | null>(null);
+  const [roomId, setRoomId] = useState<string>('');
   const [gameMode, setGameMode] = useState<'sequential' | 'random' | null>(null);
   const [questions, setQuestions] = useState<Question[]>([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
@@ -51,7 +52,7 @@ const TVHost: React.FC<TVHostProps> = ({ onBack }) => {
   const [connectionStatus, setConnectionStatus] = useState<'connecting' | 'connected' | 'disconnected'>('connecting');
   const [toasts, setToasts] = useState<Array<{id: string, message: string, type: 'success' | 'info' | 'warning'}>>([]);
 
-  const joinLink = `${window.location.origin}/#player`;
+  const joinLink = roomId ? `${window.location.origin}/#player?room=${roomId}` : `${window.location.origin}/#player`;
 
   // Toast notification sistemi
   const addToast = (message: string, type: 'success' | 'info' | 'warning' = 'info') => {
@@ -90,16 +91,19 @@ const TVHost: React.FC<TVHostProps> = ({ onBack }) => {
       // Bağlantı kurulduğunda hemen ping gönder
       socketConnection.emit('ping', { timestamp: Date.now(), source: 'tvhost' });
       
-      // Mevcut katılımcıları iste
-      console.log('📋 Mevcut katılımcıları istiyorum...');
-      setTimeout(() => {
-        if (socketConnection && socketConnection.connected) {
-          socketConnection.emit('getParticipants');
-          console.log('📤 getParticipants event gönderildi');
-        } else {
-          console.error('❌ Socket bağlantısı yok, getParticipants gönderilemedi');
+      // Room oluştur
+      socketConnection.emit('createRoom', (response: { roomId: string, success: boolean }) => {
+        if (response.success) {
+          setRoomId(response.roomId);
+          console.log('🏠 TV Room oluşturuldu:', response.roomId);
         }
-      }, 100);
+      });
+    });
+
+    // Room oluşturuldu event'i
+    socketConnection.on('roomCreated', (data: { roomId: string }) => {
+      setRoomId(data.roomId);
+      console.log('🏠 TV Room ID alındı:', data.roomId);
     });
 
     socketConnection.on('reconnect', (attemptNumber) => {
@@ -161,13 +165,15 @@ const TVHost: React.FC<TVHostProps> = ({ onBack }) => {
 
     loadQuestions();
 
-    // QR kod oluştur
-    QRCode.toDataURL(joinLink, { width: 300, margin: 2 })
-      .then(url => {
-        console.log('📱 QR kod oluşturuldu');
-        setQrCodeUrl(url);
-      })
-      .catch(err => console.error('❌ QR kod oluşturulamadı:', err));
+    // QR kod oluştur (roomId değiştiğinde yeniden oluştur)
+    if (joinLink) {
+      QRCode.toDataURL(joinLink, { width: 300, margin: 2 })
+        .then(url => {
+          console.log('📱 TV QR kod oluşturuldu:', joinLink);
+          setQrCodeUrl(url);
+        })
+        .catch(err => console.error('❌ QR kod oluşturulamadı:', err));
+    }
 
     // Socket eventleri
     socketConnection.on('playerCount', (count: PlayerCount) => {
@@ -617,6 +623,19 @@ const TVHost: React.FC<TVHostProps> = ({ onBack }) => {
               <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-8 border border-white/20">
                 <h2 className="text-3xl font-bold text-white mb-6 text-center">👥 Oyuncular Bekleniyor</h2>
                 
+                {/* Room ID */}
+                {roomId && (
+                  <div className="bg-gradient-to-r from-purple-600 to-blue-600 rounded-xl p-6 mb-6">
+                    <div className="flex items-center justify-center mb-3">
+                      <h3 className="text-3xl font-bold text-white">🎮 Oyun Kodu</h3>
+                    </div>
+                    <div className="bg-white/20 rounded-lg p-6">
+                      <p className="text-6xl font-bold text-white text-center tracking-wider">{roomId}</p>
+                    </div>
+                    <p className="text-white/80 text-center mt-4 text-lg">Oyunculara bu kodu verin</p>
+                  </div>
+                )}
+
                 {/* QR Kod ve Link */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
                   <div className="text-center">

@@ -847,10 +847,18 @@ io.on('connection', (socket) => {
   });
 
   socket.on('answer', (value) => {
+    // Room ID'yi al
+    const roomId = socket.roomId;
+    const room = roomId ? getRoom(roomId) : null;
+    const playersObj = room ? room.players : players;
+    const answersObj = room ? room.answers : answers;
+    const gameStateObj = room ? room.gameState : gameState;
+    
     console.log('📝 Cevap alındı:', { 
-      player: players[socket.id]?.name || 'Bilinmeyen',
+      player: playersObj[socket.id]?.name || 'Bilinmeyen',
       value, 
       socketId: socket.id,
+      roomId: roomId || 'global',
       timestamp: new Date().toISOString()
     });
     
@@ -862,7 +870,7 @@ io.on('connection', (socket) => {
     }
     
     // Oyuncu yoksa hata ver
-    if (!players[socket.id]) {
+    if (!playersObj[socket.id]) {
       console.log('❌ Geçersiz cevap veya oyuncu bulunamadı');
       socket.emit('answerError', { 
         message: 'Oyuncu bulunamadı! Lütfen oyuna tekrar katılın.' 
@@ -871,8 +879,8 @@ io.on('connection', (socket) => {
     }
     
     // Aynı oyuncu daha önce cevap vermiş mi kontrol et
-    if (answers[socket.id]) {
-      console.log('⚠️ Oyuncu zaten cevap vermiş:', players[socket.id].name);
+    if (answersObj[socket.id]) {
+      console.log('⚠️ Oyuncu zaten cevap vermiş:', playersObj[socket.id].name);
       socket.emit('answerError', { 
         message: 'Zaten cevap verdiniz! Tekrar cevap veremezsiniz.' 
       });
@@ -883,7 +891,7 @@ io.on('connection', (socket) => {
     const currentTime = Date.now();
     const questionDuration = 30000; // 30 saniye
     
-    if (!gameState.isActive) {
+    if (!gameStateObj.isActive) {
       console.log('❌ Aktif soru yok, cevap reddediliyor');
       socket.emit('answerError', { 
         message: 'Şu anda aktif bir soru yok. Lütfen soru başladıktan sonra cevap verin.' 
@@ -891,7 +899,7 @@ io.on('connection', (socket) => {
       return;
     }
     
-    if (gameState.questionStartTime && (currentTime - gameState.questionStartTime > questionDuration)) {
+    if (gameStateObj.questionStartTime && (currentTime - gameStateObj.questionStartTime > questionDuration)) {
       console.log('❌ Süre doldu, geç cevap reddediliyor');
       socket.emit('answerError', { 
         message: 'Süre doldu! Geç cevap kabul edilmez. Lütfen bir sonraki soruyu bekleyin.' 
@@ -899,33 +907,41 @@ io.on('connection', (socket) => {
       return;
     }
     
-    if (players[socket.id] && value !== null && value !== undefined) {
+    if (playersObj[socket.id] && value !== null && value !== undefined) {
       // Oyuncu aktivitesini güncelle
-      players[socket.id].lastActivity = Date.now();
+      playersObj[socket.id].lastActivity = Date.now();
       
       // Cevabı float olarak sakla
       const numericValue = parseFloat(value);
-      answers[socket.id] = {
+      answersObj[socket.id] = {
         value: numericValue,
         timestamp: currentTime,
-        playerName: players[socket.id].name,
+        playerName: playersObj[socket.id].name,
         playerId: socket.id
       };
       
       // Cevap verme süresini hesapla (saniye cinsinden)
-      const answerTime = gameState.questionStartTime ? 
-        Math.round((currentTime - gameState.questionStartTime) / 1000) : 0;
+      const answerTime = gameStateObj.questionStartTime ? 
+        Math.round((currentTime - gameStateObj.questionStartTime) / 1000) : 0;
       
       
-      // Tüm oyunculara (cevap veren dahil) bu oyuncunun cevap verdiğini bildir
-      io.emit('playerAnswered', {
-        playerName: players[socket.id].name,
-        timestamp: currentTime,
-        answerTime: answerTime
-      });
+      // Tüm oyunculara (cevap veren dahil) bu oyuncunun cevap verdiğini bildir (room'a özel)
+      if (roomId) {
+        io.to(roomId).emit('playerAnswered', {
+          playerName: playersObj[socket.id].name,
+          timestamp: currentTime,
+          answerTime: answerTime
+        });
+      } else {
+        io.emit('playerAnswered', {
+          playerName: playersObj[socket.id].name,
+          timestamp: currentTime,
+          answerTime: answerTime
+        });
+      }
       
-      console.log(`✅ ${players[socket.id].name} cevap verdi: ${numericValue}`);
-      console.log('📊 Toplam cevap:', Object.keys(answers).length);
+      console.log(`✅ ${playersObj[socket.id].name} cevap verdi: ${numericValue}${roomId ? ` (Room: ${roomId})` : ''}`);
+      console.log('📊 Toplam cevap:', Object.keys(answersObj).length);
 
       // Cevap veren/Toplam oyuncu sayısını anlık güncelle
       updatePlayerCount();
