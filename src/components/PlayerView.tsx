@@ -355,6 +355,25 @@ const PlayerView: React.FC<PlayerViewProps> = ({ onBack }) => {
       setGameEnded(true);
     });
 
+    socketConnection.on('gameReset', (data: {message: string}) => {
+      console.log('🔄 Oyun sıfırlandı:', data);
+      // Oyuncuyu katılım ekranına geri gönder
+      setIsJoined(false);
+      setPlayerName('');
+      setCurrentQuestion('');
+      setAnswer('');
+      setHasAnswered(false);
+      setAnswerError('');
+      setAllAnswers([]);
+      setShowFullResults(false);
+      setAnsweredPlayers([]);
+      setWinnerInfo(null);
+      setGameEnded(false);
+      setFinalScores({});
+      setTimeLeft(30);
+      setGameResult(null);
+    });
+
     // Ping-pong test - daha az sıklıkta
     const pingInterval = setInterval(() => {
       if (socketConnection.connected) {

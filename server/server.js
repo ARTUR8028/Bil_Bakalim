@@ -1079,6 +1079,9 @@ io.on('connection', (socket) => {
   socket.on('startNewGame', () => {
     console.log('🆕 Yeni oyun başlatılıyor - tüm veriler temizleniyor...');
     
+    // Tüm oyunculara oyundan çıkarıldıklarını bildir
+    io.emit('gameReset', { message: 'Yeni oyun başlatıldı, lütfen tekrar katılın' });
+    
     // Tüm oyuncuları ve global puanları temizle
     players = {};
     globalScores = {};
@@ -1094,12 +1097,16 @@ io.on('connection', (socket) => {
     
     // Tüm client'lara boş oyuncu listesi gönder
     io.emit('allParticipants', []);
+    io.emit('playerCount', { total: 0, answered: 0 });
     console.log('✅ Yeni oyun için tüm veriler temizlendi');
   });
 
   socket.on('restartGame', () => {
     console.log('🔄 Oyun yeniden başlatılıyor - puanlar sıfırlanıyor...');
     
+    // Tüm oyunculara oyundan çıkarıldıklarını bildir
+    io.emit('gameReset', { message: 'Oyun yeniden başlatıldı, lütfen tekrar katılın' });
+    
     // Tüm oyuncuları ve global puanları temizle
     players = {};
     globalScores = {};
@@ -1115,6 +1122,7 @@ io.on('connection', (socket) => {
     
     // Tüm client'lara boş oyuncu listesi gönder
     io.emit('allParticipants', []);
+    io.emit('playerCount', { total: 0, answered: 0 });
     console.log('✅ Oyun yeniden başlatıldı, tüm puanlar temizlendi');
   });
 
