@@ -619,6 +619,24 @@ const PlayerView: React.FC<PlayerViewProps> = ({ onBack }) => {
             <div className="space-y-6">
               <div>
                 <label className="block text-sm font-medium text-purple-200 mb-2">
+                  🎮 Oyun Kodu (Opsiyonel)
+                </label>
+                <input
+                  type="text"
+                  value={roomId}
+                  onChange={(e) => setRoomId(e.target.value.toUpperCase())}
+                  className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-purple-300 focus:ring-2 focus:ring-yellow-500 focus:border-transparent transition-all font-mono text-center text-xl tracking-widest"
+                  placeholder="ABC123"
+                  maxLength={6}
+                  disabled={connectionStatus !== 'connected'}
+                />
+                <p className="text-xs text-purple-300 mt-1">
+                  {roomId ? '✓ Özel oyuna katılacaksınız' : 'Boş bırakırsanız genel oyuna katılırsınız'}
+                </p>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-purple-200 mb-2">
                   Adınız
                 </label>
                 <input
