@@ -130,7 +130,8 @@ const upload = multer({
 
 // Oyun durumu
 let questions = [];
-// Room bazlı state yönetimi
+
+// Room-based sistem
 const rooms = new Map(); // roomId -> room state
 
 // Room state yapısı:
@@ -145,6 +146,11 @@ const rooms = new Map(); // roomId -> room state
 // }
 
 // Yardımcı fonksiyonlar
+function generateRoomId() {
+  // 6 haneli benzersiz room ID oluştur
+  return Math.random().toString(36).substring(2, 8).toUpperCase();
+}
+
 function createRoom(roomId, hostSocketId) {
   const room = {
     players: {},
@@ -170,9 +176,13 @@ function getRoom(roomId) {
   return rooms.get(roomId);
 }
 
-function generateRoomId() {
-  // 6 haneli benzersiz room ID oluştur
-  return Math.random().toString(36).substring(2, 8).toUpperCase();
+function deleteRoom(roomId) {
+  const room = rooms.get(roomId);
+  if (room && room.currentTimerInterval) {
+    clearInterval(room.currentTimerInterval);
+  }
+  rooms.delete(roomId);
+  console.log(`🗑️ Room silindi: ${roomId}`);
 }
 
 // Geriye dönük uyumluluk için global state (eski sistemle çalışması için)
@@ -735,6 +745,11 @@ io.on('connection', (socket) => {
     }
     
     if (name && typeof name === 'string' && name.trim()) {
+      // Room ID'ye göre player objesi seç
+      const room = roomId ? getRoom(roomId) : null;
+      const playersObj = room ? room.players : players;
+      const globalScoresObj = room ? room.globalScores : globalScores;
+      
       // Türkçe karakterleri koruyarak büyük harfe çevir
       const playerName = name.trim()
         .replace(/ı/g, 'I')
@@ -747,7 +762,7 @@ io.on('connection', (socket) => {
         .toUpperCase();
       
       // KESIN ÇÖZÜM: Büyük küçük harf duyarsız kontrol
-      const existingPlayer = Object.values(players).find(p => 
+      const existingPlayer = Object.values(playersObj).find(p => 
         p.name.toLowerCase() === playerName.toLowerCase()
       );
       
@@ -760,22 +775,22 @@ io.on('connection', (socket) => {
       }
       
       // Global puan kontrolü - oyuncu daha önce oynamış mı?
-      const existingGlobalScore = globalScores[playerName] || 0;
-      console.log(`🔍 ${playerName} global puanı: ${existingGlobalScore}`);
+      const existingGlobalScore = globalScoresObj[playerName] || 0;
+      console.log(`🔍 ${playerName} global puanı: ${existingGlobalScore}${roomId ? ` (Room: ${roomId})` : ''}`);
       
       // Socket ID kontrolü - eğer aynı socket ID'ye sahip oyuncu varsa, güncelle
-      if (players[socket.id]) {
-        console.log('🔄 Mevcut oyuncu güncelleniyor:', socket.id, players[socket.id].name);
+      if (playersObj[socket.id]) {
+        console.log('🔄 Mevcut oyuncu güncelleniyor:', socket.id, playersObj[socket.id].name);
         // Mevcut oyuncuyu güncelle
-        players[socket.id].name = playerName;
-        players[socket.id].score = existingGlobalScore; // Global puandan devam et
-        players[socket.id].lastActivity = Date.now();
-        players[socket.id].isDisconnected = false;
-        players[socket.id].disconnectedAt = undefined;
+        playersObj[socket.id].name = playerName;
+        playersObj[socket.id].score = existingGlobalScore; // Global puandan devam et
+        playersObj[socket.id].lastActivity = Date.now();
+        playersObj[socket.id].isDisconnected = false;
+        playersObj[socket.id].disconnectedAt = undefined;
         console.log(`✅ ${playerName} oyuncu bilgileri güncellendi (${socket.id}) - Puan: ${existingGlobalScore}`);
       } else {
         // Yeni oyuncu ekle
-        players[socket.id] = { 
+        playersObj[socket.id] = { 
           name: playerName, 
           score: existingGlobalScore, // Global puandan devam et
           joinTime: Date.now(),
@@ -786,31 +801,45 @@ io.on('connection', (socket) => {
         console.log(`✅ ${playerName} yeni oyuncu olarak eklendi (${socket.id}) - Puan: ${existingGlobalScore}`);
       }
       
-      console.log(`✅ ${playerName} oyuna katıldı (${socket.id})`);
-      console.log('👥 Aktif oyuncular:', Object.keys(players).length);
-      console.log('👥 Oyuncu detayları:', players[socket.id]);
+      console.log(`✅ ${playerName} oyuna katıldı (${socket.id})${roomId ? ` Room: ${roomId}` : ''}`);
+      console.log('👥 Aktif oyuncular:', Object.keys(playersObj).length);
+      console.log('👥 Oyuncu detayları:', playersObj[socket.id]);
       
       // Katılım onayı gönder
+      const gameStateObj = room ? room.gameState : gameState;
       socket.emit('joinConfirmed', { 
         name: playerName, 
         playerId: socket.id,
-        totalPlayers: Object.keys(players).length,
+        totalPlayers: Object.keys(playersObj).length,
         message: 'Başarıyla katıldınız!',
         gameState: {
-          isActive: gameState.isActive,
-          totalQuestions: gameState.totalQuestions
+          isActive: gameStateObj.isActive,
+          totalQuestions: gameStateObj.totalQuestions
         }
       });
       
-      // Tüm host'lara oyuncu katıldığını bildir
-      socket.broadcast.emit('playerJoined', playerName);
+      // Tüm host'lara oyuncu katıldığını bildir (room'a özel)
+      if (roomId) {
+        io.to(roomId).emit('playerJoined', playerName);
+      } else {
+        socket.broadcast.emit('playerJoined', playerName);
+      }
       
-      // Mevcut tüm katılımcıları host'a gönder
-      const participantNames = Object.values(players).map(p => p.name);
+      // Mevcut tüm katılımcıları host'a gönder (room'a özel)
+      const participantNames = Object.values(playersObj).map(p => p.name);
       console.log('📤 allParticipants gönderiliyor:', participantNames);
-      io.emit('allParticipants', participantNames);
+      if (roomId) {
+        io.to(roomId).emit('allParticipants', participantNames);
+      } else {
+        io.emit('allParticipants', participantNames);
+      }
       
-      updatePlayerCount();
+      // Player count güncelleme (room'a özel)
+      if (roomId) {
+        updatePlayerCountForRoom(roomId);
+      } else {
+        updatePlayerCount();
+      }
     } else {
       console.log('❌ Geçersiz isim:', name);
       socket.emit('joinError', { message: 'Geçerli bir isim girin' });
@@ -1289,6 +1318,20 @@ function updatePlayerCount() {
   };
   console.log('📊 Oyuncu durumu güncellendi:', count);
   io.emit('playerCount', count);
+}
+
+function updatePlayerCountForRoom(roomId) {
+  const room = getRoom(roomId);
+  if (!room) return;
+  
+  const activePlayersInRoom = Object.values(room.players).filter(p => !p.isDisconnected);
+  const count = {
+    total: activePlayersInRoom.length,
+    answered: Object.keys(room.answers).length,
+    timestamp: Date.now()
+  };
+  console.log(`📊 Room ${roomId} oyuncu durumu güncellendi:`, count);
+  io.to(roomId).emit('playerCount', count);
 }
 
 function calculateResults() {

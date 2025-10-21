@@ -23,9 +23,9 @@ interface GameResult {
 
 const PlayerView: React.FC<PlayerViewProps> = ({ onBack }) => {
   const [socket, setSocket] = useState<Socket | null>(null);
+  const [roomId, setRoomId] = useState<string>('');
   const [playerName, setPlayerName] = useState('');
   const [isJoined, setIsJoined] = useState(false);
-  const [roomId, setRoomId] = useState<string>('');
 
   // Türkçe karakterleri koruyarak büyük harfe çeviren fonksiyon
   const toTurkishUpperCase = (str: string) => {
@@ -125,12 +125,12 @@ const PlayerView: React.FC<PlayerViewProps> = ({ onBack }) => {
   useEffect(() => {
     console.log('🔌 Player Socket bağlantısı kuruluyor...');
     
-    // URL'den room ID'yi al
-    const urlParams = new URLSearchParams(window.location.hash.split('?')[1]);
+    // URL'den room parametresini oku
+    const urlParams = new URLSearchParams(window.location.hash.split('?')[1] || '');
     const roomParam = urlParams.get('room');
     if (roomParam) {
-      console.log('🏠 URL\'den room ID alındı:', roomParam);
-      setRoomId(roomParam);
+      setRoomId(roomParam.toUpperCase());
+      console.log('🏠 Room ID URL\'den alındı:', roomParam.toUpperCase());
     }
     
     // Sayfa yüklendiğinde oyuncu durumunu sıfırla
@@ -150,13 +150,15 @@ const PlayerView: React.FC<PlayerViewProps> = ({ onBack }) => {
     
     // Optimize edilmiş socket konfigürasyonu
     const socketConnection = io(import.meta.env.VITE_SERVER_URL || 'https://bil-bakalim.onrender.com', {
-      transports: ['polling', 'websocket'],
-      upgrade: true,
-      timeout: 20000,
+      transports: ['polling', 'websocket'], // Polling öncelikli
+      upgrade: true, // WebSocket'e upgrade et
+      timeout: 30000, // Daha uzun timeout
+      forceNew: true,
       reconnection: true,
-      reconnectionAttempts: 10,
-      reconnectionDelay: 1000,
-      reconnectionDelayMax: 5000
+      reconnectionAttempts: 20, // Daha fazla deneme
+      reconnectionDelay: 2000, // Daha uzun gecikme
+      reconnectionDelayMax: 10000, // Daha uzun maksimum gecikme
+      autoConnect: true
     });
     
     setSocket(socketConnection);
@@ -416,14 +418,14 @@ const PlayerView: React.FC<PlayerViewProps> = ({ onBack }) => {
       return;
     }
 
-    console.log('👤 Oyuna katılım isteği gönderiliyor:', playerName, roomId ? `Room: ${roomId}` : 'Global room');
+    console.log('👤 Oyuna katılım isteği gönderiliyor:', playerName, roomId ? `(Room: ${roomId})` : '');
     setJoinError('');
     
-    // Room ID varsa room ile katıl, yoksa global room
+    // Room ID varsa obje olarak gönder, yoksa sadece isim gönder (geriye dönük uyumluluk)
     if (roomId) {
-      socket.emit('join', { name: playerName.trim(), roomId });
+      socket.emit('join', { name: playerName.trim(), roomId: roomId });
     } else {
-      socket.emit('join', playerName.trim()); // Geriye dönük uyumluluk
+      socket.emit('join', playerName.trim());
     }
   };
 
@@ -605,6 +607,12 @@ const PlayerView: React.FC<PlayerViewProps> = ({ onBack }) => {
             <div className="text-center mb-8">
               <User className="w-16 h-16 text-purple-300 mx-auto mb-4" />
               <h1 className="text-3xl font-bold text-white mb-2">Yarışmaya Katıl</h1>
+              {roomId && (
+                <div className="bg-gradient-to-r from-purple-600 to-blue-600 rounded-lg p-3 mb-3">
+                  <p className="text-white/80 text-sm mb-1">Oyun Kodu</p>
+                  <p className="text-2xl font-bold text-white tracking-wider">{roomId}</p>
+                </div>
+              )}
               <p className="text-purple-200">Adınızı girin ve oyuna başlayın</p>
             </div>
 
@@ -617,25 +625,7 @@ const PlayerView: React.FC<PlayerViewProps> = ({ onBack }) => {
             <div className="space-y-6">
               <div>
                 <label className="block text-sm font-medium text-purple-200 mb-2">
-                  🎮 Oyun Kodu {roomId ? '(Otomatik Alındı)' : '(İsteğe Bağlı)'}
-                </label>
-                <input
-                  type="text"
-                  value={roomId}
-                  onChange={(e) => setRoomId(e.target.value.toUpperCase().trim())}
-                  className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-purple-300 focus:ring-2 focus:ring-yellow-500 focus:border-transparent transition-all font-mono text-center text-2xl tracking-widest"
-                  placeholder="ABC123"
-                  maxLength={6}
-                  disabled={connectionStatus !== 'connected'}
-                />
-                <p className="text-xs text-purple-300 mt-1 text-center">
-                  {roomId ? '✅ Özel oyuna katılacaksınız' : 'ℹ️ Boş bırakırsanız genel oyuna katılırsınız'}
-                </p>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-purple-200 mb-2">
-                  👤 Adınız
+                  Adınız
                 </label>
                 <input
                   type="text"

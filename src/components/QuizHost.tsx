@@ -33,6 +33,7 @@ interface GameResult {
 
 const QuizHost: React.FC<QuizHostProps> = ({ onBack }) => {
   const [socket, setSocket] = useState<Socket | null>(null);
+  const [roomId, setRoomId] = useState<string>('');
   const [gameMode, setGameMode] = useState<'sequential' | 'random' | null>(null);
   const deviceInfo = getDeviceInfo();
   const [questions, setQuestions] = useState<Question[]>([]);
@@ -51,7 +52,6 @@ const QuizHost: React.FC<QuizHostProps> = ({ onBack }) => {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [connectionStatus, setConnectionStatus] = useState<'connecting' | 'connected' | 'disconnected'>('connecting');
   const [toasts, setToasts] = useState<Array<{id: string, message: string, type: 'success' | 'info' | 'warning'}>>([]);
-  const [roomId, setRoomId] = useState<string>('');
 
   const joinLink = roomId ? `${window.location.origin}/#player?room=${roomId}` : `${window.location.origin}/#player`;
 
@@ -71,13 +71,15 @@ const QuizHost: React.FC<QuizHostProps> = ({ onBack }) => {
     
     // Optimize edilmiş socket konfigürasyonu
     const socketConnection = io(import.meta.env.VITE_SERVER_URL || 'https://bil-bakalim.onrender.com', {
-      transports: ['polling', 'websocket'],
-      upgrade: true,
-      timeout: 20000,
+      transports: ['polling', 'websocket'], // Polling öncelikli
+      upgrade: true, // WebSocket'e upgrade et
+      timeout: 30000, // Daha uzun timeout
+      forceNew: true,
       reconnection: true,
-      reconnectionAttempts: 10,
-      reconnectionDelay: 1000,
-      reconnectionDelayMax: 5000
+      reconnectionAttempts: 20, // Daha fazla deneme
+      reconnectionDelay: 2000, // Daha uzun gecikme
+      reconnectionDelayMax: 10000, // Daha uzun maksimum gecikme
+      autoConnect: true
     });
     
     setSocket(socketConnection);
@@ -87,27 +89,23 @@ const QuizHost: React.FC<QuizHostProps> = ({ onBack }) => {
       console.log('✅ Quiz Host socket bağlantısı kuruldu:', socketConnection.id);
       setConnectionStatus('connected');
       
-      // Room oluştur
-      socketConnection.emit('createRoom', (response: { roomId: string, success: boolean }) => {
-        if (response.success) {
-          console.log('🏠 Room oluşturuldu:', response.roomId);
-          setRoomId(response.roomId);
-        }
-      });
-      
       // Bağlantı kurulduğunda hemen ping gönder
       socketConnection.emit('ping', { timestamp: Date.now(), source: 'host' });
       
-      // Mevcut katılımcıları iste
-      console.log('📋 Mevcut katılımcıları istiyorum...');
-      setTimeout(() => {
-        if (socketConnection && socketConnection.connected) {
-          socketConnection.emit('getParticipants');
-          console.log('📤 getParticipants event gönderildi');
-        } else {
-          console.error('❌ Socket bağlantısı yok, getParticipants gönderilemedi');
+      // Room oluştur
+      socketConnection.emit('createRoom', (response: { roomId: string, success: boolean }) => {
+        if (response.success) {
+          setRoomId(response.roomId);
+          console.log('🏠 Room oluşturuldu:', response.roomId);
+          addToast(`🏠 Oyun odası oluşturuldu: ${response.roomId}`, 'success');
         }
-      }, 100);
+      });
+    });
+
+    // Room oluşturuldu event'i
+    socketConnection.on('roomCreated', (data: { roomId: string }) => {
+      setRoomId(data.roomId);
+      console.log('🏠 Room ID alındı:', data.roomId);
     });
 
     socketConnection.on('disconnect', (reason) => {
@@ -155,6 +153,16 @@ const QuizHost: React.FC<QuizHostProps> = ({ onBack }) => {
     };
 
     loadQuestions();
+
+    // QR kod oluştur (roomId değiştiğinde yeniden oluştur)
+    if (joinLink) {
+      QRCode.toDataURL(joinLink, { width: 300, margin: 2 })
+        .then(url => {
+          console.log('📱 QR kod oluşturuldu:', joinLink);
+          setQrCodeUrl(url);
+        })
+        .catch(err => console.error('❌ QR kod oluşturulamadı:', err));
+    }
 
     // Socket eventleri
     socketConnection.on('playerCount', (count: PlayerCount) => {
@@ -236,20 +244,6 @@ const QuizHost: React.FC<QuizHostProps> = ({ onBack }) => {
       socketConnection.disconnect();
     };
   }, [joinLink]);
-
-  // Room ID değiştiğinde QR kod oluştur
-  useEffect(() => {
-    if (roomId) {
-      console.log('📱 QR kod oluşturuluyor, Room ID:', roomId);
-      console.log('🔗 Join linki:', joinLink);
-      QRCode.toDataURL(joinLink, { width: 300, margin: 2 })
-        .then(url => {
-          console.log('✅ QR kod oluşturuldu');
-          setQrCodeUrl(url);
-        })
-        .catch(err => console.error('❌ QR kod oluşturulamadı:', err));
-    }
-  }, [roomId, joinLink]);
 
   // Ses çalma fonksiyonu
   const playSound = (type: 'tick' | 'final') => {
@@ -716,6 +710,19 @@ const QuizHost: React.FC<QuizHostProps> = ({ onBack }) => {
             <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 mb-6">
               <h2 className="text-3xl font-bold text-white mb-6">👥 Oyuncular Katılıyor</h2>
               
+              {/* Room ID */}
+              {roomId && (
+                <div className="bg-gradient-to-r from-purple-600 to-blue-600 rounded-xl p-6 mb-6">
+                  <div className="flex items-center justify-center mb-3">
+                    <h3 className="text-2xl font-bold text-white">🎮 Oyun Kodu</h3>
+                  </div>
+                  <div className="bg-white/20 rounded-lg p-4">
+                    <p className="text-5xl font-bold text-white text-center tracking-wider">{roomId}</p>
+                  </div>
+                  <p className="text-white/80 text-center mt-3 text-sm">Oyunculara bu kodu verin</p>
+                </div>
+              )}
+
               {/* QR Kod, Link ve Katılımcı Listesi - 3 Sütun Layout */}
               <div className="grid lg:grid-cols-3 md:grid-cols-2 gap-6 mb-8">
                 {/* QR Kod */}
@@ -724,12 +731,6 @@ const QuizHost: React.FC<QuizHostProps> = ({ onBack }) => {
                     <QrCode className="w-8 h-8 text-blue-300 mr-3" />
                     <h3 className="text-xl font-semibold text-white">📱 QR Kod ile Katıl</h3>
                   </div>
-                  {roomId && (
-                    <div className="mb-3">
-                      <p className="text-yellow-300 font-bold text-2xl">🎮 Oyun Kodu</p>
-                      <p className="text-white font-mono text-3xl tracking-wider">{roomId}</p>
-                    </div>
-                  )}
                   {qrCodeUrl ? (
                     <div className="bg-white p-4 rounded-lg inline-block">
                       <img src={qrCodeUrl} alt="QR Kod" className="w-48 h-48 mx-auto" />
