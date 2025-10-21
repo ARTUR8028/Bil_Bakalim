@@ -150,13 +150,14 @@ const PlayerView: React.FC<PlayerViewProps> = ({ onBack }) => {
     
     // Optimize edilmiş socket konfigürasyonu
     const socketConnection = io(import.meta.env.VITE_SERVER_URL || 'https://bil-bakalim.onrender.com', {
-      transports: ['polling', 'websocket'], // Polling önce, daha stabil
-      upgrade: true,
-      timeout: 45000, // 45 saniye
+      transports: ['polling', 'websocket'], // Polling öncelikli
+      upgrade: true, // WebSocket'e upgrade et
+      timeout: 30000, // Daha uzun timeout
+      forceNew: true,
       reconnection: true,
-      reconnectionAttempts: Infinity, // Sürekli dene
-      reconnectionDelay: 1000, // 1 saniye
-      reconnectionDelayMax: 5000, // Max 5 saniye
+      reconnectionAttempts: 20, // Daha fazla deneme
+      reconnectionDelay: 2000, // Daha uzun gecikme
+      reconnectionDelayMax: 10000, // Daha uzun maksimum gecikme
       autoConnect: true
     });
     
@@ -618,25 +619,25 @@ const PlayerView: React.FC<PlayerViewProps> = ({ onBack }) => {
             <div className="space-y-6">
               <div>
                 <label className="block text-sm font-medium text-purple-200 mb-2">
-                  🎮 Oyun Kodu (Opsiyonel)
+                  🎮 Oyun Kodu {roomId ? '(Otomatik Alındı)' : '(İsteğe Bağlı)'}
                 </label>
                 <input
                   type="text"
                   value={roomId}
-                  onChange={(e) => setRoomId(e.target.value.toUpperCase())}
-                  className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-purple-300 focus:ring-2 focus:ring-yellow-500 focus:border-transparent transition-all font-mono text-center text-xl tracking-widest"
+                  onChange={(e) => setRoomId(e.target.value.toUpperCase().trim())}
+                  className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-purple-300 focus:ring-2 focus:ring-yellow-500 focus:border-transparent transition-all font-mono text-center text-2xl tracking-widest"
                   placeholder="ABC123"
                   maxLength={6}
                   disabled={connectionStatus !== 'connected'}
                 />
-                <p className="text-xs text-purple-300 mt-1">
-                  {roomId ? '✓ Özel oyuna katılacaksınız' : 'Boş bırakırsanız genel oyuna katılırsınız'}
+                <p className="text-xs text-purple-300 mt-1 text-center">
+                  {roomId ? '✅ Özel oyuna katılacaksınız' : 'ℹ️ Boş bırakırsanız genel oyuna katılırsınız'}
                 </p>
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-purple-200 mb-2">
-                  Adınız
+                  👤 Adınız
                 </label>
                 <input
                   type="text"

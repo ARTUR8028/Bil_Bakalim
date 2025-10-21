@@ -69,15 +69,16 @@ const QuizHost: React.FC<QuizHostProps> = ({ onBack }) => {
   useEffect(() => {
     console.log('🔌 Quiz Host socket bağlantısı kuruluyor...');
     
-    // Optimize edilmiş socket konfigürasyonu - Render için stabil
+    // Optimize edilmiş socket konfigürasyonu
     const socketConnection = io(import.meta.env.VITE_SERVER_URL || 'https://bil-bakalim.onrender.com', {
-      transports: ['polling', 'websocket'], // Polling önce, daha stabil
-      upgrade: true,
-      timeout: 45000, // 45 saniye
+      transports: ['polling', 'websocket'], // Polling öncelikli
+      upgrade: true, // WebSocket'e upgrade et
+      timeout: 30000, // Daha uzun timeout
+      forceNew: true,
       reconnection: true,
-      reconnectionAttempts: Infinity, // Sürekli dene
-      reconnectionDelay: 1000, // 1 saniye
-      reconnectionDelayMax: 5000, // Max 5 saniye
+      reconnectionAttempts: 20, // Daha fazla deneme
+      reconnectionDelay: 2000, // Daha uzun gecikme
+      reconnectionDelayMax: 10000, // Daha uzun maksimum gecikme
       autoConnect: true
     });
     

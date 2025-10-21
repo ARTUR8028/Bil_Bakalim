@@ -68,15 +68,16 @@ const TVHost: React.FC<TVHostProps> = ({ onBack }) => {
   useEffect(() => {
     console.log('🔌 TV Host socket bağlantısı kuruluyor...');
     
-    // Optimize edilmiş socket konfigürasyonu - Render için stabil
+    // Optimize edilmiş socket konfigürasyonu
     const socketConnection = io(import.meta.env.VITE_SERVER_URL || 'https://bil-bakalim.onrender.com', {
-      transports: ['polling', 'websocket'], // Polling önce, daha stabil
-      upgrade: true,
-      timeout: 45000, // 45 saniye
+      transports: ['polling', 'websocket'], // Polling öncelikli
+      upgrade: true, // WebSocket'e upgrade et
+      timeout: 30000, // Daha uzun timeout
+      forceNew: true,
       reconnection: true,
-      reconnectionAttempts: Infinity, // Sürekli dene
-      reconnectionDelay: 1000, // 1 saniye
-      reconnectionDelayMax: 5000, // Max 5 saniye
+      reconnectionAttempts: 20, // Daha fazla deneme
+      reconnectionDelay: 2000, // Daha uzun gecikme
+      reconnectionDelayMax: 10000, // Daha uzun maksimum gecikme
       autoConnect: true
     });
 
@@ -650,7 +651,7 @@ const TVHost: React.FC<TVHostProps> = ({ onBack }) => {
                       <div className="mb-4">
                         <p className="text-yellow-300 font-bold text-3xl">🎮 Oyun Kodu</p>
                         <p className="text-white font-mono text-5xl tracking-widest">{roomId}</p>
-                      </div>
+              </div>
                     )}
                     {qrCodeUrl && (
                       <img src={qrCodeUrl} alt="QR Code" className="mx-auto mb-4 rounded-lg shadow-lg" />
