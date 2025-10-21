@@ -50,8 +50,9 @@ const TVHost: React.FC<TVHostProps> = ({ onBack }) => {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [connectionStatus, setConnectionStatus] = useState<'connecting' | 'connected' | 'disconnected'>('connecting');
   const [toasts, setToasts] = useState<Array<{id: string, message: string, type: 'success' | 'info' | 'warning'}>>([]);
+  const [roomId, setRoomId] = useState<string>('');
 
-  const joinLink = `${window.location.origin}/#player`;
+  const joinLink = roomId ? `${window.location.origin}/#player?room=${roomId}` : `${window.location.origin}/#player`;
 
   // Toast notification sistemi
   const addToast = (message: string, type: 'success' | 'info' | 'warning' = 'info') => {
@@ -86,6 +87,14 @@ const TVHost: React.FC<TVHostProps> = ({ onBack }) => {
     socketConnection.on('connect', () => {
       console.log('✅ TV Host socket bağlantısı kuruldu:', socketConnection.id);
       setConnectionStatus('connected');
+      
+      // Room oluştur
+      socketConnection.emit('createRoom', (response: { roomId: string, success: boolean }) => {
+        if (response.success) {
+          console.log('🏠 TV Room oluşturuldu:', response.roomId);
+          setRoomId(response.roomId);
+        }
+      });
       
       // Bağlantı kurulduğunda hemen ping gönder
       socketConnection.emit('ping', { timestamp: Date.now(), source: 'tvhost' });
@@ -248,6 +257,20 @@ const TVHost: React.FC<TVHostProps> = ({ onBack }) => {
       socketConnection.disconnect();
     };
   }, [joinLink]);
+
+  // Room ID değiştiğinde QR kod oluştur
+  useEffect(() => {
+    if (roomId) {
+      console.log('📱 TV QR kod oluşturuluyor, Room ID:', roomId);
+      console.log('🔗 TV Join linki:', joinLink);
+      QRCode.toDataURL(joinLink, { width: 300, margin: 2 })
+        .then(url => {
+          console.log('✅ TV QR kod oluşturuldu');
+          setQrCodeUrl(url);
+        })
+        .catch(err => console.error('❌ TV QR kod oluşturulamadı:', err));
+    }
+  }, [roomId, joinLink]);
 
   // Ses çalma fonksiyonu
   const playSound = (type: 'tick' | 'final') => {
@@ -624,6 +647,12 @@ const TVHost: React.FC<TVHostProps> = ({ onBack }) => {
                       <QrCode className="w-8 h-8 text-blue-300 mr-3" />
                       <h3 className="text-xl font-bold text-white">📱 QR Kod</h3>
               </div>
+                    {roomId && (
+                      <div className="mb-4">
+                        <p className="text-yellow-300 font-bold text-3xl">🎮 Oyun Kodu</p>
+                        <p className="text-white font-mono text-5xl tracking-widest">{roomId}</p>
+                      </div>
+                    )}
                     {qrCodeUrl && (
                       <img src={qrCodeUrl} alt="QR Code" className="mx-auto mb-4 rounded-lg shadow-lg" />
                     )}

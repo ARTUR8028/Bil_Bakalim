@@ -130,6 +130,52 @@ const upload = multer({
 
 // Oyun durumu
 let questions = [];
+// Room bazlı state yönetimi
+const rooms = new Map(); // roomId -> room state
+
+// Room state yapısı:
+// {
+//   players: {},
+//   answers: {},
+//   globalScores: {},
+//   currentTimerInterval: null,
+//   gameState: { isActive, currentQuestion, questionStartTime, totalQuestions, currentQuestionIndex },
+//   hostSocketId: string,
+//   createdAt: timestamp
+// }
+
+// Yardımcı fonksiyonlar
+function createRoom(roomId, hostSocketId) {
+  const room = {
+    players: {},
+    answers: {},
+    globalScores: {},
+    currentTimerInterval: null,
+    gameState: {
+      isActive: false,
+      currentQuestion: null,
+      questionStartTime: null,
+      totalQuestions: questions.length,
+      currentQuestionIndex: 0
+    },
+    hostSocketId: hostSocketId,
+    createdAt: Date.now()
+  };
+  rooms.set(roomId, room);
+  console.log(`🏠 Yeni room oluşturuldu: ${roomId}, Host: ${hostSocketId}`);
+  return room;
+}
+
+function getRoom(roomId) {
+  return rooms.get(roomId);
+}
+
+function generateRoomId() {
+  // 6 haneli benzersiz room ID oluştur
+  return Math.random().toString(36).substring(2, 8).toUpperCase();
+}
+
+// Geriye dönük uyumluluk için global state (eski sistemle çalışması için)
 let players = {};
 let currentAnswer = null;
 let answers = {};
@@ -641,12 +687,52 @@ io.on('connection', (socket) => {
     });
   });
 
-  socket.on('join', (name) => {
+  // Host room oluşturma
+  socket.on('createRoom', (callback) => {
+    const roomId = generateRoomId();
+    const room = createRoom(roomId, socket.id);
+    socket.join(roomId);
+    socket.roomId = roomId; // Socket'e room ID'yi ekle
+    console.log(`🏠 Host ${socket.id} room ${roomId} oluşturdu ve katıldı`);
+    
+    if (callback && typeof callback === 'function') {
+      callback({ roomId, success: true });
+    } else {
+      socket.emit('roomCreated', { roomId });
+    }
+  });
+
+  // Oyuncu room'a katılma (roomId ile)
+  socket.on('join', (data) => {
+    let name, roomId;
+    
+    // Geriye dönük uyumluluk: string ise eski sistem, object ise yeni sistem
+    if (typeof data === 'string') {
+      name = data;
+      roomId = null; // Eski sistem - global room
+    } else {
+      name = data.name;
+      roomId = data.roomId;
+    }
+    
     console.log('👤 Katılım isteği:', { 
       name, 
+      roomId,
       socketId: socket.id,
       timestamp: new Date().toISOString()
     });
+    
+    // Room ID varsa, room'a katıl
+    if (roomId) {
+      const room = getRoom(roomId);
+      if (!room) {
+        socket.emit('joinError', { message: 'Geçersiz oyun kodu! Lütfen doğru kodu girin.' });
+        return;
+      }
+      socket.join(roomId);
+      socket.roomId = roomId;
+      console.log(`🏠 Oyuncu ${socket.id} room ${roomId}'ye katıldı`);
+    }
     
     if (name && typeof name === 'string' && name.trim()) {
       // Türkçe karakterleri koruyarak büyük harfe çevir

@@ -25,6 +25,7 @@ const PlayerView: React.FC<PlayerViewProps> = ({ onBack }) => {
   const [socket, setSocket] = useState<Socket | null>(null);
   const [playerName, setPlayerName] = useState('');
   const [isJoined, setIsJoined] = useState(false);
+  const [roomId, setRoomId] = useState<string>('');
 
   // Türkçe karakterleri koruyarak büyük harfe çeviren fonksiyon
   const toTurkishUpperCase = (str: string) => {
@@ -123,6 +124,14 @@ const PlayerView: React.FC<PlayerViewProps> = ({ onBack }) => {
 
   useEffect(() => {
     console.log('🔌 Player Socket bağlantısı kuruluyor...');
+    
+    // URL'den room ID'yi al
+    const urlParams = new URLSearchParams(window.location.hash.split('?')[1]);
+    const roomParam = urlParams.get('room');
+    if (roomParam) {
+      console.log('🏠 URL\'den room ID alındı:', roomParam);
+      setRoomId(roomParam);
+    }
     
     // Sayfa yüklendiğinde oyuncu durumunu sıfırla
     setPlayerName('');
@@ -409,9 +418,15 @@ const PlayerView: React.FC<PlayerViewProps> = ({ onBack }) => {
       return;
     }
 
-    console.log('👤 Oyuna katılım isteği gönderiliyor:', playerName);
+    console.log('👤 Oyuna katılım isteği gönderiliyor:', playerName, roomId ? `Room: ${roomId}` : 'Global room');
     setJoinError('');
-    socket.emit('join', playerName.trim());
+    
+    // Room ID varsa room ile katıl, yoksa global room
+    if (roomId) {
+      socket.emit('join', { name: playerName.trim(), roomId });
+    } else {
+      socket.emit('join', playerName.trim()); // Geriye dönük uyumluluk
+    }
   };
 
   const sendAnswer = () => {
