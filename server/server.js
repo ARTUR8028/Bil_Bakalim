@@ -1000,8 +1000,8 @@ io.on('connection', (socket) => {
           }
           
           // Sonuçları hesapla ve gönder
-          console.log('📊 Tüm oyuncular cevap verdi, sonuçlar hesaplanıyor...');
-          const result = calculateResults();
+          console.log(`📊 Tüm oyuncular cevap verdi, sonuçlar hesaplanıyor...${roomId ? ` (Room: ${roomId})` : ''}`);
+          const result = calculateResults(roomId);
           
           if (roomId) {
             io.to(roomId).emit('showResult', result);
@@ -1138,7 +1138,7 @@ io.on('connection', (socket) => {
             currentTimerInterval = null;
           }
           console.log(`⏰ Süre doldu, sonuçlar hesaplanıyor...${roomId ? ` (Room: ${roomId})` : ''}`);
-          const result = calculateResults();
+          const result = calculateResults(roomId);
           
           if (roomId) {
             io.to(roomId).emit('showResult', result);
@@ -1461,22 +1461,32 @@ function updatePlayerCountForRoom(roomId) {
   io.to(roomId).emit('playerCount', count);
 }
 
-function calculateResults() {
+function calculateResults(roomId) {
+  // Room'dan state'i al
+  const room = getRoom(roomId);
+  if (!room) {
+    console.error('❌ calculateResults: Room bulunamadı:', roomId);
+    return { winners: [], correctAnswer: null, allAnswers: {} };
+  }
+
+  const answersObj = room.answers || {};
+  const correctAnswerValue = room.currentAnswer;
+
   let closest = null;
   let minDiff = Infinity;
   let winners = [];
   let allWinnersByAnswer = {}; // Aynı cevabı veren tüm oyuncular
 
-  console.log('🧮 Sonuçlar hesaplanıyor...');
-  console.log('🎯 Doğru cevap:', currentAnswer);
-  console.log('📝 Gelen cevaplar:', Object.keys(answers).length);
+  console.log(`🧮 [${roomId}] Sonuçlar hesaplanıyor...`);
+  console.log(`🎯 [${roomId}] Doğru cevap:`, correctAnswerValue);
+  console.log(`📝 [${roomId}] Gelen cevaplar:`, Object.keys(answersObj).length);
 
   // Tüm cevapları grupla (aynı cevabı veren oyuncuları birleştir)
-  for (const [id, answerObj] of Object.entries(answers)) {
+  for (const [id, answerObj] of Object.entries(answersObj)) {
     const num = parseFloat(answerObj.value);
     if (!isNaN(num)) {
-      const diff = Math.abs(num - currentAnswer);
-      console.log(`🔍 ${answerObj.playerName}: ${num} (fark: ${diff})`);
+      const diff = Math.abs(num - correctAnswerValue);
+      console.log(`🔍 [${roomId}] ${answerObj.playerName}: ${num} (fark: ${diff})`);
       
       // Aynı cevabı veren oyuncuları grupla
       if (!allWinnersByAnswer[num]) {
@@ -1511,20 +1521,23 @@ function calculateResults() {
 
   // Puanları güncelle (en yakın cevabı veren TÜM oyunculara puan ver)
   if (winners.length > 0) {
-    for (const [id, answerObj] of Object.entries(answers)) {
+    const playersObj = room.players || {};
+    const globalScoresObj = room.globalScores || {};
+    
+    for (const [id, answerObj] of Object.entries(answersObj)) {
       const num = parseFloat(answerObj.value);
-      const diff = Math.abs(num - currentAnswer);
+      const diff = Math.abs(num - correctAnswerValue);
       // En yakın mesafedeki tüm oyunculara puan ver
       if (diff === minDiff) {
         // Mevcut oyuncuya puan ver
-        if (players[id]) {
-          players[id].score += 10;
-          console.log(`🏆 ${players[id].name} 10 puan kazandı! (Cevap: ${num}, Mesafe: ${diff}, Toplam: ${players[id].score})`);
+        if (playersObj[id]) {
+          playersObj[id].score += 10;
+          console.log(`🏆 [${roomId}] ${playersObj[id].name} 10 puan kazandı! (Cevap: ${num}, Mesafe: ${diff}, Toplam: ${playersObj[id].score})`);
         }
         
         // Global puanı her zaman güncelle (oyuncu çıksa bile)
-        globalScores[answerObj.playerName] = (globalScores[answerObj.playerName] || 0) + 10;
-        console.log(`🌍 ${answerObj.playerName} global puanı güncellendi: ${globalScores[answerObj.playerName]}`);
+        globalScoresObj[answerObj.playerName] = (globalScoresObj[answerObj.playerName] || 0) + 10;
+        console.log(`🌍 [${roomId}] ${answerObj.playerName} global puanı güncellendi: ${globalScoresObj[answerObj.playerName]}`);
       }
     }
   }
@@ -1551,17 +1564,18 @@ function calculateResults() {
   }
 
   // Tüm cevapları sırala (en yakından en uzağa) + cevap vermeyen oyuncular
-  const allAnswers = Object.values(answers).map(answerObj => ({
+  const allAnswers = Object.values(answersObj).map(answerObj => ({
     playerName: answerObj.playerName,
     answer: parseFloat(answerObj.value),
-    difference: Math.abs(parseFloat(answerObj.value) - currentAnswer),
-    isCorrect: Math.abs(parseFloat(answerObj.value) - currentAnswer) === 0,
+    difference: Math.abs(parseFloat(answerObj.value) - correctAnswerValue),
+    isCorrect: Math.abs(parseFloat(answerObj.value) - correctAnswerValue) === 0,
     hasAnswered: true
   })).sort((a, b) => a.difference - b.difference);
 
   // Cevap vermeyen oyuncuları ekle
-  const answeredPlayerNames = Object.values(answers).map(a => a.playerName);
-  const allPlayerNames = Object.values(players).map(p => p.name);
+  const playersObj = room.players || {};
+  const answeredPlayerNames = Object.values(answersObj).map(a => a.playerName);
+  const allPlayerNames = Object.values(playersObj).map(p => p.name);
   const noAnswerPlayers = allPlayerNames.filter(name => !answeredPlayerNames.includes(name));
   
   // Cevap vermeyen oyuncuları listeye ekle (en altta)
@@ -1576,12 +1590,12 @@ function calculateResults() {
   });
 
   const result = {
-    correct: currentAnswer,
+    correct: correctAnswerValue,
     closest: winnerDisplay,
     winners: winners, // Tüm kazananları ayrı olarak gönder
     allAnswers: allAnswers, // Tüm cevapları sıralı olarak gönder
-    totalAnswers: Object.keys(answers).length,
-    totalPlayers: Object.keys(players).length
+    totalAnswers: Object.keys(answersObj).length,
+    totalPlayers: Object.keys(playersObj).length
   };
 
   console.log('📊 Final sonuç:', result);
