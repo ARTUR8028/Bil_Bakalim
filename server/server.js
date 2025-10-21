@@ -156,6 +156,7 @@ function createRoom(roomId, hostSocketId) {
     players: {},
     answers: {},
     globalScores: {},
+    currentAnswer: null,
     currentTimerInterval: null,
     gameState: {
       isActive: false,
@@ -971,12 +972,16 @@ io.on('connection', (socket) => {
       console.log(`✅ ${playersObj[socket.id].name} cevap verdi: ${numericValue}${roomId ? ` (Room: ${roomId})` : ''}`);
       console.log('📊 Toplam cevap:', Object.keys(answersObj).length);
 
-      // Cevap veren/Toplam oyuncu sayısını anlık güncelle
-      updatePlayerCount();
+      // Cevap veren/Toplam oyuncu sayısını anlık güncelle (room'a özel)
+      if (roomId) {
+        updatePlayerCountForRoom(roomId);
+      } else {
+        updatePlayerCount();
+      }
       
       // Tüm oyuncular cevap verdi mi kontrol et
-      const totalPlayers = getActivePlayers().length;
-      const totalAnswers = Object.keys(answers).length;
+      const totalPlayers = Object.keys(playersObj).length;
+      const totalAnswers = Object.keys(answersObj).length;
       console.log(`📊 Cevap durumu: ${totalAnswers}/${totalPlayers}`);
       
       if (totalAnswers === totalPlayers && totalPlayers > 0) {
@@ -1037,47 +1042,98 @@ io.on('connection', (socket) => {
   });
 
   socket.on('startQuestion', (questionObj) => {
+    // Room ID'yi al
+    const roomId = socket.roomId;
+    const room = roomId ? getRoom(roomId) : null;
+    
     console.log('🎯 Soru başlatıldı:', {
       question: questionObj?.question?.substring(0, 50),
       answer: questionObj?.answer,
+      roomId: roomId || 'global',
       timestamp: new Date().toISOString()
     });
     
     if (questionObj && questionObj.answer) {
-      currentAnswer = parseFloat(questionObj.answer);
-      answers = {};
-      gameState.isActive = true;
-      gameState.currentQuestion = questionObj;
-      gameState.questionStartTime = Date.now();
+      // Room'a göre state seç
+      if (room) {
+        room.currentAnswer = parseFloat(questionObj.answer);
+        room.answers = {};
+        room.gameState.isActive = true;
+        room.gameState.currentQuestion = questionObj;
+        room.gameState.questionStartTime = Date.now();
+      } else {
+        currentAnswer = parseFloat(questionObj.answer);
+        answers = {};
+        gameState.isActive = true;
+        gameState.currentQuestion = questionObj;
+        gameState.questionStartTime = Date.now();
+      }
       
-      console.log(`📢 Yeni soru yayınlanıyor: ${questionObj.question}`);
-      console.log(`🎯 Doğru cevap: ${currentAnswer}`);
+      console.log(`📢 Yeni soru yayınlanıyor: ${questionObj.question}${roomId ? ` (Room: ${roomId})` : ''}`);
+      console.log(`🎯 Doğru cevap: ${room ? room.currentAnswer : currentAnswer}`);
       
-      io.emit('newQuestion', questionObj);
-      updatePlayerCount();
+      // Soruyu room'a veya global'e yayınla
+      if (roomId) {
+        io.to(roomId).emit('newQuestion', questionObj);
+        updatePlayerCountForRoom(roomId);
+      } else {
+        io.emit('newQuestion', questionObj);
+        updatePlayerCount();
+      }
 
       // Önceki timer varsa temizle
-      if (currentTimerInterval) {
-        clearInterval(currentTimerInterval);
-        currentTimerInterval = null;
+      const timerToUse = room ? room.currentTimerInterval : currentTimerInterval;
+      if (timerToUse) {
+        clearInterval(timerToUse);
+        if (room) {
+          room.currentTimerInterval = null;
+        } else {
+          currentTimerInterval = null;
+        }
       }
 
       // Gerçek zamanlı süre güncellemeleri gönder - daha sık güncelleme
       let timeLeft = 30;
-      currentTimerInterval = setInterval(() => {
+      const timerInterval = setInterval(() => {
         timeLeft--;
-        io.emit('timerUpdate', { timeLeft });
+        
+        if (roomId) {
+          io.to(roomId).emit('timerUpdate', { timeLeft });
+        } else {
+          io.emit('timerUpdate', { timeLeft });
+        }
         
         if (timeLeft <= 0) {
-          clearInterval(currentTimerInterval);
-          currentTimerInterval = null;
-          console.log('⏰ Süre doldu, sonuçlar hesaplanıyor...');
+          clearInterval(timerInterval);
+          if (room) {
+            room.currentTimerInterval = null;
+          } else {
+            currentTimerInterval = null;
+          }
+          console.log(`⏰ Süre doldu, sonuçlar hesaplanıyor...${roomId ? ` (Room: ${roomId})` : ''}`);
           const result = calculateResults();
-          io.emit('showResult', result);
+          
+          if (roomId) {
+            io.to(roomId).emit('showResult', result);
+          } else {
+            io.emit('showResult', result);
+          }
           console.log('📊 Sonuçlar gönderildi:', result);
-          gameState.isActive = false;
+          
+          if (room) {
+            room.gameState.isActive = false;
+          } else {
+            gameState.isActive = false;
+          }
         }
       }, 1000); // 1 saniye aralıklarla güncelle
+      
+      // Timer'ı kaydet
+      if (room) {
+        room.currentTimerInterval = timerInterval;
+      } else {
+        currentTimerInterval = timerInterval;
+      }
     } else {
       console.log('❌ Geçersiz soru objesi:', questionObj);
     }
