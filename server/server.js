@@ -1058,9 +1058,18 @@ io.on('connection', (socket) => {
   });
 
   socket.on('endGame', () => {
-    // Global puanları kullan - oyuncular çıksa bile puanları korunur
+    // Global puanları kullan ve aktif olan tüm oyuncuları da dahil et
     const finalScores = { ...globalScores };
-    console.log('🏁 Oyun bitti. Final skorları (Global):', finalScores);
+    
+    // Aktif oyuncuları da ekle (eğer henüz skor almamışlarsa 0 puan ile)
+    Object.keys(players).forEach(playerName => {
+      if (!(playerName in finalScores)) {
+        finalScores[playerName] = 0;
+        console.log(`➕ Aktif oyuncu ${playerName} final sıralamasına 0 puan ile eklendi`);
+      }
+    });
+    
+    console.log('🏁 Oyun bitti. Final skorları (Global + Aktif oyuncular):', finalScores);
     io.emit('gameEnded', finalScores);
     
     // Oyun verilerini sıfırla

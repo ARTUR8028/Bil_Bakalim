@@ -102,8 +102,21 @@ const TVHost: React.FC<TVHostProps> = ({ onBack }) => {
       }, 100);
     });
 
+    socketConnection.on('reconnect', (attemptNumber) => {
+      console.log('🔄 TV Host yeniden bağlanıldı, deneme sayısı:', attemptNumber);
+      // Oyun durumunu geri yükle
+      if (socketConnection && socketConnection.connected) {
+        socketConnection.emit('getParticipants');
+      }
+    });
+
+    socketConnection.on('reconnect_attempt', (attemptNumber) => {
+      console.log('🔄 TV Host yeniden bağlanma denemesi:', attemptNumber);
+    });
+
     socketConnection.on('disconnect', (reason) => {
       console.log('❌ TV Host socket bağlantısı kesildi:', reason);
+      console.log('⚠️ Sunucu bağlantısı kesildi! Yeniden bağlanılıyor...');
       setConnectionStatus('disconnected');
       // Bağlantı kesildiğinde oyuncu listesini temizle
       setParticipantNames([]);
