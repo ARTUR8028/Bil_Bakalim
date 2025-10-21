@@ -68,17 +68,19 @@ const TVHost: React.FC<TVHostProps> = ({ onBack }) => {
   useEffect(() => {
     console.log('🔌 TV Host socket bağlantısı kuruluyor...');
     
-    // Optimize edilmiş socket konfigürasyonu
+    // Optimize edilmiş socket konfigürasyonu - Render için stabil
     const socketConnection = io(import.meta.env.VITE_SERVER_URL || 'https://bil-bakalim.onrender.com', {
-      transports: ['polling', 'websocket'], // Polling öncelikli
-      upgrade: true, // WebSocket'e upgrade et
-      timeout: 30000, // Daha uzun timeout
-      forceNew: true,
+      transports: ['polling', 'websocket'], // Polling önce, daha stabil
+      upgrade: true,
+      timeout: 45000, // 45 saniye
+      forceNew: false, // Mevcut bağlantıyı kullan
       reconnection: true,
-      reconnectionAttempts: 20, // Daha fazla deneme
-      reconnectionDelay: 2000, // Daha uzun gecikme
-      reconnectionDelayMax: 10000, // Daha uzun maksimum gecikme
-      autoConnect: true
+      reconnectionAttempts: Infinity, // Sürekli dene
+      reconnectionDelay: 1000, // 1 saniye
+      reconnectionDelayMax: 5000, // Max 5 saniye
+      autoConnect: true,
+      withCredentials: false,
+      path: '/socket.io/'
     });
 
     setSocket(socketConnection);

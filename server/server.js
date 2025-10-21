@@ -24,19 +24,24 @@ const io = new Server(server, {
     credentials: true,
     allowedHeaders: ["Origin", "X-Requested-With", "Content-Type", "Accept", "Authorization"]
   },
-  transports: ['websocket', 'polling'],
+  transports: ['polling', 'websocket'], // Polling önce, daha stabil
   allowEIO3: true,
-  pingTimeout: 60000,
-  pingInterval: 25000,
+  pingTimeout: 120000, // 2 dakika - daha uzun
+  pingInterval: 15000, // 15 saniye - daha sık ping
   // İyileştirilmiş bağlantı ayarları
   maxHttpBufferSize: 1e6,
-  compression: true,
+  compression: false, // Render'da bazen compression sorun çıkarıyor
   serveClient: false,
   // Bağlantı stabilitesi için
   connectionStateRecovery: {
-    maxDisconnectionDuration: 2 * 60 * 1000, // 2 dakika
+    maxDisconnectionDuration: 3 * 60 * 1000, // 3 dakika
     skipMiddlewares: true,
-  }
+  },
+  // Render için ek ayarlar
+  upgradeTimeout: 30000,
+  connectTimeout: 45000,
+  perMessageDeflate: false, // WebSocket compression kapat
+  httpCompression: false
 });
 
 const PORT = process.env.PORT || 3001;
@@ -303,6 +308,15 @@ app.get('/api/health', (req, res) => {
     uptime: health.uptime
   });
   res.json(health);
+});
+
+// Keep-alive endpoint - Sunucunun uyumaması için
+app.get('/api/ping', (req, res) => {
+  res.json({ 
+    status: 'alive', 
+    timestamp: Date.now(),
+    uptime: Math.floor(process.uptime())
+  });
 });
 
 // APK Download endpoint
