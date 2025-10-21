@@ -1172,6 +1172,12 @@ io.on('connection', (socket) => {
     const participantNames = getActivePlayers().map(p => p.name);
     console.log('📤 allParticipants gönderiliyor:', participantNames);
     socket.emit('allParticipants', participantNames);
+    
+    // Oyuncu sayısını da gönder
+    const totalPlayers = Object.keys(players).length;
+    const answeredPlayers = Object.keys(answers).length;
+    socket.emit('playerCount', { total: totalPlayers, answered: answeredPlayers });
+    console.log('📤 playerCount gönderiliyor:', { total: totalPlayers, answered: answeredPlayers });
   });
 
   // Hata yakalama
