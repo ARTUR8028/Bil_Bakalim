@@ -220,6 +220,8 @@ async function initializeServer() {
   try {
     const questionsPath = path.join(__dirname, '../data/questions.json');
     console.log('📁 Soru dosyası yolu:', questionsPath);
+    console.log('📁 __dirname:', __dirname);
+    console.log('📁 process.cwd():', process.cwd());
     
     if (fsSync.existsSync(questionsPath)) {
       const raw = await fs.readFile(questionsPath, 'utf-8');
@@ -228,8 +230,34 @@ async function initializeServer() {
       console.log(`✅ ${questions.length} soru yüklendi`);
     } else {
       console.log('⚠️ Soru dosyası bulunamadı:', questionsPath);
-      questions = [];
-      gameState.totalQuestions = 0;
+      console.log('⚠️ Dizin içeriği kontrol ediliyor...');
+      
+      // Alternatif yolları dene
+      const alternativePaths = [
+        path.join(process.cwd(), 'data/questions.json'),
+        path.join(__dirname, 'data/questions.json'),
+        'data/questions.json'
+      ];
+      
+      let found = false;
+      for (const altPath of alternativePaths) {
+        console.log(`🔍 Kontrol ediliyor: ${altPath}`);
+        if (fsSync.existsSync(altPath)) {
+          console.log(`✅ Bulundu: ${altPath}`);
+          const raw = await fs.readFile(altPath, 'utf-8');
+          questions = JSON.parse(raw);
+          gameState.totalQuestions = questions.length;
+          console.log(`✅ ${questions.length} soru yüklendi (alternatif yol)`);
+          found = true;
+          break;
+        }
+      }
+      
+      if (!found) {
+        console.error('❌ Hiçbir yolda questions.json bulunamadı!');
+        questions = [];
+        gameState.totalQuestions = 0;
+      }
     }
   } catch (err) {
     console.error('❌ Soru yükleme hatası:', err);
