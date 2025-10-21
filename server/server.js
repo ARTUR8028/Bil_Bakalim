@@ -134,6 +134,7 @@ let players = {};
 let currentAnswer = null;
 let answers = {};
 let globalScores = {}; // Global puan sistemi - oyuncular çıksa bile puanları korunur
+let currentTimerInterval = null; // Timer interval'ı global olarak sakla
 let gameState = {
   isActive: false,
   currentQuestion: null,
@@ -814,6 +815,30 @@ io.on('connection', (socket) => {
       // Cevap veren/Toplam oyuncu sayısını anlık güncelle
       updatePlayerCount();
       
+      // Tüm oyuncular cevap verdi mi kontrol et
+      const totalPlayers = getActivePlayers().length;
+      const totalAnswers = Object.keys(answers).length;
+      console.log(`📊 Cevap durumu: ${totalAnswers}/${totalPlayers}`);
+      
+      if (totalAnswers === totalPlayers && totalPlayers > 0) {
+        console.log('🎉 Tüm oyuncular cevap verdi! Sonuç ekranına geçiliyor...');
+        // Kısa bir gecikme ile sonuçları göster
+        setTimeout(() => {
+          // Timer'ı durdur
+          if (currentTimerInterval) {
+            clearInterval(currentTimerInterval);
+            currentTimerInterval = null;
+          }
+          
+          // Sonuçları hesapla ve gönder
+          console.log('📊 Tüm oyuncular cevap verdi, sonuçlar hesaplanıyor...');
+          const result = calculateResults();
+          io.emit('showResult', result);
+          console.log('📊 Sonuçlar gönderildi:', result);
+          gameState.isActive = false;
+        }, 1000); // 1 saniye bekle
+      }
+      
       // Cevap doğruluğunu kontrol et
       if (typeof answerValue === 'number' && typeof currentAnswer === 'number') {
         const diff = Math.abs(answerValue - currentAnswer);
@@ -872,14 +897,21 @@ io.on('connection', (socket) => {
       io.emit('newQuestion', questionObj);
       updatePlayerCount();
 
+      // Önceki timer varsa temizle
+      if (currentTimerInterval) {
+        clearInterval(currentTimerInterval);
+        currentTimerInterval = null;
+      }
+
       // Gerçek zamanlı süre güncellemeleri gönder - daha sık güncelleme
       let timeLeft = 30;
-      const timerInterval = setInterval(() => {
+      currentTimerInterval = setInterval(() => {
         timeLeft--;
         io.emit('timerUpdate', { timeLeft });
         
         if (timeLeft <= 0) {
-          clearInterval(timerInterval);
+          clearInterval(currentTimerInterval);
+          currentTimerInterval = null;
           console.log('⏰ Süre doldu, sonuçlar hesaplanıyor...');
           const result = calculateResults();
           io.emit('showResult', result);
