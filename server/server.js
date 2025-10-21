@@ -988,36 +988,63 @@ io.on('connection', (socket) => {
         console.log('🎉 Tüm oyuncular cevap verdi! Sonuç ekranına geçiliyor...');
         // Kısa bir gecikme ile sonuçları göster
         setTimeout(() => {
-          // Timer'ı durdur
-          if (currentTimerInterval) {
-            clearInterval(currentTimerInterval);
-            currentTimerInterval = null;
+          // Timer'ı durdur (room-aware)
+          const timerToStop = room ? room.currentTimerInterval : currentTimerInterval;
+          if (timerToStop) {
+            clearInterval(timerToStop);
+            if (room) {
+              room.currentTimerInterval = null;
+            } else {
+              currentTimerInterval = null;
+            }
           }
           
           // Sonuçları hesapla ve gönder
           console.log('📊 Tüm oyuncular cevap verdi, sonuçlar hesaplanıyor...');
           const result = calculateResults();
-          io.emit('showResult', result);
+          
+          if (roomId) {
+            io.to(roomId).emit('showResult', result);
+          } else {
+            io.emit('showResult', result);
+          }
           console.log('📊 Sonuçlar gönderildi:', result);
-          gameState.isActive = false;
+          
+          if (room) {
+            room.gameState.isActive = false;
+          } else {
+            gameState.isActive = false;
+          }
         }, 1000); // 1 saniye bekle
       }
       
-      // Cevap doğruluğunu kontrol et
-      if (typeof answerValue === 'number' && typeof currentAnswer === 'number') {
-        const diff = Math.abs(answerValue - currentAnswer);
-        console.log(`🔍 Cevap doğrulama: ${answerValue} vs ${currentAnswer} (fark: ${diff})`);
+      // Cevap doğruluğunu kontrol et (room-aware)
+      const currentAnswerToCheck = room ? room.currentAnswer : currentAnswer;
+      const globalScoresObj = room ? room.globalScores : globalScores;
+      
+      if (typeof numericValue === 'number' && typeof currentAnswerToCheck === 'number') {
+        const diff = Math.abs(numericValue - currentAnswerToCheck);
+        console.log(`🔍 Cevap doğrulama: ${numericValue} vs ${currentAnswerToCheck} (fark: ${diff})${roomId ? ` (Room: ${roomId})` : ''}`);
         
         // Eğer cevap doğruysa anında puan ver
         if (diff < 0.001) { // Küçük bir epsilon değeri ile karşılaştırma
-          players[socket.id].score += 10;
-          globalScores[players[socket.id].name] = (globalScores[players[socket.id].name] || 0) + 10; // Global puanı güncelle
-          console.log(`🏆 ${players[socket.id].name} anında 10 puan kazandı! (Toplam: ${players[socket.id].score}, Global: ${globalScores[players[socket.id].name]})`);
-          io.emit('correctAnswer', {
-            playerName: players[socket.id].name,
-            score: players[socket.id].score,
-            message: 'Doğru cevap verildi!'
-          });
+          playersObj[socket.id].score += 10;
+          globalScoresObj[playersObj[socket.id].name] = (globalScoresObj[playersObj[socket.id].name] || 0) + 10;
+          console.log(`🏆 ${playersObj[socket.id].name} anında 10 puan kazandı! (Toplam: ${playersObj[socket.id].score}, Global: ${globalScoresObj[playersObj[socket.id].name]})`);
+          
+          if (roomId) {
+            io.to(roomId).emit('correctAnswer', {
+              playerName: playersObj[socket.id].name,
+              score: playersObj[socket.id].score,
+              message: 'Doğru cevap verildi!'
+            });
+          } else {
+            io.emit('correctAnswer', {
+              playerName: playersObj[socket.id].name,
+              score: playersObj[socket.id].score,
+              message: 'Doğru cevap verildi!'
+            });
+          }
         }
       }
       
