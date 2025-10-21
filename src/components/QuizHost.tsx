@@ -154,16 +154,6 @@ const QuizHost: React.FC<QuizHostProps> = ({ onBack }) => {
 
     loadQuestions();
 
-    // QR kod oluştur (roomId değiştiğinde yeniden oluştur)
-    if (joinLink) {
-      QRCode.toDataURL(joinLink, { width: 300, margin: 2 })
-        .then(url => {
-          console.log('📱 QR kod oluşturuldu:', joinLink);
-          setQrCodeUrl(url);
-        })
-        .catch(err => console.error('❌ QR kod oluşturulamadı:', err));
-    }
-
     // Socket eventleri
     socketConnection.on('playerCount', (count: PlayerCount) => {
       console.log('👥 QuizHost Oyuncu sayısı güncellendi:', count);
@@ -243,7 +233,20 @@ const QuizHost: React.FC<QuizHostProps> = ({ onBack }) => {
     return () => {
       socketConnection.disconnect();
     };
-  }, [joinLink]);
+  }, []);
+
+  // QR kod oluşturma - roomId her değiştiğinde yeniden oluştur
+  useEffect(() => {
+    if (joinLink && roomId) {
+      console.log('🔄 QR kod oluşturuluyor, Room ID:', roomId, 'Link:', joinLink);
+      QRCode.toDataURL(joinLink, { width: 300, margin: 2 })
+        .then(url => {
+          console.log('✅ QR kod oluşturuldu');
+          setQrCodeUrl(url);
+        })
+        .catch(err => console.error('❌ QR kod oluşturulamadı:', err));
+    }
+  }, [joinLink, roomId]);
 
   // Ses çalma fonksiyonu
   const playSound = (type: 'tick' | 'final') => {

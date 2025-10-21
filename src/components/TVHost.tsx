@@ -165,16 +165,6 @@ const TVHost: React.FC<TVHostProps> = ({ onBack }) => {
 
     loadQuestions();
 
-    // QR kod oluştur (roomId değiştiğinde yeniden oluştur)
-    if (joinLink) {
-      QRCode.toDataURL(joinLink, { width: 300, margin: 2 })
-        .then(url => {
-          console.log('📱 TV QR kod oluşturuldu:', joinLink);
-          setQrCodeUrl(url);
-        })
-        .catch(err => console.error('❌ QR kod oluşturulamadı:', err));
-    }
-
     // Socket eventleri
     socketConnection.on('playerCount', (count: PlayerCount) => {
       console.log('👥 Oyuncu sayısı güncellendi:', count);
@@ -253,7 +243,20 @@ const TVHost: React.FC<TVHostProps> = ({ onBack }) => {
     return () => {
       socketConnection.disconnect();
     };
-  }, [joinLink]);
+  }, []);
+
+  // QR kod oluşturma - roomId her değiştiğinde yeniden oluştur
+  useEffect(() => {
+    if (joinLink && roomId) {
+      console.log('🔄 TV QR kod oluşturuluyor, Room ID:', roomId, 'Link:', joinLink);
+      QRCode.toDataURL(joinLink, { width: 300, margin: 2 })
+        .then(url => {
+          console.log('✅ TV QR kod oluşturuldu');
+          setQrCodeUrl(url);
+        })
+        .catch(err => console.error('❌ TV QR kod oluşturulamadı:', err));
+    }
+  }, [joinLink, roomId]);
 
   // Ses çalma fonksiyonu
   const playSound = (type: 'tick' | 'final') => {
