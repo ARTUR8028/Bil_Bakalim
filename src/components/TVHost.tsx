@@ -73,14 +73,11 @@ const TVHost: React.FC<TVHostProps> = ({ onBack }) => {
       transports: ['polling', 'websocket'], // Polling önce, daha stabil
       upgrade: true,
       timeout: 45000, // 45 saniye
-      forceNew: false, // Mevcut bağlantıyı kullan
       reconnection: true,
       reconnectionAttempts: Infinity, // Sürekli dene
       reconnectionDelay: 1000, // 1 saniye
       reconnectionDelayMax: 5000, // Max 5 saniye
-      autoConnect: true,
-      withCredentials: false,
-      path: '/socket.io/'
+      autoConnect: true
     });
 
     setSocket(socketConnection);

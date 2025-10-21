@@ -30,7 +30,6 @@ const io = new Server(server, {
   pingInterval: 15000, // 15 saniye - daha sık ping
   // İyileştirilmiş bağlantı ayarları
   maxHttpBufferSize: 1e6,
-  compression: false, // Render'da bazen compression sorun çıkarıyor
   serveClient: false,
   // Bağlantı stabilitesi için
   connectionStateRecovery: {
@@ -39,9 +38,7 @@ const io = new Server(server, {
   },
   // Render için ek ayarlar
   upgradeTimeout: 30000,
-  connectTimeout: 45000,
-  perMessageDeflate: false, // WebSocket compression kapat
-  httpCompression: false
+  connectTimeout: 45000
 });
 
 const PORT = process.env.PORT || 3001;
