@@ -940,14 +940,23 @@ io.on('connection', (socket) => {
       timestamp: new Date().toISOString()
     });
     
-    // Oyuncu varsa sadece cevabını sil, oyuncuyu silme
+    // Oyuncu varsa puanını kaydet ve oyuncuyu sil
     if (players[socket.id]) {
       const player = players[socket.id];
       const playerName = player.name;
-      console.log(`👋 ${playerName} bağlantısı koptu. Oyuncu kaydı korunuyor, yeniden bağlanabilir.`);
+      const currentScore = player.score || 0;
       
-      // Sadece cevabını sil, oyuncuyu silme
+      // Oyuncunun mevcut puanını globalScores'a kaydet
+      globalScores[playerName] = currentScore;
+      console.log(`👋 ${playerName} bağlantısı koptu - Puan kaydedildi: ${currentScore}, Oyuncu siliniyor`);
+      
+      // Oyuncuyu ve cevabını sil
+      delete players[socket.id];
       delete answers[socket.id];
+      
+      // Tüm host'lara oyuncunun ayrıldığını bildir
+      io.emit('playerLeft', playerName);
+      io.emit('allParticipants', getActivePlayers().map(p => p.name));
       
       // Oyuncu sayısını güncelle
       updatePlayerCount();
@@ -1086,6 +1095,27 @@ io.on('connection', (socket) => {
     // Tüm client'lara boş oyuncu listesi gönder
     io.emit('allParticipants', []);
     console.log('✅ Yeni oyun için tüm veriler temizlendi');
+  });
+
+  socket.on('restartGame', () => {
+    console.log('🔄 Oyun yeniden başlatılıyor - puanlar sıfırlanıyor...');
+    
+    // Tüm oyuncuları ve global puanları temizle
+    players = {};
+    globalScores = {};
+    answers = {};
+    currentAnswer = null;
+    gameState = {
+      isActive: false,
+      currentQuestion: null,
+      questionStartTime: null,
+      totalQuestions: questions.length,
+      currentQuestionIndex: 0
+    };
+    
+    // Tüm client'lara boş oyuncu listesi gönder
+    io.emit('allParticipants', []);
+    console.log('✅ Oyun yeniden başlatıldı, tüm puanlar temizlendi');
   });
 
   // TV Host için startGame event'i
