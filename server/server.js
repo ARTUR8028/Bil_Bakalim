@@ -1077,8 +1077,17 @@ io.on('connection', (socket) => {
       question: questionObj?.question?.substring(0, 50),
       answer: questionObj?.answer,
       roomId: roomId || 'global',
+      socketId: socket.id,
+      roomFound: !!room,
       timestamp: new Date().toISOString()
     });
+    
+    // KRİTİK DEBUG
+    if (roomId && !room) {
+      console.error('❌ HATA: Room ID var ama room bulunamadı!', { roomId, socketId: socket.id });
+      console.error('❌ Mevcut rooms:', Array.from(rooms.keys()));
+      return;
+    }
     
     if (questionObj && questionObj.answer) {
       // Room'a göre state seç
@@ -1088,12 +1097,17 @@ io.on('connection', (socket) => {
         room.gameState.isActive = true;
         room.gameState.currentQuestion = questionObj;
         room.gameState.questionStartTime = Date.now();
+        
+        console.log(`✅ [${roomId}] Room currentAnswer SET EDİLDİ:`, room.currentAnswer);
+        console.log(`✅ [${roomId}] Room gameState.isActive:`, room.gameState.isActive);
       } else {
         currentAnswer = parseFloat(questionObj.answer);
         answers = {};
         gameState.isActive = true;
         gameState.currentQuestion = questionObj;
         gameState.questionStartTime = Date.now();
+        
+        console.log('✅ [GLOBAL] currentAnswer SET EDİLDİ:', currentAnswer);
       }
       
       console.log(`📢 Yeni soru yayınlanıyor: ${questionObj.question}${roomId ? ` (Room: ${roomId})` : ''}`);
