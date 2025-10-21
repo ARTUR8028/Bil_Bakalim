@@ -16,16 +16,19 @@ function App() {
     const hash = window.location.hash.slice(1);
     const deviceType = detectDeviceType();
     
+    // Hash'i ve query parametrelerini ayır
+    const hashBase = hash.split('?')[0];
+    
     // Hash varsa ve erişim izni varsa hash'i kullan
-    if (hash === 'player' && canAccessPlayerView(deviceType)) {
+    if (hashBase === 'player' && canAccessPlayerView(deviceType)) {
       return 'player';
-    } else if (hash === 'tv' && canAccessTVHost(deviceType)) {
+    } else if (hashBase === 'tv' && canAccessTVHost(deviceType)) {
       return 'tv';
-    } else if (hash === 'host') {
+    } else if (hashBase === 'host') {
       return 'host';
-    } else if (hash === 'admin') {
+    } else if (hashBase === 'admin') {
       return 'admin';
-    } else if (hash === 'apk') {
+    } else if (hashBase === 'apk') {
       return 'apk';
     }
     
@@ -42,16 +45,19 @@ function App() {
       const hash = window.location.hash.slice(1); // # işaretini kaldır
       const deviceType = detectDeviceType();
       
+      // Hash'i ve query parametrelerini ayır
+      const hashBase = hash.split('?')[0];
+      
       // Erişim izni kontrolü ile hash değişikliklerini işle
-      if (hash === 'player' && canAccessPlayerView(deviceType)) {  
+      if (hashBase === 'player' && canAccessPlayerView(deviceType)) {  
         setCurrentView('player');
-      } else if (hash === 'admin') {
+      } else if (hashBase === 'admin') {
         setCurrentView('admin');
-      } else if (hash === 'host') {
+      } else if (hashBase === 'host') {
         setCurrentView('host');
-      } else if (hash === 'tv' && canAccessTVHost(deviceType)) {
+      } else if (hashBase === 'tv' && canAccessTVHost(deviceType)) {
         setCurrentView('tv');
-      } else if (hash === 'apk') {
+      } else if (hashBase === 'apk') {
         setCurrentView('apk');
       } else {
         // Hash yoksa ana menüye git
