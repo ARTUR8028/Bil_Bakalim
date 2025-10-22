@@ -591,13 +591,14 @@ const TVHost: React.FC<TVHostProps> = ({ onBack }) => {
             Ana Menü
           </button>
           
+          {/* Room ID ve Bağlantı Durumu - Sağ */}
           <div className="flex items-center gap-3">
-            <ConnectionIndicator />
             {roomId && (
               <div className="bg-white/10 backdrop-blur-lg rounded-lg px-4 py-2 flex items-center">
                 <span className="text-white font-medium text-lg">📍 Room: {roomId}</span>
               </div>
             )}
+            <ConnectionIndicator />
           </div>
         </div>
 
