@@ -464,7 +464,7 @@ app.post('/api/change-password', (req, res) => {
 });
 
 // Tüm soruları silme endpoint
-app.delete('/api/delete-all-questions', (req, res) => {
+app.delete('/api/delete-all-questions', async (req, res) => {
   console.log('🗑️ Tüm soruları silme isteği alındı');
   
   const { username } = req.body;
@@ -478,7 +478,21 @@ app.delete('/api/delete-all-questions', (req, res) => {
   }
   
   // Soruları temizle
+  const deletedCount = questions.length;
   questions = [];
+  
+  // Dosyaya da yaz
+  try {
+    const questionsPath = path.join(__dirname, '../data/questions.json');
+    await fs.writeFile(questionsPath, JSON.stringify([], null, 2), 'utf-8');
+    console.log('✅ questions.json dosyası temizlendi');
+  } catch (error) {
+    console.error('❌ Dosya yazma hatası:', error);
+    return res.status(500).json({ 
+      success: false, 
+      message: 'Sorular bellekten silindi ama dosyaya yazılamadı.' 
+    });
+  }
   
   // Oyun durumunu sıfırla
   gameState = {
@@ -492,12 +506,12 @@ app.delete('/api/delete-all-questions', (req, res) => {
   // Cevapları temizle
   answers = {};
   
-  console.log(`🗑️ ${username} kullanıcısı tüm soruları sildi`);
+  console.log(`🗑️ ${username} kullanıcısı tüm soruları sildi (${deletedCount} soru)`);
   
   res.json({ 
     success: true, 
     message: 'Tüm sorular başarıyla silindi!',
-    deletedCount: questions.length
+    deletedCount: deletedCount
   });
 });
 
@@ -598,10 +612,21 @@ app.post('/api/upload', (req, res) => {
       let addedCount = 0;
       let skippedCount = 0;
       let errorCount = 0;
+      let duplicateCount = 0;
       
       // Array formatında gelen veriyi işle
       data.forEach((row, index) => {
         try {
+          // İlk satırı (başlık) atla
+          if (index === 0) {
+            const firstCol = row[0]?.toString().toLowerCase();
+            if (firstCol && (firstCol.includes('soru') || firstCol.includes('question'))) {
+              console.log(`📋 Başlık satırı atlandı: ${row.join(', ')}`);
+              skippedCount++;
+              return;
+            }
+          }
+          
           // Array formatında gelen veriyi kontrol et
           if (!Array.isArray(row) || row.length < 2) {
             skippedCount++;
@@ -623,13 +648,22 @@ app.post('/api/upload', (req, res) => {
             const answerStr = answerText.toString().trim();
             
             if (questionStr && answerStr) {
-              // Duplicate kontrolünü kaldır - tüm soruları ekle
-              merged.push({
-                question: questionStr,
-                answer: answerStr
-              });
-              addedCount++;
-              console.log(`✅ Soru eklendi: ${questionStr.substring(0, 50)}...`);
+              // Duplicate kontrolü yap
+              const isDuplicate = merged.some(q => 
+                q.question.toLowerCase() === questionStr.toLowerCase()
+              );
+              
+              if (isDuplicate) {
+                duplicateCount++;
+                console.log(`⚠️ Satır ${index + 1} atlandı: mükerrer soru - ${questionStr.substring(0, 50)}...`);
+              } else {
+                merged.push({
+                  question: questionStr,
+                  answer: answerStr
+                });
+                addedCount++;
+                console.log(`✅ Soru eklendi: ${questionStr.substring(0, 50)}...`);
+              }
             } else {
               skippedCount++;
               console.log(`⚠️ Satır ${index + 1} atlandı: boş veri`);
@@ -652,7 +686,7 @@ app.post('/api/upload', (req, res) => {
       questions = merged;
       gameState.totalQuestions = questions.length;
 
-      console.log(`✅ İşlem tamamlandı: ${addedCount} eklendi, ${skippedCount} atlandı, ${errorCount} hata`);
+      console.log(`✅ İşlem tamamlandı: ${addedCount} eklendi, ${duplicateCount} mükerrer, ${skippedCount} atlandı, ${errorCount} hata`);
 
       // Geçici dosyayı sil
       try {
@@ -662,18 +696,19 @@ app.post('/api/upload', (req, res) => {
         console.error('⚠️ Geçici dosya silinemedi:', unlinkErr);
       }
 
-      const message = `Dosya başarıyla işlendi! ${addedCount} yeni soru eklendi${skippedCount > 0 ? `, ${skippedCount} soru atlandı` : ''}${errorCount > 0 ? `, ${errorCount} hata` : ''}. Toplam: ${merged.length} soru.`;
+      const message = `Dosya başarıyla işlendi! ${addedCount} yeni soru eklendi${duplicateCount > 0 ? `, ${duplicateCount} mükerrer soru atlandı` : ''}${skippedCount > 0 ? `, ${skippedCount} geçersiz satır` : ''}${errorCount > 0 ? `, ${errorCount} hata` : ''}. Toplam: ${merged.length} soru.`;
 
       res.json({ 
         message,
         added: addedCount,
+        duplicates: duplicateCount,
         skipped: skippedCount,
         errors: errorCount,
         total: merged.length,
         success: true,
         details: {
           originalRows: data.length,
-          processedSuccessfully: addedCount + skippedCount,
+          processedSuccessfully: addedCount + duplicateCount + skippedCount,
           finalQuestionCount: merged.length
         }
       });

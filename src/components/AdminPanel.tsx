@@ -356,6 +356,11 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onBack }) => {
         setTimeout(() => {
           setSelectedFile(null);
           setUploadProgress(0);
+          // Input elementini de sıfırla
+          const fileInput = document.getElementById('file-upload') as HTMLInputElement;
+          if (fileInput) {
+            fileInput.value = '';
+          }
         }, 100);
         checkServerHealth(); // Soru sayısını güncelle
       } else {
