@@ -36,7 +36,6 @@ const TVHost: React.FC<TVHostProps> = ({ onBack }) => {
   const [gameMode, setGameMode] = useState<'sequential' | 'random' | null>(null);
   const [questions, setQuestions] = useState<Question[]>([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-  const [currentQuestion, setCurrentQuestion] = useState<Question | null>(null);
   const [playerCount, setPlayerCount] = useState<PlayerCount>({ total: 0, answered: 0 });
   const [participantNames, setParticipantNames] = useState<string[]>([]);
   const [answeredPlayers, setAnsweredPlayers] = useState<Array<{name: string, answerTime: number}>>([]);
@@ -350,7 +349,7 @@ const TVHost: React.FC<TVHostProps> = ({ onBack }) => {
         setTimer(30);
         setShowResult(false);
         setGameResult(null);
-        setCurrentQuestion(question); // TV'de soruyu göster
+        // Soru questions[currentQuestionIndex] ile gösteriliyor
         
         socket.emit('startQuestion', question);
         // Süre sayacını oyunculara gönder
@@ -379,7 +378,7 @@ const TVHost: React.FC<TVHostProps> = ({ onBack }) => {
         const question = questions[currentQuestionIndex + 1];
         console.log('📝 TV Sonraki soru otomatik başlatılıyor:', question);
         
-        setCurrentQuestion(question); // TV'de yeni soruyu göster
+        // Soru questions[currentQuestionIndex + 1] ile gösteriliyor
         setTimer(30);
         
         socket.emit('startQuestion', question);
@@ -427,7 +426,6 @@ const TVHost: React.FC<TVHostProps> = ({ onBack }) => {
     setParticipantNames([]);
     setPlayerCount({ total: 0, answered: 0 });
     setCurrentQuestionIndex(0); // Soru index'ini sıfırla
-    setCurrentQuestion(null); // Mevcut soruyu temizle
   };
 
   // Oyuncu listesi componenti
@@ -554,7 +552,7 @@ const TVHost: React.FC<TVHostProps> = ({ onBack }) => {
           </div>
                 ))}
         </div>
-      </div>
+          </div>
 
             <div className="flex justify-center space-x-4">
               <button
@@ -570,9 +568,9 @@ const TVHost: React.FC<TVHostProps> = ({ onBack }) => {
             >
                 🏠 Ana Menü
             </button>
-                  </div>
-                  </div>
-                </div>
+          </div>
+        </div>
+      </div>
         <ToastContainer />
       </div>
     );
@@ -594,14 +592,14 @@ const TVHost: React.FC<TVHostProps> = ({ onBack }) => {
           {/* Sonraki Soru Butonu - Orta (sadece soru ekranında) */}
           {gameMode && !waitingForPlayers && !showFinalRankings && currentQuestionIndex < questions.length && (
             <div className="flex justify-center items-center gap-3">
-              <button
+            <button
                 onClick={nextQuestion}
                 disabled={currentQuestionIndex >= questions.length - 1}
                 className="bg-purple-600 text-white px-6 py-3 rounded-lg hover:bg-purple-700 transition-colors font-medium disabled:bg-gray-500 disabled:cursor-not-allowed text-lg"
               >
                 Sonraki Soru
-              </button>
-            </div>
+            </button>
+          </div>
           )}
           
           {/* Room ID, Bağlantı Durumu - Sağ */}
@@ -609,16 +607,17 @@ const TVHost: React.FC<TVHostProps> = ({ onBack }) => {
             {roomId && (
               <div className="bg-white/10 backdrop-blur-lg rounded-lg px-4 py-2 flex items-center">
                 <span className="text-white font-medium text-lg">📍 Room: {roomId}</span>
-              </div>
+                  </div>
             )}
             <ConnectionIndicator />
-          </div>
-        </div>
-
+                  </div>
+                </div>
+                
         {/* Main Content */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Sol Panel - Oyun Kontrolü */}
-          <div className="lg:col-span-2 space-y-6">
+          <div className="lg:col-span-2">
+            <div className="space-y-6">
             {!gameMode ? (
               /* Oyun Modu Seçimi */
               <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-8 border border-white/20">
@@ -663,7 +662,7 @@ const TVHost: React.FC<TVHostProps> = ({ onBack }) => {
 
                 {/* QR Kod ve Link */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                  <div className="text-center">
+                <div className="text-center">
                     <div className="flex items-center justify-center mb-4">
                       <QrCode className="w-8 h-8 text-blue-300 mr-3" />
                       <h3 className="text-xl font-bold text-white">📱 QR Kod</h3>
@@ -686,8 +685,8 @@ const TVHost: React.FC<TVHostProps> = ({ onBack }) => {
                       {linkCopied ? <CheckCircle className="w-4 h-4 mr-2" /> : <Copy className="w-4 h-4 mr-2" />}
                       {linkCopied ? 'Kopyalandı!' : 'Linki Kopyala'}
                     </button>
-                  </div>
                 </div>
+              </div>
 
                 {/* Oyuncu Sayısı */}
                 <div className="text-center mb-8">
@@ -698,8 +697,8 @@ const TVHost: React.FC<TVHostProps> = ({ onBack }) => {
                       {playerCount.total > 0 ? 'Oyuncular hazır!' : 'Oyuncu bekleniyor...'}
                     </p>
                     </div>
-                  </div>
-                  
+                </div>
+
                 {/* Oyunu Başlat Butonu */}
                 <div className="text-center">
                   <button
@@ -716,101 +715,207 @@ const TVHost: React.FC<TVHostProps> = ({ onBack }) => {
                 </div>
               </div>
             ) : (
-              /* Oyun Aktif Ekranı */
-              <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-8 border border-white/20">
-                <div className="text-center mb-8">
-                  <h2 className="text-3xl font-bold text-white mb-4">🎮 Oyun Aktif</h2>
-                  <div className="text-6xl font-bold text-yellow-400 mb-4">⏰ {timer}</div>
-                  <p className="text-xl text-gray-300">Soru {currentQuestionIndex + 1} / {questions.length}</p>
-                </div>
-                
-                {/* Soru Gösterimi */}
-                {currentQuestion && (
-                  <div className="text-center mb-8">
-                    <h3 className="text-4xl font-bold text-white mb-6 leading-relaxed">
-                      {currentQuestion.question}
-                    </h3>
-                    <p className="text-2xl text-blue-300">
-                      Oyuncular cevaplarını gönderiyor...
-                    </p>
+              /* Oyun Aktif Ekranı - TV Optimize */
+              <div className="space-y-8">
+                {/* Gelişmiş Geri Sayım Timer - TV için daha büyük */}
+                {currentQuestionIndex < questions.length && !showResult && timer > 0 && (
+                  <div className="flex justify-center mb-8">
+                    <div className="relative">
+                      {/* Dış çember - progress bar */}
+                      <div className="w-56 h-56 rounded-full border-8 border-purple-600 relative overflow-hidden bg-gradient-to-br from-purple-900 to-blue-900">
+                        <div 
+                          className={`absolute inset-0 rounded-full transition-all duration-1000 ${
+                            timer <= 5 ? 'bg-gradient-to-br from-red-500 to-red-600' : 
+                            timer <= 10 ? 'bg-gradient-to-br from-yellow-400 to-orange-500' : 
+                            'bg-gradient-to-br from-blue-400 to-blue-500'
+                          }`}
+                          style={{
+                            clipPath: `polygon(0 0, ${(30 - timer) * 100 / 30}% 0, ${(30 - timer) * 100 / 30}% 100%, 0% 100%)`,
+                            animation: timer <= 5 ? 'pulse 1s infinite' : 'none'
+                          }}
+                        ></div>
+                        
+                        {/* Dalga efekti - son 5 saniye */}
+                        {timer <= 5 && (
+                          <div className="absolute inset-0 rounded-full animate-ping bg-red-400/30"></div>
+                        )}
                   </div>
-                )}
-
-                {/* Cevap Verenler Listesi */}
-                {!showResult && (
-                  <div className="bg-white/5 rounded-lg p-6 mb-8">
-                    <h4 className="text-blue-300 font-semibold mb-4 text-center">📝 Cevap Verenler</h4>
-                    <div className="text-center">
-                      <div className="text-3xl font-bold text-green-400 mb-2">
-                        {playerCount.answered} / {playerCount.total}
-                        </div>
-                      <p className="text-gray-300 mb-4">
-                        {playerCount.answered === playerCount.total 
-                          ? '🎉 Tüm oyuncular cevap verdi!' 
-                          : `${playerCount.total - playerCount.answered} oyuncu daha cevap bekleniyor...`}
-                      </p>
                       
-                      {/* Cevap Veren Oyuncular Listesi */}
-                      {answeredPlayers.length > 0 && (
-                        <div className="mt-4">
-                          <h5 className="text-blue-300 font-semibold mb-3">⚡ Cevap Verenler</h5>
-                    <div className="space-y-2">
-                            {answeredPlayers.map((player, index) => (
-                              <div key={player.name} className="flex justify-between items-center bg-white/10 rounded-lg p-3">
-                                <span className="text-white font-medium">
-                                  {index + 1}. {player.name}
-                                </span>
-                                <span className="text-yellow-400 font-bold">
-                                  {player.answerTime}s ⚡
-                                </span>
-                        </div>
-                      ))}
-                    </div>
+                      {/* İç sayı - TV için daha büyük */}
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <div className={`text-8xl font-black transition-all duration-500 transform ${
+                          timer <= 5 ? 'animate-bounce text-white scale-110' : 
+                          timer <= 10 ? 'animate-pulse text-white scale-105' : 
+                          'text-white'
+                        } ${timer <= 3 ? 'drop-shadow-2xl' : 'drop-shadow-lg'}`}
+                        style={{
+                          textShadow: timer <= 5 ? '0 0 30px rgba(239, 68, 68, 1), 0 0 60px rgba(239, 68, 68, 0.5), 2px 2px 4px rgba(0,0,0,0.8)' : 
+                                     timer <= 10 ? '0 0 20px rgba(251, 191, 36, 0.8), 0 0 40px rgba(251, 191, 36, 0.4), 2px 2px 4px rgba(0,0,0,0.8)' : 
+                                     '0 0 15px rgba(59, 130, 246, 0.6), 0 0 30px rgba(59, 130, 246, 0.3), 2px 2px 4px rgba(0,0,0,0.8)',
+                          filter: timer <= 5 ? 'brightness(1.2)' : timer <= 10 ? 'brightness(1.1)' : 'brightness(1)',
+                          color: timer <= 5 ? '#ef4444' : timer <= 10 ? '#fbbf24' : '#3b82f6'
+                        }}>
+                          {timer}
                   </div>
+                </div>
+
+                      {/* Parlama efekti */}
+                      {timer <= 5 && (
+                        <div className="absolute inset-0 rounded-full bg-white/20 animate-ping"></div>
                       )}
                     </div>
                   </div>
                 )}
-                
-                {showResult && gameResult ? (
-                  <div className="text-center">
-                    <h3 className="text-2xl font-bold text-white mb-4">🏆 Sonuçlar</h3>
-                    <div className="text-3xl font-bold text-green-400 mb-4">
-                      Doğru Cevap: {gameResult.correct}
-                    </div>
-                    <div className="text-xl text-yellow-400 mb-6">
-                      {gameResult.winners && gameResult.winners.length > 0 
-                        ? `🏆 Kazanan: ${gameResult.winners.join(', ')}`
-                        : `🎯 En Yakın: ${gameResult.closest}`
-                      }
-                </div>
 
-                <div className="flex justify-center space-x-4">
-                  <button
-                    onClick={nextQuestion}
-                    className="bg-blue-600 hover:bg-blue-700 text-white text-xl px-8 py-4 rounded-xl transition-colors"
-                  >
-                    ➡️ Sonraki Soru
-                  </button>
+                {/* Soru - TV için daha büyük */}
+                {currentQuestionIndex < questions.length && (
+                  <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-10">
+                    <div className="flex justify-center items-center mb-6">
+                      <span className="text-green-300 font-semibold text-2xl">
+                        📝 Soru {currentQuestionIndex + 1} / {questions.length}
+                      </span>
+                    </div>
+                    
+                    <h3 className="text-5xl font-bold text-white mb-10 px-4 break-words text-center leading-relaxed">
+                      {questions[currentQuestionIndex]?.question}
+                    </h3>
+
+                    {/* Cevap Verenler Listesi - TV için daha büyük */}
+                    {!showResult && (
+                      <div className="bg-white/5 rounded-lg p-8 mb-8">
+                        <h4 className="text-blue-300 font-semibold mb-6 text-center text-2xl">📝 Cevap Verenler</h4>
+                        <div className="text-center">
+                          <div className="text-5xl font-bold text-green-400 mb-4">
+                            {playerCount.answered} / {playerCount.total}
+                          </div>
+                          <p className="text-gray-300 mb-6 text-xl">
+                            {playerCount.answered === playerCount.total 
+                              ? '🎉 Tüm oyuncular cevap verdi!' 
+                              : `${playerCount.total - playerCount.answered} oyuncu daha cevap bekleniyor...`}
+                          </p>
+                          
+                          {/* Cevap Veren Oyuncular Listesi */}
+                          {answeredPlayers.length > 0 && (
+                            <div className="mt-6">
+                              <h5 className="text-blue-300 font-semibold mb-4 text-xl">⚡ Cevap Verenler</h5>
+                              <div className="space-y-3">
+                                {answeredPlayers.map((player, index) => (
+                                  <div key={player.name} className="flex justify-between items-center bg-white/10 rounded-lg p-4">
+                                    <span className="text-white font-medium text-xl">
+                                      {index + 1}. {player.name}
+                                    </span>
+                                    <span className="text-yellow-400 font-bold text-xl">
+                                      {player.answerTime}s ⚡
+                                    </span>
+                        </div>
+                      ))}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                
+                    {showResult && gameResult && (
+                      <div className="space-y-6">
+                        {/* Doğru Cevap - TV için daha büyük */}
+                        <div className="bg-green-600/20 rounded-lg p-8">
+                          <h4 className="text-green-300 font-semibold mb-4 text-2xl">✅ Doğru Cevap</h4>
+                          <p className="text-white text-7xl font-bold">{gameResult.correct}</p>
+                        </div>
+                        
+                        {/* Kazanan Gösterimi - TV için daha büyük ve parlak */}
+                        <div className="bg-gradient-to-r from-blue-500/20 to-purple-500/20 border border-blue-500/30 rounded-lg p-8 relative overflow-hidden">
+                          <h4 className="text-blue-300 font-semibold mb-6 text-2xl">🎯 Doğru veya En Yakın Cevap Veren</h4>
+                          <div className="relative">
+                            {gameResult.winners && gameResult.winners.length > 0 ? (
+                              <div className="space-y-4">
+                                {gameResult.winners.length === 1 ? (
+                                  <p className="text-white text-6xl font-bold text-center animate-pulse" style={{
+                                    animation: 'heartbeat 1.5s ease-in-out infinite, glow 2s ease-in-out infinite alternate'
+                                  }}>{gameResult.winners[0]}</p>
+                                ) : (
+                                  <div className="space-y-3">
+                                    <p className="text-blue-300 text-2xl mb-4">Aynı cevabı veren kazananlar:</p>
+                                    {gameResult.winners.map((winner, index) => (
+                                      <div key={winner} className="bg-white/10 rounded-lg p-4 animate-slideInRight" style={{
+                                        animationDelay: `${index * 0.2}s`
+                                      }}>
+                                        <p className="text-white text-4xl font-bold text-center animate-pulse">
+                                          🏆 {winner}
+                                        </p>
+                                      </div>
+                                    ))}
+                                  </div>
+                                )}
+                                <p className="text-blue-300 text-2xl mt-6">
+                                  Cevap: {gameResult.closest.includes('(') ? gameResult.closest.split('(')[1].replace(')', '') : gameResult.correct}
+                                </p>
+                              </div>
+                            ) : (
+                              <p className="text-white text-4xl font-bold text-center">
+                                Kimse doğru bilmedi
+                              </p>
+                            )}
+                    </div>
+                  </div>
+                  
+                        {/* Tüm Cevaplar Listesi - TV için */}
+                        {gameResult.allAnswers && gameResult.allAnswers.length > 0 && (
+                          <div className="mt-8 bg-white/5 rounded-lg p-6">
+                            <h5 className="text-blue-300 font-semibold mb-4 text-center text-2xl">📋 Tüm Cevaplar</h5>
+                            <div className="space-y-3">
+                              {gameResult.allAnswers.map((answer, index) => (
+                                <div key={index} className={`flex justify-between items-center p-4 rounded-lg text-lg ${
+                                  !answer.hasAnswered ? 'bg-red-600/20 border border-red-500/30' :
+                                  answer.isCorrect ? 'bg-green-600/20 border border-green-500/30' : 
+                                  answer.difference <= 5 ? 'bg-yellow-600/20 border border-yellow-500/30' :
+                                  'bg-gray-600/20 border border-gray-500/30'
+                                }`}>
+                                  <div className="flex items-center">
+                                    <span className={`text-lg font-bold mr-3 ${
+                                      !answer.hasAnswered ? 'text-red-300' :
+                                      answer.isCorrect ? 'text-green-300' : 
+                                      answer.difference <= 5 ? 'text-yellow-300' : 'text-gray-300'
+                                    }`}>
+                                      {index + 1}.
+                                    </span>
+                                    <span className="text-white font-medium text-xl">{answer.playerName}</span>
+                                  </div>
+                                  <div className="flex items-center space-x-2">
+                                    {!answer.hasAnswered ? (
+                                      <span className="text-red-300 font-bold text-xl">Cevap yok</span>
+                                    ) : (
+                                      <>
+                                        <span className="text-white font-bold text-xl">{answer.answer}</span>
+                                        {answer.isCorrect && <span className="text-green-300 text-lg">✓</span>}
+                                        {!answer.isCorrect && gameResult.allAnswers && answer.difference === Math.min(...gameResult.allAnswers.filter(a => a.hasAnswered).map(a => a.difference)) && <span className="text-yellow-300 text-lg">🎯</span>}
+                                      </>
+                                    )}
+                                  </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                        )}
+                      </div>
+                    )}
+                </div>
+                )}
+
+                {/* Oyunu Bitir Butonu - TV için daha büyük */}
+                <div className="flex justify-center mt-8">
                   <button
                     onClick={endGame}
-                    className="bg-red-600 hover:bg-red-700 text-white text-xl px-8 py-4 rounded-xl transition-colors"
+                    className="bg-red-600 text-white px-12 py-6 rounded-xl hover:bg-red-700 transition-colors font-medium text-2xl"
                   >
                     🏁 Oyunu Bitir
                   </button>
                 </div>
-              </div>
-            ) : (
-              <div className="text-center">
-                    <div className="text-2xl text-white mb-4">Soru yanıtlanıyor...</div>
-                    <div className="text-lg text-gray-300">
-                      {playerCount.answered} / {playerCount.total} oyuncu cevapladı
-                    </div>
-              </div>
-            )}
           </div>
         )}
       </div>
+          </div>
 
           {/* Sağ Panel - Oyuncu Listesi */}
           <div className="lg:col-span-1">
@@ -825,9 +930,9 @@ const TVHost: React.FC<TVHostProps> = ({ onBack }) => {
                 </div>
               </div>
               <PlayerList />
-            </div>
+              </div>
           </div>
-        </div>
+      </div>
       </div>
       
       <ToastContainer />
