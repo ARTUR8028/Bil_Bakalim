@@ -1201,64 +1201,90 @@ io.on('connection', (socket) => {
   });
 
   socket.on('disconnect', (reason) => {
+    const roomId = socket.roomId;
+    const room = roomId ? getRoom(roomId) : null;
+    
+    // Room-aware player management
+    const playersObj = room ? room.players : players;
+    const answersObj = room ? room.answers : answers;
+    const globalScoresObj = room ? room.globalScores : globalScores;
+    
     console.log('🔌 Bağlantı kesildi:', { 
       socketId: socket.id, 
       reason,
-      player: players[socket.id]?.name || 'Bilinmeyen',
+      roomId: roomId || 'global',
+      player: playersObj[socket.id]?.name || 'Bilinmeyen',
       timestamp: new Date().toISOString()
     });
     
     // Oyuncu varsa puanını kaydet ve oyuncuyu sil
-    if (players[socket.id]) {
-      const player = players[socket.id];
+    if (playersObj[socket.id]) {
+      const player = playersObj[socket.id];
       const playerName = player.name;
       const currentScore = player.score || 0;
       
       // Oyuncunun mevcut puanını globalScores'a kaydet
-      globalScores[playerName] = currentScore;
-      console.log(`👋 ${playerName} bağlantısı koptu - Puan kaydedildi: ${currentScore}, Oyuncu siliniyor`);
+      globalScoresObj[playerName] = currentScore;
+      console.log(`👋 [${roomId || 'GLOBAL'}] ${playerName} bağlantısı koptu - Puan kaydedildi: ${currentScore}, Oyuncu siliniyor`);
       
       // Oyuncuyu ve cevabını sil
-      delete players[socket.id];
-      delete answers[socket.id];
+      delete playersObj[socket.id];
+      delete answersObj[socket.id];
       
-      // Tüm host'lara oyuncunun ayrıldığını bildir
-      io.emit('playerLeft', playerName);
-      io.emit('allParticipants', getActivePlayers().map(p => p.name));
-      
-      // Oyuncu sayısını güncelle
-      updatePlayerCount();
+      if (roomId) {
+        // Room'a özgü bildirimler
+        io.to(roomId).emit('playerLeft', playerName);
+        io.to(roomId).emit('allParticipants', Object.values(playersObj).map(p => p.name));
+        updatePlayerCountForRoom(roomId);
+      } else {
+        // Global bildirimler
+        io.emit('playerLeft', playerName);
+        io.emit('allParticipants', getActivePlayers().map(p => p.name));
+        updatePlayerCount();
+      }
     } else {
       // Oyuncu kaydı yoksa sadece cevabını sil
-      delete answers[socket.id];
+      delete answersObj[socket.id];
     }
   });
 
   // Manuel oyuncu çıkışı (Ana Menü ile çıkış)
   socket.on('leave', (playerName) => {
+    const roomId = socket.roomId;
+    const room = roomId ? getRoom(roomId) : null;
+    
     console.log('👋 Manuel oyuncu çıkışı:', { 
       playerName,
       socketId: socket.id,
+      roomId: roomId || 'global',
       timestamp: new Date().toISOString()
     });
     
-    if (players[socket.id]) {
-      const actualPlayerName = players[socket.id].name;
-      const currentScore = players[socket.id].score || 0;
+    // Room-aware player management
+    const playersObj = room ? room.players : players;
+    const globalScoresObj = room ? room.globalScores : globalScores;
+    
+    if (playersObj[socket.id]) {
+      const actualPlayerName = playersObj[socket.id].name;
+      const currentScore = playersObj[socket.id].score || 0;
       
       // Oyuncunun mevcut puanını globalScores'a kaydet
-      globalScores[actualPlayerName] = currentScore;
-      console.log(`👋 ${actualPlayerName} manuel olarak ayrıldı - Puan kaydedildi: ${currentScore}`);
+      globalScoresObj[actualPlayerName] = currentScore;
+      console.log(`👋 [${roomId || 'GLOBAL'}] ${actualPlayerName} manuel olarak ayrıldı - Puan kaydedildi: ${currentScore}`);
       
-      delete players[socket.id];
+      delete playersObj[socket.id];
       
-      // Tüm host'lara oyuncunun ayrıldığını bildir
-      socket.broadcast.emit('playerLeft', actualPlayerName);
-      
-      // Mevcut tüm katılımcıları host'a gönder
-      io.emit('allParticipants', Object.values(players).map(p => p.name));
-      
-      updatePlayerCount();
+      if (roomId) {
+        // Room'a özgü bildirimler
+        io.to(roomId).emit('playerLeft', actualPlayerName);
+        io.to(roomId).emit('allParticipants', Object.values(playersObj).map(p => p.name));
+        updatePlayerCountForRoom(roomId);
+      } else {
+        // Global bildirimler
+        socket.broadcast.emit('playerLeft', actualPlayerName);
+        io.emit('allParticipants', Object.values(playersObj).map(p => p.name));
+        updatePlayerCount();
+      }
     }
   });
 
