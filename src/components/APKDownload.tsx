@@ -7,8 +7,8 @@ interface APKDownloadProps {
 }
 
 const APKDownload: React.FC<APKDownloadProps> = ({ onBack }) => {
-  const apkUrl = '/apps/BilBakalimTV.apk';
-  const apkSize = '15.2 MB'; // APK boyutunu buraya yazın
+  const apkUrl = '/apps/app-debug.apk';
+  const apkSize = '8.6 MB'; // APK boyutu: 9066255 bytes = 8.6 MB
   const version = '1.0.0'; // Versiyon numarasını buraya yazın
   const [qrCodeUrl, setQrCodeUrl] = useState('');
   const fullApkUrl = `${window.location.origin}${apkUrl}`;
@@ -37,7 +37,7 @@ const APKDownload: React.FC<APKDownloadProps> = ({ onBack }) => {
   const handleDownload = () => {
     const link = document.createElement('a');
     link.href = apkUrl;
-    link.download = 'BilBakalimTV.apk';
+    link.download = 'BilBakalimTV.apk'; // İndirilen dosya adı
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
