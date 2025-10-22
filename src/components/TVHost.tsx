@@ -579,8 +579,8 @@ const TVHost: React.FC<TVHostProps> = ({ onBack }) => {
   return (
     <div translate="no" className="h-screen overflow-hidden bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 p-4 flex flex-col">
       <div className="max-w-8xl mx-auto flex-1 flex flex-col overflow-hidden">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-8">
+        {/* Header - Kompakt */}
+        <div className="flex items-center justify-between mb-4">
           <button
             onClick={onBack}
             className="flex items-center text-white hover:text-yellow-300 transition-colors"
@@ -613,12 +613,12 @@ const TVHost: React.FC<TVHostProps> = ({ onBack }) => {
                   </div>
                 </div>
                 
-        {/* Main Content */}
+        {/* Main Content - Kompakt */}
         <div className="flex-1 overflow-auto">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 h-full">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 h-full">
           {/* Sol Panel - Oyun Kontrolü */}
           <div className="lg:col-span-2">
-            <div className="space-y-6">
+            <div className="space-y-4">
             {!gameMode ? (
               /* Oyun Modu Seçimi - Kompakt */
               <div className="bg-white/10 backdrop-blur-lg rounded-xl p-6 border border-white/20">
@@ -663,7 +663,7 @@ const TVHost: React.FC<TVHostProps> = ({ onBack }) => {
 
                 {/* QR Kod ve Link - Kompakt */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                  <div className="text-center">
+                <div className="text-center">
                     <div className="flex items-center justify-center mb-2">
                       <QrCode className="w-6 h-6 text-blue-300 mr-2" />
                       <h3 className="text-lg font-bold text-white">📱 QR Kod</h3>
@@ -672,7 +672,7 @@ const TVHost: React.FC<TVHostProps> = ({ onBack }) => {
                       <img src={qrCodeUrl} alt="QR Code" className="mx-auto mb-2 rounded-lg shadow-lg max-w-[200px]" />
                     )}
                     <p className="text-gray-300 text-xs">QR kodu okutarak katılın</p>
-                  </div>
+                </div>
 
                   <div className="text-center">
                     <h3 className="text-lg font-bold text-white mb-3">🔗 Katılım Linki</h3>
@@ -697,7 +697,7 @@ const TVHost: React.FC<TVHostProps> = ({ onBack }) => {
                     <p className="text-gray-300 text-sm">
                       {playerCount.total > 0 ? 'Oyuncular hazır!' : 'Oyuncu bekleniyor...'}
                     </p>
-                  </div>
+              </div>
                 </div>
 
                 {/* Oyunu Başlat Butonu - Kompakt */}
@@ -716,14 +716,14 @@ const TVHost: React.FC<TVHostProps> = ({ onBack }) => {
                 </div>
               </div>
             ) : (
-              /* Oyun Aktif Ekranı - TV Optimize */
-              <div className="space-y-8">
-                {/* Gelişmiş Geri Sayım Timer - TV için daha büyük */}
+              /* Oyun Aktif Ekranı - Kompakt */
+              <div className="space-y-4">
+                {/* Geri Sayım Timer - Kompakt */}
                 {currentQuestionIndex < questions.length && !showResult && timer > 0 && (
-                  <div className="flex justify-center mb-8">
+                  <div className="flex justify-center mb-6">
                     <div className="relative">
-                      {/* Dış çember - progress bar */}
-                      <div className="w-56 h-56 rounded-full border-8 border-purple-600 relative overflow-hidden bg-gradient-to-br from-purple-900 to-blue-900">
+                      {/* Dış çember - progress bar - Kompakt */}
+                      <div className="w-40 h-40 rounded-full border-6 border-purple-600 relative overflow-hidden bg-gradient-to-br from-purple-900 to-blue-900">
                         <div 
                           className={`absolute inset-0 rounded-full transition-all duration-1000 ${
                             timer <= 5 ? 'bg-gradient-to-br from-red-500 to-red-600' : 
@@ -742,9 +742,9 @@ const TVHost: React.FC<TVHostProps> = ({ onBack }) => {
                         )}
                   </div>
                       
-                      {/* İç sayı - TV için daha büyük */}
+                      {/* İç sayı - Kompakt */}
                       <div className="absolute inset-0 flex items-center justify-center">
-                        <div className={`text-8xl font-black transition-all duration-500 transform ${
+                        <div className={`text-6xl font-black transition-all duration-500 transform ${
                           timer <= 5 ? 'animate-bounce text-white scale-110' : 
                           timer <= 10 ? 'animate-pulse text-white scale-105' : 
                           'text-white'
@@ -768,49 +768,49 @@ const TVHost: React.FC<TVHostProps> = ({ onBack }) => {
                   </div>
                 )}
 
-                {/* Soru - TV için daha büyük */}
+                {/* Soru - Kompakt */}
                 {currentQuestionIndex < questions.length && (
-                  <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-10">
-                    <div className="flex justify-center items-center mb-6">
-                      <span className="text-green-300 font-semibold text-2xl">
+                  <div className="bg-white/10 backdrop-blur-lg rounded-xl p-6">
+                    <div className="flex justify-center items-center mb-4">
+                      <span className="text-green-300 font-semibold text-lg">
                         📝 Soru {currentQuestionIndex + 1} / {questions.length}
                       </span>
                     </div>
                     
-                    <h3 className="text-5xl font-bold text-white mb-10 px-4 break-words text-center leading-relaxed">
+                    <h3 className="text-3xl font-bold text-white mb-6 px-4 break-words text-center leading-relaxed">
                       {questions[currentQuestionIndex]?.question}
                     </h3>
 
-                    {/* Cevap Verenler Listesi - TV için daha büyük */}
+                    {/* Cevap Verenler Listesi - Kompakt */}
                     {!showResult && (
-                      <div className="bg-white/5 rounded-lg p-8 mb-8">
-                        <h4 className="text-blue-300 font-semibold mb-6 text-center text-2xl">📝 Cevap Verenler</h4>
+                      <div className="bg-white/5 rounded-lg p-4 mb-4">
+                        <h4 className="text-blue-300 font-semibold mb-3 text-center text-lg">📝 Cevap Verenler</h4>
                         <div className="text-center">
-                          <div className="text-5xl font-bold text-green-400 mb-4">
+                          <div className="text-3xl font-bold text-green-400 mb-3">
                             {playerCount.answered} / {playerCount.total}
                           </div>
-                          <p className="text-gray-300 mb-6 text-xl">
+                          <p className="text-gray-300 mb-4 text-base">
                             {playerCount.answered === playerCount.total 
                               ? '🎉 Tüm oyuncular cevap verdi!' 
                               : `${playerCount.total - playerCount.answered} oyuncu daha cevap bekleniyor...`}
                           </p>
                           
-                          {/* Cevap Veren Oyuncular Listesi */}
+                          {/* Cevap Veren Oyuncular Listesi - Kompakt */}
                           {answeredPlayers.length > 0 && (
-                            <div className="mt-6">
-                              <h5 className="text-blue-300 font-semibold mb-4 text-xl">⚡ Cevap Verenler</h5>
-                              <div className="space-y-3">
+                            <div className="mt-4">
+                              <h5 className="text-blue-300 font-semibold mb-2 text-base">⚡ Cevap Verenler</h5>
+                    <div className="space-y-2">
                                 {answeredPlayers.map((player, index) => (
-                                  <div key={player.name} className="flex justify-between items-center bg-white/10 rounded-lg p-4">
-                                    <span className="text-white font-medium text-xl">
+                                  <div key={player.name} className="flex justify-between items-center bg-white/10 rounded-lg p-3">
+                                    <span className="text-white font-medium text-base">
                                       {index + 1}. {player.name}
                                     </span>
-                                    <span className="text-yellow-400 font-bold text-xl">
+                                    <span className="text-yellow-400 font-bold text-base">
                                       {player.answerTime}s ⚡
                                     </span>
                         </div>
                       ))}
-                              </div>
+                    </div>
                             </div>
                           )}
                         </div>
@@ -818,77 +818,77 @@ const TVHost: React.FC<TVHostProps> = ({ onBack }) => {
                     )}
                 
                     {showResult && gameResult && (
-                      <div className="space-y-6">
-                        {/* Doğru Cevap - TV için daha büyük */}
-                        <div className="bg-green-600/20 rounded-lg p-8">
-                          <h4 className="text-green-300 font-semibold mb-4 text-2xl">✅ Doğru Cevap</h4>
-                          <p className="text-white text-7xl font-bold">{gameResult.correct}</p>
-                        </div>
-                        
-                        {/* Kazanan Gösterimi - TV için daha büyük ve parlak */}
-                        <div className="bg-gradient-to-r from-blue-500/20 to-purple-500/20 border border-blue-500/30 rounded-lg p-8 relative overflow-hidden">
-                          <h4 className="text-blue-300 font-semibold mb-6 text-2xl">🎯 Doğru veya En Yakın Cevap Veren</h4>
+                      <div className="space-y-4">
+                        {/* Doğru Cevap - Kompakt */}
+                        <div className="bg-green-600/20 rounded-lg p-4">
+                          <h4 className="text-green-300 font-semibold mb-2 text-lg">✅ Doğru Cevap</h4>
+                          <p className="text-white text-4xl font-bold">{gameResult.correct}</p>
+                  </div>
+                  
+                        {/* Kazanan Gösterimi - Kompakt */}
+                        <div className="bg-gradient-to-r from-blue-500/20 to-purple-500/20 border border-blue-500/30 rounded-lg p-4 relative overflow-hidden">
+                          <h4 className="text-blue-300 font-semibold mb-3 text-lg">🎯 Doğru veya En Yakın Cevap Veren</h4>
                           <div className="relative">
                             {gameResult.winners && gameResult.winners.length > 0 ? (
-                              <div className="space-y-4">
+                              <div className="space-y-3">
                                 {gameResult.winners.length === 1 ? (
-                                  <p className="text-white text-6xl font-bold text-center animate-pulse" style={{
+                                  <p className="text-white text-3xl font-bold text-center animate-pulse" style={{
                                     animation: 'heartbeat 1.5s ease-in-out infinite, glow 2s ease-in-out infinite alternate'
                                   }}>{gameResult.winners[0]}</p>
                                 ) : (
-                                  <div className="space-y-3">
-                                    <p className="text-blue-300 text-2xl mb-4">Aynı cevabı veren kazananlar:</p>
+                    <div className="space-y-2">
+                                    <p className="text-blue-300 text-lg mb-2">Aynı cevabı veren kazananlar:</p>
                                     {gameResult.winners.map((winner, index) => (
-                                      <div key={winner} className="bg-white/10 rounded-lg p-4 animate-slideInRight" style={{
+                                      <div key={winner} className="bg-white/10 rounded-lg p-3 animate-slideInRight" style={{
                                         animationDelay: `${index * 0.2}s`
                                       }}>
-                                        <p className="text-white text-4xl font-bold text-center animate-pulse">
+                                        <p className="text-white text-2xl font-bold text-center animate-pulse">
                                           🏆 {winner}
                                         </p>
                                       </div>
                                     ))}
                                   </div>
                                 )}
-                                <p className="text-blue-300 text-2xl mt-6">
+                                <p className="text-blue-300 text-lg mt-4">
                                   Cevap: {gameResult.closest.includes('(') ? gameResult.closest.split('(')[1].replace(')', '') : gameResult.correct}
                                 </p>
                               </div>
                             ) : (
-                              <p className="text-white text-4xl font-bold text-center">
+                              <p className="text-white text-2xl font-bold text-center">
                                 Kimse doğru bilmedi
                               </p>
                             )}
                     </div>
                   </div>
                   
-                        {/* Tüm Cevaplar Listesi - TV için */}
+                        {/* Tüm Cevaplar Listesi - Kompakt */}
                         {gameResult.allAnswers && gameResult.allAnswers.length > 0 && (
-                          <div className="mt-8 bg-white/5 rounded-lg p-6">
-                            <h5 className="text-blue-300 font-semibold mb-4 text-center text-2xl">📋 Tüm Cevaplar</h5>
-                            <div className="space-y-3">
+                          <div className="mt-4 bg-white/5 rounded-lg p-4">
+                            <h5 className="text-blue-300 font-semibold mb-3 text-center text-lg">📋 Tüm Cevaplar</h5>
+                    <div className="space-y-2">
                               {gameResult.allAnswers.map((answer, index) => (
-                                <div key={index} className={`flex justify-between items-center p-4 rounded-lg text-lg ${
+                                <div key={index} className={`flex justify-between items-center p-3 rounded-lg text-base ${
                                   !answer.hasAnswered ? 'bg-red-600/20 border border-red-500/30' :
                                   answer.isCorrect ? 'bg-green-600/20 border border-green-500/30' : 
                                   answer.difference <= 5 ? 'bg-yellow-600/20 border border-yellow-500/30' :
                                   'bg-gray-600/20 border border-gray-500/30'
                                 }`}>
                                   <div className="flex items-center">
-                                    <span className={`text-lg font-bold mr-3 ${
+                                    <span className={`text-base font-bold mr-2 ${
                                       !answer.hasAnswered ? 'text-red-300' :
                                       answer.isCorrect ? 'text-green-300' : 
                                       answer.difference <= 5 ? 'text-yellow-300' : 'text-gray-300'
                                     }`}>
                                       {index + 1}.
                                     </span>
-                                    <span className="text-white font-medium text-xl">{answer.playerName}</span>
+                                    <span className="text-white font-medium text-base">{answer.playerName}</span>
                                   </div>
                                   <div className="flex items-center space-x-2">
                                     {!answer.hasAnswered ? (
-                                      <span className="text-red-300 font-bold text-xl">Cevap yok</span>
+                                      <span className="text-red-300 font-bold text-base">Cevap yok</span>
                                     ) : (
                                       <>
-                                        <span className="text-white font-bold text-xl">{answer.answer}</span>
+                                        <span className="text-white font-bold text-base">{answer.answer}</span>
                                         {answer.isCorrect && <span className="text-green-300 text-lg">✓</span>}
                                         {!answer.isCorrect && gameResult.allAnswers && answer.difference === Math.min(...gameResult.allAnswers.filter(a => a.hasAnswered).map(a => a.difference)) && <span className="text-yellow-300 text-lg">🎯</span>}
                                       </>
@@ -904,11 +904,11 @@ const TVHost: React.FC<TVHostProps> = ({ onBack }) => {
                 </div>
                 )}
 
-                {/* Oyunu Bitir Butonu - TV için daha büyük */}
-                <div className="flex justify-center mt-8">
+                {/* Oyunu Bitir Butonu - Kompakt */}
+                <div className="flex justify-center mt-6">
                   <button
                     onClick={endGame}
-                    className="bg-red-600 text-white px-12 py-6 rounded-xl hover:bg-red-700 transition-colors font-medium text-2xl"
+                    className="bg-red-600 text-white px-8 py-4 rounded-xl hover:bg-red-700 transition-colors font-medium text-xl"
                   >
                     🏁 Oyunu Bitir
                   </button>
