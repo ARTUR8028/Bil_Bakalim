@@ -582,7 +582,7 @@ const TVHost: React.FC<TVHostProps> = ({ onBack }) => {
     <div translate="no" className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 p-4">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
-        <div className="flex justify-between items-center mb-8">
+        <div className="flex items-center justify-between mb-8">
           <button
             onClick={onBack}
             className="flex items-center text-white hover:text-yellow-300 transition-colors"
@@ -591,7 +591,20 @@ const TVHost: React.FC<TVHostProps> = ({ onBack }) => {
             Ana Menü
           </button>
           
-          {/* Room ID ve Bağlantı Durumu - Sağ */}
+          {/* Sonraki Soru Butonu - Orta (sadece soru ekranında) */}
+          {gameMode && !waitingForPlayers && !showFinalRankings && currentQuestionIndex < questions.length && (
+            <div className="flex justify-center items-center gap-3">
+              <button
+                onClick={nextQuestion}
+                disabled={currentQuestionIndex >= questions.length - 1}
+                className="bg-purple-600 text-white px-6 py-3 rounded-lg hover:bg-purple-700 transition-colors font-medium disabled:bg-gray-500 disabled:cursor-not-allowed text-lg"
+              >
+                Sonraki Soru
+              </button>
+            </div>
+          )}
+          
+          {/* Room ID, Bağlantı Durumu - Sağ */}
           <div className="flex items-center gap-3">
             {roomId && (
               <div className="bg-white/10 backdrop-blur-lg rounded-lg px-4 py-2 flex items-center">
