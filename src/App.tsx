@@ -32,6 +32,13 @@ function App() {
       return 'apk';
     }
     
+    // APK (TV cihazı) ise otomatik olarak TVHost'a yönlendir
+    if (deviceType === 'TV' && !hash) {
+      console.log('📺 TV cihazı tespit edildi, TVHost\'a yönlendiriliyor...');
+      window.location.hash = '#tv';
+      return 'tv';
+    }
+    
     // Hash yoksa ana menüye git
     return 'home';
   };
@@ -105,26 +112,8 @@ function App() {
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 mb-6 md:mb-8 mobile-grid-1">
-                <div 
-                  onClick={() => setCurrentView('admin')}
-                  className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 md:p-8 cursor-pointer transform hover:scale-105 transition-all duration-300 hover:bg-white/20 border border-white/20 mobile-btn mobile-touch-manipulation tv-focusable"
-                >
-                  <Settings className="w-10 h-10 md:w-12 md:h-12 text-blue-300 mx-auto mb-3 md:mb-4" />
-                  <h3 className="text-lg md:text-xl font-semibold text-white mb-2 mobile-text-lg">Admin Paneli</h3>
-                  <p className="text-blue-200 text-sm mobile-text-sm">Soru ekleyin ve oyunu yönetin</p>
-                </div>
-
-                <div 
-                  onClick={() => setCurrentView('host')}
-                  className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 md:p-8 cursor-pointer transform hover:scale-105 transition-all duration-300 hover:bg-white/20 border border-white/20 mobile-btn mobile-touch-manipulation tv-focusable"
-                >
-                  <Play className="w-10 h-10 md:w-12 md:h-12 text-green-300 mx-auto mb-3 md:mb-4" />
-                  <h3 className="text-lg md:text-xl font-semibold text-white mb-2 mobile-text-lg">Oyun Sunucusu</h3>
-                  <p className="text-blue-200 text-sm mobile-text-sm">Quiz oyununu başlatın ve yönetin</p>
-                </div>
-
-                {/* TV butonu sadece TV cihazında görünür */}
-                {canAccessTVHost(deviceInfo.type) && (
+                {/* TV cihazında sadece TV butonu gösterilir */}
+                {deviceInfo.type === 'TV' ? (
                   <div 
                     onClick={() => setCurrentView('tv')}
                     className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 md:p-8 cursor-pointer transform hover:scale-105 transition-all duration-300 hover:bg-white/20 border border-white/20 mobile-btn mobile-touch-manipulation tv-focusable"
@@ -133,19 +122,37 @@ function App() {
                     <h3 className="text-lg md:text-xl font-semibold text-white mb-2 mobile-text-lg">📺 Google TV</h3>
                     <p className="text-blue-200 text-sm mobile-text-sm">TV ekranında soruları yayınlayın</p>
                   </div>
+                ) : (
+                  <>
+                    {/* TV dışındaki cihazlarda tüm butonlar görünür */}
+                    <div 
+                      onClick={() => setCurrentView('admin')}
+                      className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 md:p-8 cursor-pointer transform hover:scale-105 transition-all duration-300 hover:bg-white/20 border border-white/20 mobile-btn mobile-touch-manipulation tv-focusable"
+                    >
+                      <Settings className="w-10 h-10 md:w-12 md:h-12 text-blue-300 mx-auto mb-3 md:mb-4" />
+                      <h3 className="text-lg md:text-xl font-semibold text-white mb-2 mobile-text-lg">Admin Paneli</h3>
+                      <p className="text-blue-200 text-sm mobile-text-sm">Soru ekleyin ve oyunu yönetin</p>
+                    </div>
+
+                    <div 
+                      onClick={() => setCurrentView('host')}
+                      className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 md:p-8 cursor-pointer transform hover:scale-105 transition-all duration-300 hover:bg-white/20 border border-white/20 mobile-btn mobile-touch-manipulation tv-focusable"
+                    >
+                      <Play className="w-10 h-10 md:w-12 md:h-12 text-green-300 mx-auto mb-3 md:mb-4" />
+                      <h3 className="text-lg md:text-xl font-semibold text-white mb-2 mobile-text-lg">Oyun Sunucusu</h3>
+                      <p className="text-blue-200 text-sm mobile-text-sm">Quiz oyununu başlatın ve yönetin</p>
+                    </div>
+
+                    <div 
+                      onClick={() => setCurrentView('apk')}
+                      className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 md:p-8 cursor-pointer transform hover:scale-105 transition-all duration-300 hover:bg-white/20 border border-white/20 mobile-btn mobile-touch-manipulation tv-focusable"
+                    >
+                      <Download className="w-10 h-10 md:w-12 md:h-12 text-orange-300 mx-auto mb-3 md:mb-4" />
+                      <h3 className="text-lg md:text-xl font-semibold text-white mb-2 mobile-text-lg">Android APP</h3>
+                      <p className="text-blue-200 text-sm mobile-text-sm">APK dosyasını indirin</p>
+                    </div>
+                  </>
                 )}
-
-                {/* Player butonu ana ekranda görünmez - sadece /#player linki ile erişilebilir */}
-
-                <div 
-                  onClick={() => setCurrentView('apk')}
-                  className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 md:p-8 cursor-pointer transform hover:scale-105 transition-all duration-300 hover:bg-white/20 border border-white/20 mobile-btn mobile-touch-manipulation tv-focusable"
-                >
-                  <Download className="w-10 h-10 md:w-12 md:h-12 text-orange-300 mx-auto mb-3 md:mb-4" />
-                  <h3 className="text-lg md:text-xl font-semibold text-white mb-2 mobile-text-lg">Android APP</h3>
-                  <p className="text-blue-200 text-sm mobile-text-sm">APK dosyasını indirin</p>
-                </div>
-
               </div>
 
               <div className="flex items-center justify-center space-x-2 text-blue-300 mobile-flex-row mobile-items-center mobile-justify-center">
