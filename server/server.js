@@ -1326,11 +1326,24 @@ io.on('connection', (socket) => {
   });
 
   socket.on('endGame', () => {
+    // Room ID'yi al
+    const roomId = socket.roomId;
+    const room = roomId ? getRoom(roomId) : null;
+    
+    // Room'a göre state seç
+    const playersObj = room ? room.players : players;
+    const globalScoresObj = room ? room.globalScores : globalScores;
+    const gameStateObj = room ? room.gameState : gameState;
+    
+    console.log(`🏁 Oyun bitirildi${roomId ? ` (Room: ${roomId})` : ' (Global)'}`);
+    console.log(`📊 Aktif oyuncu sayısı: ${Object.keys(playersObj).length}`);
+    console.log(`📊 Global skorlar:`, globalScoresObj);
+    
     // Global puanları kullan ve aktif olan tüm oyuncuları da dahil et
-    const finalScores = { ...globalScores };
+    const finalScores = { ...globalScoresObj };
     
     // Aktif oyuncuları da ekle (eğer henüz skor almamışlarsa 0 puan ile)
-    Object.values(players).forEach(player => {
+    Object.values(playersObj).forEach(player => {
       const playerName = player.name;
       if (!(playerName in finalScores)) {
         finalScores[playerName] = 0;
@@ -1338,69 +1351,140 @@ io.on('connection', (socket) => {
       }
     });
     
-    console.log('🏁 Oyun bitti. Final skorları (Global + Aktif oyuncular):', finalScores);
-    io.emit('gameEnded', finalScores);
+    console.log('🏁 Final skorları (Global + Aktif oyuncular):', finalScores);
     
-    // Oyun verilerini sıfırla
-    players = {};
-    answers = {};
-    currentAnswer = null;
-    gameState = {
-      isActive: false,
-      currentQuestion: null,
-      questionStartTime: null,
-      totalQuestions: questions.length,
-      currentQuestionIndex: 0
-    };
+    // Room'a veya global'e emit et
+    if (roomId) {
+      io.to(roomId).emit('gameEnded', finalScores);
+    } else {
+      io.emit('gameEnded', finalScores);
+    }
+    
+    // Oyun verilerini sıfırla (room-aware)
+    if (room) {
+      room.answers = {};
+      room.currentAnswer = null;
+      room.gameState.isActive = false;
+      room.gameState.currentQuestion = null;
+      room.gameState.questionStartTime = null;
+      room.gameState.currentQuestionIndex = 0;
+    } else {
+      players = {};
+      answers = {};
+      currentAnswer = null;
+      gameState = {
+        isActive: false,
+        currentQuestion: null,
+        questionStartTime: null,
+        totalQuestions: questions.length,
+        currentQuestionIndex: 0
+      };
+    }
   });
 
   socket.on('startNewGame', () => {
-    console.log('🆕 Yeni oyun başlatılıyor - tüm veriler temizleniyor...');
+    // Room ID'yi al
+    const roomId = socket.roomId;
+    const room = roomId ? getRoom(roomId) : null;
     
-    // Tüm oyunculara oyundan çıkarıldıklarını bildir
-    io.emit('gameReset', { message: 'Yeni oyun başlatıldı, lütfen tekrar katılın' });
+    console.log(`🆕 Yeni oyun başlatılıyor${roomId ? ` (Room: ${roomId})` : ' (Global)'} - tüm veriler temizleniyor...`);
     
-    // Tüm oyuncuları ve global puanları temizle
-    players = {};
-    globalScores = {};
-    answers = {};
-    currentAnswer = null;
-    gameState = {
-      isActive: false,
-      currentQuestion: null,
-      questionStartTime: null,
-      totalQuestions: questions.length,
-      currentQuestionIndex: 0
-    };
+    // Room'a veya global'e gameReset gönder
+    if (roomId) {
+      io.to(roomId).emit('gameReset', { message: 'Yeni oyun başlatıldı, lütfen tekrar katılın' });
+    } else {
+      io.emit('gameReset', { message: 'Yeni oyun başlatıldı, lütfen tekrar katılın' });
+    }
     
-    // Tüm client'lara boş oyuncu listesi gönder
-    io.emit('allParticipants', []);
-    io.emit('playerCount', { total: 0, answered: 0 });
+    // Room-aware temizlik
+    if (room) {
+      room.players = {};
+      room.globalScores = {};
+      room.answers = {};
+      room.currentAnswer = null;
+      room.gameState = {
+        isActive: false,
+        currentQuestion: null,
+        questionStartTime: null,
+        totalQuestions: questions.length,
+        currentQuestionIndex: 0
+      };
+      
+      // Room'a boş oyuncu listesi gönder
+      io.to(roomId).emit('allParticipants', []);
+      io.to(roomId).emit('playerCount', { total: 0, answered: 0 });
+    } else {
+      // Global temizlik
+      players = {};
+      globalScores = {};
+      answers = {};
+      currentAnswer = null;
+      gameState = {
+        isActive: false,
+        currentQuestion: null,
+        questionStartTime: null,
+        totalQuestions: questions.length,
+        currentQuestionIndex: 0
+      };
+      
+      // Tüm client'lara boş oyuncu listesi gönder
+      io.emit('allParticipants', []);
+      io.emit('playerCount', { total: 0, answered: 0 });
+    }
+    
     console.log('✅ Yeni oyun için tüm veriler temizlendi');
   });
 
   socket.on('restartGame', () => {
-    console.log('🔄 Oyun yeniden başlatılıyor - puanlar sıfırlanıyor...');
+    // Room ID'yi al
+    const roomId = socket.roomId;
+    const room = roomId ? getRoom(roomId) : null;
     
-    // Tüm oyunculara oyundan çıkarıldıklarını bildir
-    io.emit('gameReset', { message: 'Oyun yeniden başlatıldı, lütfen tekrar katılın' });
+    console.log(`🔄 Oyun yeniden başlatılıyor${roomId ? ` (Room: ${roomId})` : ' (Global)'} - puanlar sıfırlanıyor...`);
     
-    // Tüm oyuncuları ve global puanları temizle
-    players = {};
-    globalScores = {};
-    answers = {};
-    currentAnswer = null;
-    gameState = {
-      isActive: false,
-      currentQuestion: null,
-      questionStartTime: null,
-      totalQuestions: questions.length,
-      currentQuestionIndex: 0
-    };
+    // Room'a veya global'e gameReset gönder
+    if (roomId) {
+      io.to(roomId).emit('gameReset', { message: 'Oyun yeniden başlatıldı, lütfen tekrar katılın' });
+    } else {
+      io.emit('gameReset', { message: 'Oyun yeniden başlatıldı, lütfen tekrar katılın' });
+    }
     
-    // Tüm client'lara boş oyuncu listesi gönder
-    io.emit('allParticipants', []);
-    io.emit('playerCount', { total: 0, answered: 0 });
+    // Room-aware temizlik
+    if (room) {
+      room.players = {};
+      room.globalScores = {};
+      room.answers = {};
+      room.currentAnswer = null;
+      room.gameState = {
+        isActive: false,
+        currentQuestion: null,
+        questionStartTime: null,
+        totalQuestions: questions.length,
+        currentQuestionIndex: 0
+      };
+      
+      // Room'a boş oyuncu listesi gönder
+      io.to(roomId).emit('allParticipants', []);
+      io.to(roomId).emit('playerCount', { total: 0, answered: 0 });
+    } else {
+      // Global temizlik
+      players = {};
+      globalScores = {};
+      answers = {};
+      currentAnswer = null;
+      gameState = {
+        isActive: false,
+        currentQuestion: null,
+        questionStartTime: null,
+        totalQuestions: questions.length,
+        currentQuestionIndex: 0
+      };
+      
+      // Tüm client'lara boş oyuncu listesi gönder
+      io.emit('allParticipants', []);
+      io.emit('playerCount', { total: 0, answered: 0 });
+    }
+    
     console.log('✅ Oyun yeniden başlatıldı, tüm puanlar temizlendi');
   });
 
