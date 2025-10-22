@@ -1,1 +1,82 @@
-[]
+[
+  {
+    "question": "Türkiye'nin başkenti neresidir?",
+    "answer": "1"
+  },
+  {
+    "question": "Dünya'nın en büyük okyanusu hangisidir? (1-Pasifik, 2-Atlas, 3-Hint)",
+    "answer": "1"
+  },
+  {
+    "question": "Bir yılda kaç ay vardır?",
+    "answer": "12"
+  },
+  {
+    "question": "Türkiye'nin nüfusu yaklaşık kaç milyondur?",
+    "answer": "85"
+  },
+  {
+    "question": "İstanbul'un kaç ilçesi vardır?",
+    "answer": "39"
+  },
+  {
+    "question": "Matematik: 25 + 37 = ?",
+    "answer": "62"
+  },
+  {
+    "question": "Matematik: 100 - 48 = ?",
+    "answer": "52"
+  },
+  {
+    "question": "Matematik: 15 × 4 = ?",
+    "answer": "60"
+  },
+  {
+    "question": "Bir haftada kaç gün vardır?",
+    "answer": "7"
+  },
+  {
+    "question": "Bir günde kaç saat vardır?",
+    "answer": "24"
+  },
+  {
+    "question": "Türkiye'nin kaç komşusu vardır?",
+    "answer": "8"
+  },
+  {
+    "question": "İnsanın kaç duyusu vardır?",
+    "answer": "5"
+  },
+  {
+    "question": "Matematik: 200 ÷ 4 = ?",
+    "answer": "50"
+  },
+  {
+    "question": "Bir dakikada kaç saniye vardır?",
+    "answer": "60"
+  },
+  {
+    "question": "Matematik: 8 × 9 = ?",
+    "answer": "72"
+  },
+  {
+    "question": "Türkiye'nin plaka kodu kaçtır? (01-99 arası)",
+    "answer": "34"
+  },
+  {
+    "question": "Matematik: 144 ÷ 12 = ?",
+    "answer": "12"
+  },
+  {
+    "question": "Bir yüzyılda kaç yıl vardır?",
+    "answer": "100"
+  },
+  {
+    "question": "Matematik: 17 + 28 + 15 = ?",
+    "answer": "60"
+  },
+  {
+    "question": "Türkiye'nin en kalabalık şehri hangisidir? (1-İstanbul, 2-Ankara, 3-İzmir)",
+    "answer": "1"
+  }
+]
