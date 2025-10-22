@@ -517,8 +517,8 @@ const TVHost: React.FC<TVHostProps> = ({ onBack }) => {
     const sortedScores = Object.entries(scores).sort(([,a], [,b]) => b - a);
 
   return (
-      <div translate="no" className="min-h-screen bg-gradient-to-br from-green-900 via-blue-900 to-purple-900 p-4">
-        <div className="max-w-4xl mx-auto">
+      <div translate="no" className="h-screen overflow-hidden bg-gradient-to-br from-green-900 via-blue-900 to-purple-900 p-4 flex flex-col">
+        <div className="max-w-6xl mx-auto flex-1 flex flex-col overflow-hidden">
           <div className="flex justify-between items-center mb-8">
         <button
               onClick={goBackToModeSelection}
@@ -530,12 +530,12 @@ const TVHost: React.FC<TVHostProps> = ({ onBack }) => {
             <ConnectionIndicator />
           </div>
 
-          <div className="text-center">
-            <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-8 mb-8 relative overflow-hidden">
-              <h1 className="text-4xl font-bold text-white mb-6">🏆 Oyun Bitti! 🏆</h1>
-              <p className="text-xl text-gray-300 mb-8">Final Sıralaması</p>
+          <div className="flex-1 overflow-auto flex flex-col">
+            <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 mb-6 flex-1 flex flex-col">
+              <h1 className="text-3xl font-bold text-white mb-4 text-center">🏆 Oyun Bitti! 🏆</h1>
+              <p className="text-lg text-gray-300 mb-6 text-center">Final Sıralaması</p>
               
-              <div className="space-y-4">
+              <div className="space-y-3 overflow-auto flex-1">
                 {sortedScores.map(([playerName, score], index) => (
                   <div key={playerName} className="flex justify-between items-center bg-white/5 rounded-lg p-4">
         <div className="flex items-center space-x-4">
@@ -551,34 +551,34 @@ const TVHost: React.FC<TVHostProps> = ({ onBack }) => {
                     <span className="text-2xl font-bold text-green-400">{score} puan</span>
           </div>
                 ))}
-        </div>
-          </div>
+              </div>
+            </div>
 
-            <div className="flex justify-center space-x-4">
+            <div className="flex justify-center space-x-4 mt-4">
               <button
                 onClick={restartGame}
-                className="bg-green-600 hover:bg-green-700 text-white text-xl px-8 py-4 rounded-xl transition-colors flex items-center"
+                className="bg-green-600 hover:bg-green-700 text-white text-lg px-6 py-3 rounded-xl transition-colors flex items-center"
               >
-                <RotateCcw className="w-6 h-6 mr-2" />
+                <RotateCcw className="w-5 h-5 mr-2" />
                 🔄 Yeniden Başlat
               </button>
-            <button
+              <button
                 onClick={goBackToModeSelection}
-                className="bg-blue-600 hover:bg-blue-700 text-white text-xl px-8 py-4 rounded-xl transition-colors"
-            >
+                className="bg-blue-600 hover:bg-blue-700 text-white text-lg px-6 py-3 rounded-xl transition-colors"
+              >
                 🏠 Ana Menü
-            </button>
+              </button>
+            </div>
           </div>
         </div>
-      </div>
         <ToastContainer />
       </div>
     );
   }
 
   return (
-    <div translate="no" className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 p-4">
-      <div className="max-w-6xl mx-auto">
+    <div translate="no" className="h-screen overflow-hidden bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 p-4 flex flex-col">
+      <div className="max-w-8xl mx-auto flex-1 flex flex-col overflow-hidden">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <button
@@ -614,7 +614,8 @@ const TVHost: React.FC<TVHostProps> = ({ onBack }) => {
                 </div>
                 
         {/* Main Content */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="flex-1 overflow-auto">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 h-full">
           {/* Sol Panel - Oyun Kontrolü */}
           <div className="lg:col-span-2">
             <div className="space-y-6">
@@ -932,7 +933,8 @@ const TVHost: React.FC<TVHostProps> = ({ onBack }) => {
               <PlayerList />
               </div>
           </div>
-      </div>
+        </div>
+        </div>
       </div>
       
       <ToastContainer />
