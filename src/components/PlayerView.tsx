@@ -63,8 +63,12 @@ const PlayerView: React.FC<PlayerViewProps> = ({ onBack }) => {
     setAllAnswers([]);
     setGameResult(null);
     
-    // URL hash'ini #player olarak ayarla
-    window.location.hash = '#player';
+    // URL hash'ini #player?room=XXX olarak ayarla (oda bilgisini koru)
+    if (roomId) {
+      window.location.hash = `#player?room=${roomId}`;
+    } else {
+      window.location.hash = '#player';
+    }
   };
   const [currentQuestion, setCurrentQuestion] = useState('');
   const [answer, setAnswer] = useState('');
