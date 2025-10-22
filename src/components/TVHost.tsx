@@ -552,7 +552,7 @@ const TVHost: React.FC<TVHostProps> = ({ onBack }) => {
           </div>
                 ))}
               </div>
-            </div>
+          </div>
 
             <div className="flex justify-center space-x-4 mt-4">
               <button
@@ -568,9 +568,9 @@ const TVHost: React.FC<TVHostProps> = ({ onBack }) => {
               >
                 🏠 Ana Menü
               </button>
-            </div>
           </div>
         </div>
+      </div>
         <ToastContainer />
       </div>
     );
@@ -620,92 +620,92 @@ const TVHost: React.FC<TVHostProps> = ({ onBack }) => {
           <div className="lg:col-span-2">
             <div className="space-y-6">
             {!gameMode ? (
-              /* Oyun Modu Seçimi */
-              <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-8 border border-white/20">
-                <h1 className="text-4xl font-bold text-white mb-6 text-center">📺 BİL BAKALIM TV</h1>
-                <p className="text-xl text-gray-300 mb-8 text-center">Google TV için Interaktif Quiz</p>
+              /* Oyun Modu Seçimi - Kompakt */
+              <div className="bg-white/10 backdrop-blur-lg rounded-xl p-6 border border-white/20">
+                <h1 className="text-3xl font-bold text-white mb-4 text-center">📺 BİL BAKALIM TV</h1>
+                <p className="text-lg text-gray-300 mb-6 text-center">Google TV için Interaktif Quiz</p>
                 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <button
                     onClick={() => startGame('sequential')}
-                    className="bg-blue-600 hover:bg-blue-700 text-white text-xl px-8 py-6 rounded-2xl transition-colors flex items-center justify-center space-x-3"
+                    className="bg-blue-600 hover:bg-blue-700 text-white text-lg px-6 py-4 rounded-xl transition-colors flex items-center justify-center space-x-3"
                   >
-                    <Play className="w-6 h-6" />
+                    <Play className="w-5 h-5" />
                     <span>📋 Sıralı Oyun</span>
                   </button>
                   
                   <button
                     onClick={() => startGame('random')}
-                    className="bg-purple-600 hover:bg-purple-700 text-white text-xl px-8 py-6 rounded-2xl transition-colors flex items-center justify-center space-x-3"
+                    className="bg-purple-600 hover:bg-purple-700 text-white text-lg px-6 py-4 rounded-xl transition-colors flex items-center justify-center space-x-3"
                   >
-                    <Shuffle className="w-6 h-6" />
+                    <Shuffle className="w-5 h-5" />
                     <span>🔀 Rastgele Oyun</span>
                   </button>
                   </div>
                 </div>
             ) : waitingForPlayers ? (
-              /* Oyuncu Bekleme Ekranı */
-              <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-8 border border-white/20">
-                <h2 className="text-3xl font-bold text-white mb-6 text-center">👥 Oyuncular Bekleniyor</h2>
+              /* Oyuncu Bekleme Ekranı - Kompakt */
+              <div className="bg-white/10 backdrop-blur-lg rounded-xl p-6 border border-white/20">
+                <h2 className="text-2xl font-bold text-white mb-4 text-center">👥 Oyuncular Bekleniyor</h2>
                 
-                {/* Room ID */}
+                {/* Room ID - Kompakt */}
                 {roomId && (
-                  <div className="bg-gradient-to-r from-purple-600 to-blue-600 rounded-xl p-5 mb-6">
-                    <div className="flex items-center justify-center mb-2">
-                      <h3 className="text-2xl font-bold text-white">🎮 Oyun Kodu</h3>
+                  <div className="bg-gradient-to-r from-purple-600 to-blue-600 rounded-lg p-4 mb-4">
+                    <div className="flex items-center justify-center mb-1">
+                      <h3 className="text-xl font-bold text-white">🎮 Oyun Kodu</h3>
                     </div>
-                    <div className="bg-white/20 rounded-lg p-4">
-                      <p className="text-4xl font-bold text-white text-center tracking-wider">{roomId}</p>
+                    <div className="bg-white/20 rounded-lg p-3">
+                      <p className="text-3xl font-bold text-white text-center tracking-wider">{roomId}</p>
                     </div>
-                    <p className="text-white/80 text-center mt-3 text-base">Oyunculara bu kodu verin</p>
+                    <p className="text-white/80 text-center mt-2 text-sm">Oyunculara bu kodu verin</p>
                   </div>
                 )}
 
-                {/* QR Kod ve Link */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                <div className="text-center">
-                    <div className="flex items-center justify-center mb-4">
-                      <QrCode className="w-8 h-8 text-blue-300 mr-3" />
-                      <h3 className="text-xl font-bold text-white">📱 QR Kod</h3>
-              </div>
+                {/* QR Kod ve Link - Kompakt */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                  <div className="text-center">
+                    <div className="flex items-center justify-center mb-2">
+                      <QrCode className="w-6 h-6 text-blue-300 mr-2" />
+                      <h3 className="text-lg font-bold text-white">📱 QR Kod</h3>
+                    </div>
                     {qrCodeUrl && (
-                      <img src={qrCodeUrl} alt="QR Code" className="mx-auto mb-4 rounded-lg shadow-lg" />
+                      <img src={qrCodeUrl} alt="QR Code" className="mx-auto mb-2 rounded-lg shadow-lg max-w-[200px]" />
                     )}
-                    <p className="text-gray-300 text-sm">Oyuncular bu QR kodu okutarak katılabilir</p>
-                </div>
+                    <p className="text-gray-300 text-xs">QR kodu okutarak katılın</p>
+                  </div>
 
                   <div className="text-center">
-                    <h3 className="text-xl font-bold text-white mb-4">🔗 Katılım Linki</h3>
-                    <div className="bg-white/10 rounded-lg p-4 mb-4">
-                      <p className="text-blue-200 font-mono text-sm break-all">{joinLink}</p>
-                  </div>
+                    <h3 className="text-lg font-bold text-white mb-3">🔗 Katılım Linki</h3>
+                    <div className="bg-white/10 rounded-lg p-3 mb-3">
+                      <p className="text-blue-200 font-mono text-xs break-all">{joinLink}</p>
+                    </div>
                     <button
                       onClick={copyLink}
-                      className="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition-colors flex items-center mx-auto"
+                      className="bg-green-600 text-white px-4 py-2 text-sm rounded-lg hover:bg-green-700 transition-colors flex items-center mx-auto"
                     >
-                      {linkCopied ? <CheckCircle className="w-4 h-4 mr-2" /> : <Copy className="w-4 h-4 mr-2" />}
+                      {linkCopied ? <CheckCircle className="w-4 h-4 mr-1" /> : <Copy className="w-4 h-4 mr-1" />}
                       {linkCopied ? 'Kopyalandı!' : 'Linki Kopyala'}
                     </button>
+                  </div>
                 </div>
-              </div>
 
-                {/* Oyuncu Sayısı */}
-                <div className="text-center mb-8">
-                  <div className="bg-white/10 rounded-2xl p-6">
-                    <h3 className="text-2xl font-bold text-white mb-2">👥 Oyuncular</h3>
-                    <div className="text-4xl font-bold text-green-400 mb-2">{playerCount.total}</div>
-                    <p className="text-gray-300">
+                {/* Oyuncu Sayısı - Kompakt */}
+                <div className="text-center mb-6">
+                  <div className="bg-white/10 rounded-xl p-4">
+                    <h3 className="text-xl font-bold text-white mb-1">👥 Oyuncular</h3>
+                    <div className="text-3xl font-bold text-green-400 mb-1">{playerCount.total}</div>
+                    <p className="text-gray-300 text-sm">
                       {playerCount.total > 0 ? 'Oyuncular hazır!' : 'Oyuncu bekleniyor...'}
                     </p>
-                    </div>
+                  </div>
                 </div>
 
-                {/* Oyunu Başlat Butonu */}
+                {/* Oyunu Başlat Butonu - Kompakt */}
                 <div className="text-center">
                   <button
                     onClick={startQuizGame}
                     disabled={playerCount.total === 0}
-                    className={`text-2xl px-12 py-6 rounded-2xl transition-colors ${
+                    className={`text-xl px-8 py-4 rounded-xl transition-colors ${
                       playerCount.total > 0
                         ? 'bg-green-600 hover:bg-green-700 text-white'
                         : 'bg-gray-600 text-gray-400 cursor-not-allowed'
