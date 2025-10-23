@@ -577,10 +577,10 @@ const TVHost: React.FC<TVHostProps> = ({ onBack }) => {
   }
 
   return (
-    <div translate="no" className="h-screen overflow-hidden bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 p-4 flex flex-col">
+    <div translate="no" className="h-screen overflow-hidden bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 p-1 flex flex-col">
       <div className="max-w-8xl mx-auto flex-1 flex flex-col overflow-hidden">
-        {/* Header - Kompakt */}
-        <div className="flex items-center justify-between mb-4">
+        {/* Header - Minimum */}
+        <div className="flex items-center justify-between mb-1">
           <button
             onClick={onBack}
             className="flex items-center text-white hover:text-yellow-300 transition-colors"
@@ -613,22 +613,22 @@ const TVHost: React.FC<TVHostProps> = ({ onBack }) => {
                   </div>
                 </div>
                 
-        {/* Main Content - Kompakt */}
+        {/* Main Content - Ultra Kompakt */}
         <div className="flex-1 overflow-auto">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 h-full">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-1 h-full">
           {/* Sol Panel - Oyun Kontrolü */}
           <div className="lg:col-span-2">
-            <div className="space-y-4">
+            <div className="space-y-1">
             {!gameMode ? (
               /* Oyun Modu Seçimi - Kompakt */
-              <div className="bg-white/10 backdrop-blur-lg rounded-xl p-6 border border-white/20">
-                <h1 className="text-3xl font-bold text-white mb-4 text-center">📺 BİL BAKALIM TV</h1>
-                <p className="text-lg text-gray-300 mb-6 text-center">Google TV için Interaktif Quiz</p>
+              <div className="bg-white/10 backdrop-blur-lg rounded-xl p-4 border border-white/20">
+                <h1 className="text-2xl font-bold text-white mb-2 text-center">📺 BİL BAKALIM TV</h1>
+                <p className="text-base text-gray-300 mb-4 text-center">Google TV için Interaktif Quiz</p>
                 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                   <button
                     onClick={() => startGame('sequential')}
-                    className="bg-blue-600 hover:bg-blue-700 text-white text-lg px-6 py-4 rounded-xl transition-colors flex items-center justify-center space-x-3"
+                    className="bg-blue-600 hover:bg-blue-700 text-white text-base px-4 py-3 rounded-xl transition-colors flex items-center justify-center space-x-2"
                   >
                     <Play className="w-5 h-5" />
                     <span>📋 Sıralı Oyun</span>
@@ -636,7 +636,7 @@ const TVHost: React.FC<TVHostProps> = ({ onBack }) => {
                   
                   <button
                     onClick={() => startGame('random')}
-                    className="bg-purple-600 hover:bg-purple-700 text-white text-lg px-6 py-4 rounded-xl transition-colors flex items-center justify-center space-x-3"
+                    className="bg-purple-600 hover:bg-purple-700 text-white text-base px-4 py-3 rounded-xl transition-colors flex items-center justify-center space-x-2"
                   >
                     <Shuffle className="w-5 h-5" />
                     <span>🔀 Rastgele Oyun</span>
@@ -645,38 +645,38 @@ const TVHost: React.FC<TVHostProps> = ({ onBack }) => {
                 </div>
             ) : waitingForPlayers ? (
               /* Oyuncu Bekleme Ekranı - Kompakt */
-              <div className="bg-white/10 backdrop-blur-lg rounded-xl p-6 border border-white/20">
-                <h2 className="text-2xl font-bold text-white mb-4 text-center">👥 Oyuncular Bekleniyor</h2>
+              <div className="bg-white/10 backdrop-blur-lg rounded-xl p-4 border border-white/20">
+                <h2 className="text-xl font-bold text-white mb-2 text-center">👥 Oyuncular Bekleniyor</h2>
                 
                 {/* Room ID - Kompakt */}
                 {roomId && (
-                  <div className="bg-gradient-to-r from-purple-600 to-blue-600 rounded-lg p-4 mb-4">
+                  <div className="bg-gradient-to-r from-purple-600 to-blue-600 rounded-lg p-3 mb-2">
                     <div className="flex items-center justify-center mb-1">
                       <h3 className="text-xl font-bold text-white">🎮 Oyun Kodu</h3>
                     </div>
                     <div className="bg-white/20 rounded-lg p-3">
-                      <p className="text-3xl font-bold text-white text-center tracking-wider">{roomId}</p>
+                      <p className="text-2xl font-bold text-white text-center tracking-wider">{roomId}</p>
                     </div>
                     <p className="text-white/80 text-center mt-2 text-sm">Oyunculara bu kodu verin</p>
                   </div>
                 )}
 
                 {/* QR Kod ve Link - Kompakt */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mb-3">
                 <div className="text-center">
                     <div className="flex items-center justify-center mb-2">
                       <QrCode className="w-6 h-6 text-blue-300 mr-2" />
                       <h3 className="text-lg font-bold text-white">📱 QR Kod</h3>
                     </div>
                     {qrCodeUrl && (
-                      <img src={qrCodeUrl} alt="QR Code" className="mx-auto mb-2 rounded-lg shadow-lg max-w-[200px]" />
+                      <img src={qrCodeUrl} alt="QR Code" className="mx-auto mb-1 rounded-lg shadow-lg max-w-[150px]" />
                     )}
                     <p className="text-gray-300 text-xs">QR kodu okutarak katılın</p>
                 </div>
 
                   <div className="text-center">
                     <h3 className="text-lg font-bold text-white mb-3">🔗 Katılım Linki</h3>
-                    <div className="bg-white/10 rounded-lg p-3 mb-3">
+                    <div className="bg-white/10 rounded-lg p-2 mb-2">
                       <p className="text-blue-200 font-mono text-xs break-all">{joinLink}</p>
                     </div>
                     <button
@@ -690,10 +690,10 @@ const TVHost: React.FC<TVHostProps> = ({ onBack }) => {
                 </div>
 
                 {/* Oyuncu Sayısı - Kompakt */}
-                <div className="text-center mb-6">
-                  <div className="bg-white/10 rounded-xl p-4">
-                    <h3 className="text-xl font-bold text-white mb-1">👥 Oyuncular</h3>
-                    <div className="text-3xl font-bold text-green-400 mb-1">{playerCount.total}</div>
+                <div className="text-center mb-3">
+                  <div className="bg-white/10 rounded-xl p-3">
+                    <h3 className="text-lg font-bold text-white mb-1">👥 Oyuncular</h3>
+                    <div className="text-2xl font-bold text-green-400 mb-1">{playerCount.total}</div>
                     <p className="text-gray-300 text-sm">
                       {playerCount.total > 0 ? 'Oyuncular hazır!' : 'Oyuncu bekleniyor...'}
                     </p>
@@ -705,7 +705,7 @@ const TVHost: React.FC<TVHostProps> = ({ onBack }) => {
                   <button
                     onClick={startQuizGame}
                     disabled={playerCount.total === 0}
-                    className={`text-xl px-8 py-4 rounded-xl transition-colors ${
+                    className={`text-lg px-6 py-3 rounded-xl transition-colors ${
                       playerCount.total > 0
                         ? 'bg-green-600 hover:bg-green-700 text-white'
                         : 'bg-gray-600 text-gray-400 cursor-not-allowed'
@@ -716,14 +716,14 @@ const TVHost: React.FC<TVHostProps> = ({ onBack }) => {
                 </div>
               </div>
             ) : (
-              /* Oyun Aktif Ekranı - Kompakt */
-              <div className="space-y-4">
+              /* Oyun Aktif Ekranı - Minimum */
+              <div className="space-y-1">
                 {/* Geri Sayım Timer - Kompakt */}
                 {currentQuestionIndex < questions.length && !showResult && timer > 0 && (
-                  <div className="flex justify-center mb-6">
+                  <div className="flex justify-center mb-1">
                     <div className="relative">
                       {/* Dış çember - progress bar - Kompakt */}
-                      <div className="w-40 h-40 rounded-full border-6 border-purple-600 relative overflow-hidden bg-gradient-to-br from-purple-900 to-blue-900">
+                      <div className="w-32 h-32 rounded-full border-4 border-purple-600 relative overflow-hidden bg-gradient-to-br from-purple-900 to-blue-900">
                         <div 
                           className={`absolute inset-0 rounded-full transition-all duration-1000 ${
                             timer <= 5 ? 'bg-gradient-to-br from-red-500 to-red-600' : 
@@ -744,7 +744,7 @@ const TVHost: React.FC<TVHostProps> = ({ onBack }) => {
                       
                       {/* İç sayı - Kompakt */}
                       <div className="absolute inset-0 flex items-center justify-center">
-                        <div className={`text-6xl font-black transition-all duration-500 transform ${
+                        <div className={`text-4xl font-black transition-all duration-500 transform ${
                           timer <= 5 ? 'animate-bounce text-white scale-110' : 
                           timer <= 10 ? 'animate-pulse text-white scale-105' : 
                           'text-white'
@@ -770,20 +770,20 @@ const TVHost: React.FC<TVHostProps> = ({ onBack }) => {
 
                 {/* Soru - Kompakt */}
                 {currentQuestionIndex < questions.length && (
-                  <div className="bg-white/10 backdrop-blur-lg rounded-xl p-6">
-                    <div className="flex justify-center items-center mb-4">
-                      <span className="text-green-300 font-semibold text-lg">
+                  <div className="bg-white/10 backdrop-blur-lg rounded-xl p-4">
+                    <div className="flex justify-center items-center mb-2">
+                      <span className="text-green-300 font-semibold text-base">
                         📝 Soru {currentQuestionIndex + 1} / {questions.length}
                       </span>
                     </div>
                     
-                    <h3 className="text-3xl font-bold text-white mb-6 px-4 break-words text-center leading-relaxed">
+                    <h3 className="text-2xl font-bold text-white mb-4 px-4 break-words text-center leading-relaxed">
                       {questions[currentQuestionIndex]?.question}
                     </h3>
 
                     {/* Cevap Verenler Listesi - Kompakt */}
                     {!showResult && (
-                      <div className="bg-white/5 rounded-lg p-4 mb-4">
+                      <div className="bg-white/5 rounded-lg p-3 mb-3">
                         <h4 className="text-blue-300 font-semibold mb-3 text-center text-lg">📝 Cevap Verenler</h4>
                         <div className="text-center">
                           <div className="text-3xl font-bold text-green-400 mb-3">
@@ -818,7 +818,7 @@ const TVHost: React.FC<TVHostProps> = ({ onBack }) => {
                     )}
                 
                     {showResult && gameResult && (
-                      <div className="space-y-4">
+                      <div className="space-y-2">
                         {/* Doğru Cevap - Kompakt */}
                         <div className="bg-green-600/20 rounded-lg p-4">
                           <h4 className="text-green-300 font-semibold mb-2 text-lg">✅ Doğru Cevap</h4>
@@ -905,7 +905,7 @@ const TVHost: React.FC<TVHostProps> = ({ onBack }) => {
                 )}
 
                 {/* Oyunu Bitir Butonu - Kompakt */}
-                <div className="flex justify-center mt-6">
+                <div className="flex justify-center mt-3">
                   <button
                     onClick={endGame}
                     className="bg-red-600 text-white px-8 py-4 rounded-xl hover:bg-red-700 transition-colors font-medium text-xl"
