@@ -43,6 +43,14 @@ function App() {
       return 'tv';
     }
     
+    // URL parametresi ile TV modu (APK için geçici çözüm)
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('tv') === 'true' && !hash) {
+      console.log('📺 URL parametresi ile TV modu aktif');
+      window.location.hash = '#tv';
+      return 'tv';
+    }
+    
     console.log('🏠 Ana menüye yönlendiriliyor');
     
     // Hash yoksa ana menüye git

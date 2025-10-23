@@ -31,10 +31,14 @@ export const detectDeviceType = (): DeviceType => {
                      userAgent.includes('AFTMM') || // Amazon Fire TV
                      userAgent.includes('AFTKA') || // Amazon Fire TV Stick
                      userAgent.includes('AFTJMST12') || // Amazon Fire TV Stick 4K
-                     userAgent.includes('Android') && screenWidth >= 1920; // Android APK + TV boyutu
+                     (userAgent.includes('Android') && screenWidth >= 1920) || // Android APK + TV boyutu
+                     (userAgent.includes('Android') && screenHeight >= 1080) || // Android APK + TV boyutu
+                     (userAgent.includes('Android') && screenWidth >= 1280 && screenHeight >= 720); // Android APK + HD boyutu
   
-  // TV ekran boyutu kontrolü (1920x1080 ve üzeri)
-  const isTVSize = screenWidth >= 1920 && screenHeight >= 1080;
+  // TV ekran boyutu kontrolü (1280x720 ve üzeri - APK için daha esnek)
+  const isTVSize = (screenWidth >= 1920 && screenHeight >= 1080) || 
+                   (screenWidth >= 1280 && screenHeight >= 720) ||
+                   (screenWidth >= 1024 && screenHeight >= 768);
   
   // Mobil cihaz tespiti
   const isMobileDevice = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(userAgent);
