@@ -795,7 +795,7 @@ const QuizHost: React.FC<QuizHostProps> = ({ onBack }) => {
                   Oyunu Başlat
                 </button>
                 
-                <p className="text-blue-300 mt-3 text-base">✅ Oyunu başlatmak için butona tıklayın</p>
+                <p className="text-blue-300 mt-3 text-base">Oyunu başlatmak için butona tıklayın</p>
               </div>
             </div>
           </div>

@@ -121,9 +121,9 @@ export const getOptimalView = (deviceType: DeviceType): string => {
 /**
  * Cihaz tipine göre player view'ına erişim izni verir mi?
  */
-export const canAccessPlayerView = (deviceType: DeviceType): boolean => {
-  // Sadece mobil, tablet ve desktop'tan player view'ına erişilebilir
-  return ['MOBILE', 'TABLET', 'DESKTOP'].includes(deviceType);
+export const canAccessPlayerView = (_deviceType: DeviceType): boolean => {
+  // Tüm cihazlardan player view'ına erişilebilir (TV dahil)
+  return true;
 };
 
 /**
