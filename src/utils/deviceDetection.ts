@@ -25,7 +25,7 @@ export const detectDeviceType = (): DeviceType => {
   console.log('📱 UserAgent:', userAgent);
   console.log('📏 Screen:', `${screenWidth}x${screenHeight}`);
   
-  // Google TV / Android TV tespiti
+  // Google TV / Android TV tespiti - SADECE gerçek TV cihazları
   const isAndroidTV = userAgent.includes('Android TV') || 
                      userAgent.includes('GoogleTV') ||
                      userAgent.includes('AFTMM') || // Amazon Fire TV
@@ -34,11 +34,6 @@ export const detectDeviceType = (): DeviceType => {
                      (userAgent.includes('Android') && screenWidth >= 1920) || // Android APK + TV boyutu
                      (userAgent.includes('Android') && screenHeight >= 1080) || // Android APK + TV boyutu
                      (userAgent.includes('Android') && screenWidth >= 1280 && screenHeight >= 720); // Android APK + HD boyutu
-  
-  // TV ekran boyutu kontrolü (1280x720 ve üzeri - APK için daha esnek)
-  const isTVSize = (screenWidth >= 1920 && screenHeight >= 1080) || 
-                   (screenWidth >= 1280 && screenHeight >= 720) ||
-                   (screenWidth >= 1024 && screenHeight >= 768);
   
   // Mobil cihaz tespiti
   const isMobileDevice = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(userAgent);
@@ -50,13 +45,14 @@ export const detectDeviceType = (): DeviceType => {
   // Desktop tespiti
   const isDesktopSize = screenWidth > 1024;
   
-  // TV öncelikli kontrol
+  // TV öncelikli kontrol - SADECE Android TV cihazları
   console.log('📺 TV Detection:');
   console.log('  - isAndroidTV:', isAndroidTV);
-  console.log('  - isTVSize:', isTVSize);
   console.log('  - isMobileDevice:', isMobileDevice);
   
-  if (isAndroidTV || (isTVSize && !isMobileDevice)) {
+  // TV tespiti sadece gerçek Android TV cihazları için
+  // Desktop browser'lar asla TV olarak algılanmamalı
+  if (isAndroidTV) {
     console.log('✅ TV cihazı tespit edildi!');
     return 'TV';
   }
