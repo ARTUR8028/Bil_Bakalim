@@ -770,23 +770,23 @@ const TVHost: React.FC<TVHostProps> = ({ onBack }) => {
 
                 {/* Soru - Kompakt */}
                 {currentQuestionIndex < questions.length && (
-                  <div className="bg-white/10 backdrop-blur-lg rounded-xl p-4">
+                  <div className="bg-white/10 backdrop-blur-lg rounded-xl p-2">
                     <div className="flex justify-center items-center mb-2">
                       <span className="text-green-300 font-semibold text-base">
                         📝 Soru {currentQuestionIndex + 1} / {questions.length}
                       </span>
                     </div>
                     
-                    <h3 className="text-2xl font-bold text-white mb-4 px-4 break-words text-center leading-relaxed">
+                    <h3 className="text-xl font-bold text-white mb-2 px-2 break-words text-center leading-relaxed">
                       {questions[currentQuestionIndex]?.question}
                     </h3>
 
                     {/* Cevap Verenler Listesi - Kompakt */}
                     {!showResult && (
-                      <div className="bg-white/5 rounded-lg p-3 mb-3">
-                        <h4 className="text-blue-300 font-semibold mb-3 text-center text-lg">📝 Cevap Verenler</h4>
+                      <div className="bg-white/5 rounded-lg p-2 mb-2">
+                        <h4 className="text-blue-300 font-semibold mb-2 text-center text-base">📝 Cevap Verenler</h4>
                         <div className="text-center">
-                          <div className="text-3xl font-bold text-green-400 mb-3">
+                          <div className="text-2xl font-bold text-green-400 mb-2">
                             {playerCount.answered} / {playerCount.total}
                           </div>
                           <p className="text-gray-300 mb-4 text-base">
@@ -820,29 +820,29 @@ const TVHost: React.FC<TVHostProps> = ({ onBack }) => {
                     {showResult && gameResult && (
                       <div className="space-y-2">
                         {/* Doğru Cevap - Kompakt */}
-                        <div className="bg-green-600/20 rounded-lg p-4">
-                          <h4 className="text-green-300 font-semibold mb-2 text-lg">✅ Doğru Cevap</h4>
-                          <p className="text-white text-4xl font-bold">{gameResult.correct}</p>
+                        <div className="bg-green-600/20 rounded-lg p-2">
+                          <h4 className="text-green-300 font-semibold mb-1 text-base">✅ Doğru Cevap</h4>
+                          <p className="text-white text-2xl font-bold">{gameResult.correct}</p>
                   </div>
                   
                         {/* Kazanan Gösterimi - Kompakt */}
-                        <div className="bg-gradient-to-r from-blue-500/20 to-purple-500/20 border border-blue-500/30 rounded-lg p-4 relative overflow-hidden">
-                          <h4 className="text-blue-300 font-semibold mb-3 text-lg">🎯 Doğru veya En Yakın Cevap Veren</h4>
+                        <div className="bg-gradient-to-r from-blue-500/20 to-purple-500/20 border border-blue-500/30 rounded-lg p-2 relative overflow-hidden">
+                          <h4 className="text-blue-300 font-semibold mb-2 text-base">🎯 Doğru veya En Yakın Cevap Veren</h4>
                           <div className="relative">
                             {gameResult.winners && gameResult.winners.length > 0 ? (
                               <div className="space-y-3">
                                 {gameResult.winners.length === 1 ? (
-                                  <p className="text-white text-3xl font-bold text-center animate-pulse" style={{
+                                  <p className="text-white text-xl font-bold text-center animate-pulse" style={{
                                     animation: 'heartbeat 1.5s ease-in-out infinite, glow 2s ease-in-out infinite alternate'
                                   }}>{gameResult.winners[0]}</p>
                                 ) : (
                     <div className="space-y-2">
-                                    <p className="text-blue-300 text-lg mb-2">Aynı cevabı veren kazananlar:</p>
+                                    <p className="text-blue-300 text-base mb-1">Aynı cevabı veren kazananlar:</p>
                                     {gameResult.winners.map((winner, index) => (
-                                      <div key={winner} className="bg-white/10 rounded-lg p-3 animate-slideInRight" style={{
+                                      <div key={winner} className="bg-white/10 rounded-lg p-2 animate-slideInRight" style={{
                                         animationDelay: `${index * 0.2}s`
                                       }}>
-                                        <p className="text-white text-2xl font-bold text-center animate-pulse">
+                                        <p className="text-white text-lg font-bold text-center animate-pulse">
                                           🏆 {winner}
                                         </p>
                                       </div>
@@ -863,11 +863,11 @@ const TVHost: React.FC<TVHostProps> = ({ onBack }) => {
                   
                         {/* Tüm Cevaplar Listesi - Kompakt */}
                         {gameResult.allAnswers && gameResult.allAnswers.length > 0 && (
-                          <div className="mt-4 bg-white/5 rounded-lg p-4">
-                            <h5 className="text-blue-300 font-semibold mb-3 text-center text-lg">📋 Tüm Cevaplar</h5>
+                          <div className="mt-2 bg-white/5 rounded-lg p-2">
+                            <h5 className="text-blue-300 font-semibold mb-2 text-center text-base">📋 Tüm Cevaplar</h5>
                     <div className="space-y-2">
                               {gameResult.allAnswers.map((answer, index) => (
-                                <div key={index} className={`flex justify-between items-center p-3 rounded-lg text-base ${
+                                <div key={index} className={`flex justify-between items-center p-2 rounded-lg text-sm ${
                                   !answer.hasAnswered ? 'bg-red-600/20 border border-red-500/30' :
                                   answer.isCorrect ? 'bg-green-600/20 border border-green-500/30' : 
                                   answer.difference <= 5 ? 'bg-yellow-600/20 border border-yellow-500/30' :

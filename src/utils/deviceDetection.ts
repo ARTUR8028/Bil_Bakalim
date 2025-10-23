@@ -26,7 +26,8 @@ export const detectDeviceType = (): DeviceType => {
                      userAgent.includes('GoogleTV') ||
                      userAgent.includes('AFTMM') || // Amazon Fire TV
                      userAgent.includes('AFTKA') || // Amazon Fire TV Stick
-                     userAgent.includes('AFTJMST12'); // Amazon Fire TV Stick 4K
+                     userAgent.includes('AFTJMST12') || // Amazon Fire TV Stick 4K
+                     userAgent.includes('Android') && screenWidth >= 1920; // Android APK + TV boyutu
   
   // TV ekran boyutu kontrolü (1920x1080 ve üzeri)
   const isTVSize = screenWidth >= 1920 && screenHeight >= 1080;
