@@ -16,6 +16,10 @@ function App() {
     const hash = window.location.hash.slice(1);
     const deviceType = detectDeviceType();
     
+    console.log('🎯 App getInitialView:');
+    console.log('  - Hash:', hash);
+    console.log('  - DeviceType:', deviceType);
+    
     // Hash'i ve query parametrelerini ayır
     const hashBase = hash.split('?')[0];
     
@@ -38,6 +42,8 @@ function App() {
       window.location.hash = '#tv';
       return 'tv';
     }
+    
+    console.log('🏠 Ana menüye yönlendiriliyor');
     
     // Hash yoksa ana menüye git
     return 'home';
@@ -113,7 +119,12 @@ function App() {
 
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 mb-6 md:mb-8 mobile-grid-1">
                 {/* TV cihazında sadece TV butonu gösterilir */}
-                {deviceInfo.type === 'TV' ? (
+                {(() => {
+                  console.log('🎮 Ana menü render:');
+                  console.log('  - deviceInfo.type:', deviceInfo.type);
+                  console.log('  - deviceInfo.isTV:', deviceInfo.isTV);
+                  return deviceInfo.type === 'TV';
+                })() ? (
                   <div 
                     onClick={() => setCurrentView('tv')}
                     className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 md:p-8 cursor-pointer transform hover:scale-105 transition-all duration-300 hover:bg-white/20 border border-white/20 mobile-btn mobile-touch-manipulation tv-focusable"

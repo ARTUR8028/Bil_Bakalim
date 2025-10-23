@@ -21,6 +21,10 @@ export const detectDeviceType = (): DeviceType => {
   const screenWidth = window.innerWidth;
   const screenHeight = window.innerHeight;
   
+  console.log('🔍 Device Detection Debug:');
+  console.log('📱 UserAgent:', userAgent);
+  console.log('📏 Screen:', `${screenWidth}x${screenHeight}`);
+  
   // Google TV / Android TV tespiti
   const isAndroidTV = userAgent.includes('Android TV') || 
                      userAgent.includes('GoogleTV') ||
@@ -43,7 +47,13 @@ export const detectDeviceType = (): DeviceType => {
   const isDesktopSize = screenWidth > 1024;
   
   // TV öncelikli kontrol
+  console.log('📺 TV Detection:');
+  console.log('  - isAndroidTV:', isAndroidTV);
+  console.log('  - isTVSize:', isTVSize);
+  console.log('  - isMobileDevice:', isMobileDevice);
+  
   if (isAndroidTV || (isTVSize && !isMobileDevice)) {
+    console.log('✅ TV cihazı tespit edildi!');
     return 'TV';
   }
   
@@ -63,6 +73,7 @@ export const detectDeviceType = (): DeviceType => {
   }
   
   // Varsayılan olarak desktop
+  console.log('🖥️ Desktop cihazı tespit edildi');
   return 'DESKTOP';
 };
 
