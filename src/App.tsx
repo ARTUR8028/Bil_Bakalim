@@ -26,7 +26,8 @@ function App() {
     // Hash varsa ve erişim izni varsa hash'i kullan
     if (hashBase === 'player' && canAccessPlayerView(deviceType)) {
       return 'player';
-    } else if (hashBase === 'tv' && canAccessTVHost(deviceType)) {
+    } else if (hashBase === 'tv') {
+      // TV hash'i varsa (APK'dan geliyorsa) direkt TV'ye git
       return 'tv';
     } else if (hashBase === 'host') {
       return 'host';
@@ -76,7 +77,8 @@ function App() {
         setCurrentView('admin');
       } else if (hashBase === 'host') {
         setCurrentView('host');
-      } else if (hashBase === 'tv' && canAccessTVHost(deviceType)) {
+      } else if (hashBase === 'tv') {
+        // TV hash'i varsa direkt TV'ye git
         setCurrentView('tv');
       } else if (hashBase === 'apk') {
         setCurrentView('apk');
