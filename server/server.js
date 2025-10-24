@@ -593,23 +593,15 @@ app.post('/api/upload', (req, res) => {
         console.log('📊 Sütun isimleri:', Object.keys(data[0]));
       }
 
-      // Replace mode kontrolü (Frontend'den gelen parametre)
-      const replaceMode = req.body.replaceMode === 'true';
-      console.log(`🔄 Replace mode: ${replaceMode ? 'AÇIK (Eski sorular silinecek)' : 'KAPALI (Eski soruların üstüne eklenecek)'}`);
-
-      // Mevcut soruları yükle (eğer replace mode kapalıysa)
+      // Mevcut soruları yükle (her zaman ekleme modunda)
       let existing = [];
-      if (!replaceMode) {
-        try {
-          const raw = await fs.readFile('data/questions.json', 'utf-8');
-          existing = JSON.parse(raw);
-          console.log(`📚 Mevcut ${existing.length} soru yüklendi (üstüne eklenecek)`);
-        } catch (err) {
-          console.log('📝 Yeni soru dosyası oluşturuluyor...');
-          existing = [];
-        }
-      } else {
-        console.log('🗑️ Replace mode AÇIK: Mevcut sorular silinecek, sadece yeni sorular kalacak');
+      try {
+        const raw = await fs.readFile('data/questions.json', 'utf-8');
+        existing = JSON.parse(raw);
+        console.log(`📚 Mevcut ${existing.length} soru yüklendi (yeni sorular üstüne eklenecek)`);
+      } catch (err) {
+        console.log('📝 Yeni soru dosyası oluşturuluyor...');
+        existing = [];
       }
 
       const merged = [...existing];
@@ -712,9 +704,7 @@ app.post('/api/upload', (req, res) => {
         console.error('⚠️ Geçici dosya silinemedi:', unlinkErr);
       }
 
-      const message = replaceMode 
-        ? `✅ TÜM eski sorular silindi! ${addedCount} yeni soru yüklendi${skippedCount > 0 ? `, ${skippedCount} geçersiz satır atlandı` : ''}${errorCount > 0 ? `, ${errorCount} hata` : ''}. Toplam: ${merged.length} soru.`
-        : `Dosya başarıyla işlendi! ${addedCount} yeni soru eklendi${duplicateCount > 0 ? `, ${duplicateCount} mükerrer soru atlandı` : ''}${skippedCount > 0 ? `, ${skippedCount} geçersiz satır` : ''}${errorCount > 0 ? `, ${errorCount} hata` : ''}. Toplam: ${merged.length} soru.`;
+      const message = `✅ Dosya başarıyla işlendi! ${addedCount} yeni soru eklendi${duplicateCount > 0 ? `, ${duplicateCount} mükerrer soru atlandı` : ''}${skippedCount > 0 ? `, ${skippedCount} geçersiz satır` : ''}${errorCount > 0 ? `, ${errorCount} hata` : ''}. Toplam: ${merged.length} soru.`;
 
       res.json({ 
         message,

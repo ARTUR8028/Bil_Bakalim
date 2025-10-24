@@ -28,7 +28,6 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onBack }) => {
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const [replaceMode, setReplaceMode] = useState(false);
 
   const checkServerHealth = useCallback(async () => {
     try {
@@ -309,7 +308,6 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onBack }) => {
     
     const formData = new FormData();
     formData.append('file', selectedFile);
-    formData.append('replaceMode', replaceMode.toString());
 
     try {
       console.log('📤 Dosya yükleniyor:', {
@@ -841,23 +839,20 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onBack }) => {
                 <em className="text-xs">Sistem farklı sütun isimlerini otomatik algılar</em>
               </div>
 
-              <div className="bg-yellow-900/30 border border-yellow-500/50 rounded-lg p-4">
-                <label className="flex items-start cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={replaceMode}
-                    onChange={(e) => setReplaceMode(e.target.checked)}
-                    className="mt-1 mr-3 h-5 w-5 text-yellow-500 bg-white/20 border-yellow-500 rounded focus:ring-yellow-500 focus:ring-2"
-                  />
+              <div className="bg-blue-900/30 border border-blue-500/50 rounded-lg p-4">
+                <div className="flex items-start">
+                  <span className="text-2xl mr-3">ℹ️</span>
                   <div>
-                    <span className="text-yellow-300 font-medium">🔄 Mevcut soruları değiştir</span>
-                    <p className="text-xs text-yellow-200/80 mt-1">
-                      ⚠️ Seçilirse: TÜM eski sorular silinir, sadece yeni yüklenen sorular kalır
+                    <span className="text-blue-300 font-medium">Yükleme Davranışı</span>
+                    <p className="text-xs text-blue-200/80 mt-1">
+                      ✅ Yeni sorular mevcut soru bankasına <strong>eklenir</strong>
                       <br />
-                      ℹ️ Seçilmezse: Yeni sorular mevcut sorulara eklenir (mükerrer soruları atlar)
+                      🚫 Aynı sorular <strong>mükerrer olarak yüklenmez</strong> (otomatik atlanır)
+                      <br />
+                      🗑️ Tüm soruları silmek için aşağıdaki "Tüm Soruları Sil" butonunu kullanın
                     </p>
                   </div>
-                </label>
+                </div>
               </div>
 
               <button
