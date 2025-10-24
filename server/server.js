@@ -9,6 +9,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
 import QRCode from 'qrcode';
+import { initializeDatabase, getAllQuestions, addQuestion, addQuestionsInBulk, getQuestionCount } from './db.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -218,53 +219,36 @@ async function initializeServer() {
   };
   console.log('🧹 Server başladı, tüm oyuncular ve oyun durumu temizlendi');
   
-  // Soruları yükle
+  // Veritabanını başlat ve soruları yükle
   try {
-    const questionsPath = path.join(__dirname, '../data/questions.json');
-    console.log('📁 Soru dosyası yolu:', questionsPath);
-    console.log('📁 __dirname:', __dirname);
-    console.log('📁 process.cwd():', process.cwd());
+    // Önce veritabanını başlat
+    await initializeDatabase();
     
-    if (fsSync.existsSync(questionsPath)) {
-      const raw = await fs.readFile(questionsPath, 'utf-8');
-      questions = JSON.parse(raw);
-      gameState.totalQuestions = questions.length;
-      console.log(`✅ ${questions.length} soru yüklendi`);
-    } else {
-      console.log('⚠️ Soru dosyası bulunamadı:', questionsPath);
-      console.log('⚠️ Dizin içeriği kontrol ediliyor...');
-      
-      // Alternatif yolları dene
-      const alternativePaths = [
-        path.join(process.cwd(), 'data/questions.json'),
-        path.join(__dirname, 'data/questions.json'),
-        'data/questions.json'
-      ];
-      
-      let found = false;
-      for (const altPath of alternativePaths) {
-        console.log(`🔍 Kontrol ediliyor: ${altPath}`);
-        if (fsSync.existsSync(altPath)) {
-          console.log(`✅ Bulundu: ${altPath}`);
-          const raw = await fs.readFile(altPath, 'utf-8');
-          questions = JSON.parse(raw);
-          gameState.totalQuestions = questions.length;
-          console.log(`✅ ${questions.length} soru yüklendi (alternatif yol)`);
-          found = true;
-          break;
-        }
-      }
-      
-      if (!found) {
-        console.error('❌ Hiçbir yolda questions.json bulunamadı!');
+    // Soruları veritabanından yükle
+    questions = await getAllQuestions();
+    gameState.totalQuestions = questions.length;
+    console.log(`✅ ${questions.length} soru veritabanından yüklendi`);
+  } catch (err) {
+    console.error('❌ Veritabanı hatası:', err);
+    console.log('⚠️ Fallback: JSON dosyasından yüklenmeye çalışılıyor...');
+    
+    // Fallback: JSON dosyasından yükle
+    try {
+      const questionsPath = path.join(__dirname, '../data/questions.json');
+      if (fsSync.existsSync(questionsPath)) {
+        const raw = await fs.readFile(questionsPath, 'utf-8');
+        questions = JSON.parse(raw);
+        gameState.totalQuestions = questions.length;
+        console.log(`✅ ${questions.length} soru JSON dosyasından yüklendi (fallback)`);
+      } else {
         questions = [];
         gameState.totalQuestions = 0;
       }
+    } catch (fileErr) {
+      console.error('❌ JSON dosyası da yüklenemedi:', fileErr);
+      questions = [];
+      gameState.totalQuestions = 0;
     }
-  } catch (err) {
-    console.error('❌ Soru yükleme hatası:', err);
-    questions = [];
-    gameState.totalQuestions = 0;
   }
 }
 
@@ -682,12 +666,14 @@ app.post('/api/upload', (req, res) => {
         }
       });
 
-      // Dosyayı kaydet
-      await fs.writeFile('data/questions.json', JSON.stringify(merged, null, 2), 'utf-8');
-      questions = merged;
+      // Veritabanına kaydet
+      const { added: dbAdded, duplicates: dbDuplicates } = await addQuestionsInBulk(merged);
+      
+      // Memory'deki listeyi güncelle
+      questions = await getAllQuestions();
       gameState.totalQuestions = questions.length;
 
-      console.log(`✅ İşlem tamamlandı: ${addedCount} eklendi, ${duplicateCount} mükerrer, ${skippedCount} atlandı, ${errorCount} hata`);
+      console.log(`✅ İşlem tamamlandı: ${dbAdded} veritabanına eklendi, ${dbDuplicates} mükerrer, ${skippedCount} atlandı, ${errorCount} hata`);
 
       // Geçici dosyayı sil
       try {
@@ -1343,20 +1329,14 @@ io.on('connection', (socket) => {
         return callback({ success: false, message: 'Soru ve cevap boş olamaz!' });
       }
 
-      const exists = questions.some(q => 
-        q.question.toLowerCase() === questionText.toLowerCase()
-      );
+      // Veritabanına ekle
+      const newQ = await addQuestion(questionText, answerText);
       
-      if (exists) {
-        return callback({ success: false, message: 'Bu soru zaten mevcut!' });
-      }
-
-      const newQ = { question: questionText, answer: answerText };
-      questions.push(newQ);
+      // Memory'deki listeyi de güncelle
+      questions = await getAllQuestions();
       gameState.totalQuestions = questions.length;
       
-      await fs.writeFile('data/questions.json', JSON.stringify(questions, null, 2), 'utf-8');
-      console.log('✅ Yeni soru eklendi:', {
+      console.log('✅ Yeni soru veritabanına eklendi:', {
         question: newQ.question.substring(0, 50),
         totalQuestions: questions.length
       });
@@ -1372,7 +1352,7 @@ io.on('connection', (socket) => {
       console.error('❌ Soru ekleme hatası:', error);
       callback({ 
         success: false, 
-        message: 'Soru eklenirken bir hata oluştu: ' + error.message 
+        message: error.message || 'Soru eklenirken bir hata oluştu!'
       });
     }
   });
