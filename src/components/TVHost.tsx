@@ -773,16 +773,16 @@ const TVHost: React.FC<TVHostProps> = ({ onBack }) => {
                   </div>
                 )}
 
-                {/* Soru - TV BÜYÜK */}
+                {/* Soru - TV BÜYÜK CENTER */}
                 {currentQuestionIndex < questions.length && (
-                  <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-8">
+                  <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-8 mx-auto max-w-6xl">
                     <div className="flex justify-center items-center mb-6">
                       <span className="text-green-300 font-semibold text-3xl">
                         📝 Soru {currentQuestionIndex + 1} / {questions.length}
                       </span>
                     </div>
                     
-                    <h3 className="text-4xl font-bold text-white mb-8 px-4 break-words text-center leading-relaxed">
+                    <h3 className="text-4xl font-bold text-white mb-8 px-4 break-words text-center leading-relaxed mx-auto">
                       {questions[currentQuestionIndex]?.question}
                     </h3>
 
@@ -823,38 +823,38 @@ const TVHost: React.FC<TVHostProps> = ({ onBack }) => {
                     )}
                 
                     {showResult && gameResult && (
-                      <div className="space-y-2">
-                        {/* Doğru Cevap - Kompakt */}
-                        <div className="bg-green-600/20 rounded-lg p-2">
-                          <h4 className="text-green-300 font-semibold mb-1 text-base">✅ Doğru Cevap</h4>
-                          <p className="text-white text-2xl font-bold">{gameResult.correct}</p>
+                      <div className="space-y-6 mx-auto max-w-6xl">
+                        {/* Doğru Cevap - TV CENTER */}
+                        <div className="bg-green-600/20 rounded-2xl p-8">
+                          <h4 className="text-green-300 font-semibold mb-4 text-3xl text-center">✅ Doğru Cevap</h4>
+                          <p className="text-white text-6xl font-bold text-center">{gameResult.correct}</p>
                   </div>
                   
-                        {/* Kazanan Gösterimi - Kompakt */}
-                        <div className="bg-gradient-to-r from-blue-500/20 to-purple-500/20 border border-blue-500/30 rounded-lg p-2 relative overflow-hidden">
-                          <h4 className="text-blue-300 font-semibold mb-2 text-base">🎯 Doğru veya En Yakın Cevap Veren</h4>
+                        {/* Kazanan Gösterimi - TV CENTER */}
+                        <div className="bg-gradient-to-r from-blue-500/20 to-purple-500/20 border border-blue-500/30 rounded-2xl p-8 relative overflow-hidden">
+                          <h4 className="text-blue-300 font-semibold mb-6 text-3xl text-center">🎯 Doğru veya En Yakın Cevap Veren</h4>
                           <div className="relative">
                             {gameResult.winners && gameResult.winners.length > 0 ? (
                               <div className="space-y-3">
                                 {gameResult.winners.length === 1 ? (
-                                  <p className="text-white text-xl font-bold text-center animate-pulse" style={{
+                                  <p className="text-white text-5xl font-bold text-center animate-pulse" style={{
                                     animation: 'heartbeat 1.5s ease-in-out infinite, glow 2s ease-in-out infinite alternate'
                                   }}>{gameResult.winners[0]}</p>
                                 ) : (
-                    <div className="space-y-2">
-                                    <p className="text-blue-300 text-base mb-1">Aynı cevabı veren kazananlar:</p>
+                    <div className="space-y-4">
+                                    <p className="text-blue-300 text-2xl mb-3 text-center">Aynı cevabı veren kazananlar:</p>
                                     {gameResult.winners.map((winner, index) => (
-                                      <div key={winner} className="bg-white/10 rounded-lg p-2 animate-slideInRight" style={{
+                                      <div key={winner} className="bg-white/10 rounded-xl p-4 animate-slideInRight" style={{
                                         animationDelay: `${index * 0.2}s`
                                       }}>
-                                        <p className="text-white text-lg font-bold text-center animate-pulse">
+                                        <p className="text-white text-4xl font-bold text-center animate-pulse">
                                           🏆 {winner}
                                         </p>
                                       </div>
                                     ))}
                                   </div>
                                 )}
-                                <p className="text-blue-300 text-lg mt-4">
+                                <p className="text-blue-300 text-2xl mt-6 text-center">
                                   Cevap: {gameResult.closest.includes('(') ? gameResult.closest.split('(')[1].replace(')', '') : gameResult.correct}
                                 </p>
                               </div>
