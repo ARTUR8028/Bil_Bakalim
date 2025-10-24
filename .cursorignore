@@ -1,1 +1,8 @@
-# Add directories or file patterns to ignore during indexing (e.g. foo/ or *.csv)
+# Gradle ve Android proje klasörlerini yoksay
+android-app/
+android-project/
+android-studio-guide/
+.gradle/
+.settings/
+*.iml
+local.properties
