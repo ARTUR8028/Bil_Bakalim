@@ -9,7 +9,7 @@ interface APKDownloadProps {
 const APKDownload: React.FC<APKDownloadProps> = ({ onBack }) => {
   const apkUrl = '/apps/BilBakalimTV.apk';
   const apkSize = '3.5 MB'; // Yeni Android Studio APK
-  const version = '2.0.0'; // Android Studio Native WebView
+  const version = '2.1.0'; // TV Otomatik Algılama + Tam Ekran
   const [qrCodeUrl, setQrCodeUrl] = useState('');
   const fullApkUrl = `${window.location.origin}${apkUrl}`;
 
