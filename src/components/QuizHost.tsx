@@ -522,8 +522,8 @@ const QuizHost: React.FC<QuizHostProps> = ({ onBack }) => {
           </div>
 
           <div className="flex-1 flex flex-col justify-center overflow-hidden">
-            <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-4 relative overflow-hidden">
-              <h1 className="text-2xl font-bold text-white mb-4">🏆 Oyun Bitti! 🏆</h1>
+            <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-4 relative overflow-hidden mx-auto w-full max-w-3xl">
+              <h1 className="text-2xl font-bold text-white mb-4 text-center">🏆 Oyun Bitti! 🏆</h1>
               
               {/* Kazanan animasyonu */}
               {sortedScores.length > 0 && (
@@ -543,8 +543,8 @@ const QuizHost: React.FC<QuizHostProps> = ({ onBack }) => {
                   </div>
                   
                   <div className="bg-gradient-to-r from-yellow-400/20 to-orange-500/20 rounded-xl p-3 border border-yellow-400/30 relative z-10">
-                    <h3 className="text-lg font-semibold text-yellow-300 mb-2">🏆 TEBRİKLER KAZANAN</h3>
-                    <div className="relative">
+                    <h3 className="text-lg font-semibold text-yellow-300 mb-2 text-center">🏆 TEBRİKLER KAZANAN</h3>
+                    <div className="relative text-center">
                       <p className="text-white text-3xl md:text-4xl font-bold animate-pulse" style={{
                         animation: 'heartbeat 1.5s ease-in-out infinite, glow 2s ease-in-out infinite alternate'
                       }}>
@@ -559,7 +559,7 @@ const QuizHost: React.FC<QuizHostProps> = ({ onBack }) => {
               )}
               
               <div className="mb-4 max-h-60 overflow-y-auto">
-                <h2 className="text-lg font-semibold text-green-300 mb-2">Final Sıralaması</h2>
+                <h2 className="text-lg font-semibold text-green-300 mb-2 text-center">Final Sıralaması</h2>
                 <div className="space-y-1">
                   {sortedScores.map(([name, score], index) => (
                     <div
@@ -710,8 +710,8 @@ const QuizHost: React.FC<QuizHostProps> = ({ onBack }) => {
 
           {/* Oyuncu Bekleme Ekranı */}
           <div className="flex-1 flex flex-col justify-center overflow-hidden">
-            <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-4">
-              <h2 className="text-2xl font-bold text-white mb-4">👥 Oyuncular Katılıyor</h2>
+            <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-4 mx-auto w-full max-w-5xl">
+              <h2 className="text-2xl font-bold text-white mb-4 text-center">👥 Oyuncular Katılıyor</h2>
               
               {/* Room ID */}
               {roomId && (
@@ -901,7 +901,7 @@ const QuizHost: React.FC<QuizHostProps> = ({ onBack }) => {
 
             {/* Soru */}
             {currentQuestionIndex < questions.length && (
-              <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-4">
+              <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-4 mx-auto w-full max-w-3xl">
                 <div className="flex justify-center items-center mb-3">
                   <span className="text-green-300 font-semibold text-sm">
                     📝 Soru {currentQuestionIndex + 1} / {questions.length}
@@ -951,14 +951,14 @@ const QuizHost: React.FC<QuizHostProps> = ({ onBack }) => {
                 )}
 
                 {showResult && (
-                  <div className="space-y-4">
+                  <div className="space-y-4 mx-auto w-full max-w-3xl">
                     <div className="bg-green-600/20 rounded-lg p-4">
-                      <h4 className="text-green-300 font-semibold mb-2">✅ Doğru Cevap</h4>
-                      <p className="text-white text-3xl sm:text-4xl md:text-6xl font-bold">{gameResult?.correct}</p>
+                      <h4 className="text-green-300 font-semibold mb-2 text-center">✅ Doğru Cevap</h4>
+                      <p className="text-white text-3xl sm:text-4xl md:text-6xl font-bold text-center">{gameResult?.correct}</p>
                     </div>
                     
                     <div className="bg-gradient-to-r from-blue-500/20 to-purple-500/20 border border-blue-500/30 rounded-lg p-6 relative overflow-hidden">
-                      <h4 className="text-blue-300 font-semibold mb-4">🎯 Doğru veya En Yakın Cevap Veren</h4>
+                      <h4 className="text-blue-300 font-semibold mb-4 text-center">🎯 Doğru veya En Yakın Cevap Veren</h4>
                       <div className="relative">
                         {/* Kazanan isimlerini göster */}
                         {gameResult?.winners && gameResult.winners.length > 0 ? (
