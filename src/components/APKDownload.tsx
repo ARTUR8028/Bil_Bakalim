@@ -8,8 +8,8 @@ interface APKDownloadProps {
 
 const APKDownload: React.FC<APKDownloadProps> = ({ onBack }) => {
   const apkUrl = '/apps/BilBakalimTV.apk';
-  const apkSize = '5.0 MB'; // Android Studio APK - PlayerView CENTER
-  const version = '2.2.2'; // PlayerView Sorular CENTER
+  const apkSize = '6.3 MB'; // Debug APK (İmzalı - Yüklenebilir)
+  const version = '2.2.2'; // Tüm Ekranlar CENTER + İmzalı
   const [qrCodeUrl, setQrCodeUrl] = useState('');
   const fullApkUrl = `${window.location.origin}${apkUrl}`;
 
