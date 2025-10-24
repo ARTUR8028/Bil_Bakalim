@@ -44,6 +44,7 @@ const NODE_ENV = process.env.NODE_ENV || 'development';
 
 console.log('\n🚀 ================================');
 console.log(`🎮 Quiz Sunucusu Başlatılıyor... (${NODE_ENV === 'production' ? 'Production' : 'Nodemon ile'})`);
+console.log('📊 Sorular yükleniyor...');
 console.log('🚀 ================================');
 
 // CORS middleware - Daha kapsamlı
