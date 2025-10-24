@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { ArrowLeft, Play, Users, Trophy, RotateCcw, Shuffle, Copy, CheckCircle, Wifi, WifiOff } from 'lucide-react';
+import { ArrowLeft, Play, Users, Trophy, RotateCcw, Shuffle, QrCode, Copy, CheckCircle, Wifi, WifiOff } from 'lucide-react';
 import { io, Socket } from 'socket.io-client';
 import QRCode from 'qrcode';
 import { getDeviceInfo } from '../utils/deviceDetection';
@@ -419,6 +419,7 @@ const QuizHost: React.FC<QuizHostProps> = ({ onBack }) => {
     return (
       <div className="bg-white/10 backdrop-blur-lg rounded-xl p-6">
         <div className="flex items-center justify-center mb-4">
+          <Users className="w-6 h-6 text-green-300 mr-3" />
           <h3 className="text-xl font-semibold text-white">🎉 Katılımcılar</h3>
         </div>
         
@@ -730,6 +731,7 @@ const QuizHost: React.FC<QuizHostProps> = ({ onBack }) => {
                 {/* QR Kod */}
                 <div className="bg-white/10 rounded-xl p-6">
                   <div className="flex items-center justify-center mb-4">
+                    <QrCode className="w-8 h-8 text-blue-300 mr-3" />
                     <h3 className="text-xl font-semibold text-white">📱 QR Kod ile Katıl</h3>
                   </div>
                   {qrCodeUrl ? (
@@ -746,6 +748,7 @@ const QuizHost: React.FC<QuizHostProps> = ({ onBack }) => {
                 {/* Link */}
                 <div className="bg-white/10 rounded-xl p-6">
                   <div className="flex items-center justify-center mb-4">
+                    <Copy className="w-8 h-8 text-green-300 mr-3" />
                     <h3 className="text-xl font-semibold text-white">🔗 Katılım Linki</h3>
                   </div>
                   <div className="bg-white/10 rounded-lg p-4 mb-4">
