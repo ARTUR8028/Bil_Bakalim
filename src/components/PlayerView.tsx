@@ -704,8 +704,8 @@ const PlayerView: React.FC<PlayerViewProps> = ({ onBack }) => {
               )}
               
               <div className="bg-white/10 rounded-lg p-6">
-                <h2 className="text-xl font-semibold text-white mb-4">📝 Soru:</h2>
-                <p className="text-lg text-purple-200">{currentQuestion}</p>
+                <h2 className="text-xl font-semibold text-white mb-4 text-center">📝 Soru:</h2>
+                <p className="text-lg text-purple-200 text-center">{currentQuestion}</p>
               </div>
 
               {answerError && (
@@ -776,13 +776,13 @@ const PlayerView: React.FC<PlayerViewProps> = ({ onBack }) => {
                 <div className="space-y-6">
                   <div className="bg-gradient-to-r from-yellow-500/20 to-orange-500/20 rounded-lg p-6 border border-yellow-500/30">
                     <Trophy className="w-16 h-16 text-yellow-400 mx-auto mb-4" />
-                    <h3 className="text-2xl font-bold text-yellow-300 mb-2">🏆 Doğru veya En Yakın Cevap Veren</h3>
-                    <p className="text-4xl font-bold text-white mb-2" style={{
+                    <h3 className="text-2xl font-bold text-yellow-300 mb-2 text-center">🏆 Doğru veya En Yakın Cevap Veren</h3>
+                    <p className="text-4xl font-bold text-white mb-2 text-center" style={{
                       animation: 'heartbeat 1.5s ease-in-out infinite, glow 2s ease-in-out infinite alternate'
                     }}>
                       {winnerInfo.playerName}
                     </p>
-                    <p className="text-xl text-yellow-200">Cevap: {winnerInfo.answer}</p>
+                    <p className="text-xl text-yellow-200 text-center">Cevap: {winnerInfo.answer}</p>
                   </div>
                 </div>
               ) : showFullResults ? (
@@ -790,11 +790,11 @@ const PlayerView: React.FC<PlayerViewProps> = ({ onBack }) => {
                 <div className="space-y-6">
                   {/* Doğru Cevap Bölümü */}
                   <div className="bg-gradient-to-r from-teal-500/20 to-green-500/20 rounded-lg p-6 border border-teal-500/30">
-                    <div className="flex items-center mb-4">
+                    <div className="flex items-center justify-center mb-4">
                       <div className="w-6 h-6 bg-green-500 rounded flex items-center justify-center mr-3">
                         <span className="text-white text-sm">✓</span>
                       </div>
-                      <h3 className="text-white font-semibold">Doğru Cevap</h3>
+                      <h3 className="text-white font-semibold text-center">Doğru Cevap</h3>
                     </div>
                     <div className="text-4xl font-bold text-white text-center">
                       {gameResult?.correct || 'Bilinmiyor'}
@@ -803,11 +803,11 @@ const PlayerView: React.FC<PlayerViewProps> = ({ onBack }) => {
 
                   {/* Doğru veya En Yakın Cevap Veren Bölümü */}
                   <div className="bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-lg p-6 border border-blue-500/30">
-                    <div className="flex items-center mb-4">
+                    <div className="flex items-center justify-center mb-4">
                       <div className="w-6 h-6 bg-red-500 rounded flex items-center justify-center mr-3">
                         <span className="text-white text-sm">🎯</span>
                       </div>
-                      <h3 className="text-white font-semibold">Doğru veya En Yakın Cevap Veren</h3>
+                      <h3 className="text-white font-semibold text-center">Doğru veya En Yakın Cevap Veren</h3>
                     </div>
                     <div className="text-center">
                       <p className="text-white text-2xl font-bold text-center animate-pulse" style={{
