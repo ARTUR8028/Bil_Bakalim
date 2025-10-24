@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Download, Smartphone, ArrowLeft } from 'lucide-react';
+import { Download, Smartphone, ArrowLeft, QrCode } from 'lucide-react';
 import QRCode from 'qrcode';
 
 interface APKDownloadProps {
@@ -113,8 +113,10 @@ const APKDownload: React.FC<APKDownloadProps> = ({ onBack }) => {
 
             {/* QR Code Download */}
             <div className="bg-white/10 backdrop-blur-lg rounded-3xl p-8 border border-white/20">
-            {/*  className="text-3xl font-bold text-white mb-6">📱 QR Kod İndirme</h2>*/
-              <h3 className="text-xl font-semibold text-white">QR Kod ile Katıl</h3>
+              <div className="flex items-center justify-center mb-6">
+                <QrCode className="w-8 h-8 text-white mr-3" />
+                <h2 className="text-3xl font-bold text-white">QR Kod İndirme</h2>
+              </div>
               <p className="text-lg text-gray-300 mb-6">
                 QR kodu telefonunuzla okutarak APK dosyasını indirin.
               </p>
