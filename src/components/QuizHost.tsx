@@ -908,7 +908,7 @@ const QuizHost: React.FC<QuizHostProps> = ({ onBack }) => {
                   </span>
                 </div>
                 
-                <h3 className={`${deviceInfo.isTV ? 'text-3xl' : 'text-lg sm:text-xl md:text-2xl'} font-bold text-white ${deviceInfo.isTV ? 'mb-8' : 'mb-4'} ${deviceInfo.isTV ? 'px-4' : 'px-2'} break-words`}>
+                <h3 className={`${deviceInfo.isTV ? 'text-3xl' : 'text-lg sm:text-xl md:text-2xl'} font-bold text-white ${deviceInfo.isTV ? 'mb-8' : 'mb-4'} ${deviceInfo.isTV ? 'px-4' : 'px-2'} break-words text-center`}>
                   {questions[currentQuestionIndex]?.question}
                 </h3>
 
@@ -953,12 +953,12 @@ const QuizHost: React.FC<QuizHostProps> = ({ onBack }) => {
                 {showResult && (
                   <div className="space-y-4 mx-auto w-full max-w-3xl">
                     <div className="bg-green-600/20 rounded-lg p-4">
-                      <h4 className="text-green-300 font-semibold mb-2 text-center">✅ Doğru Cevap</h4>
+                      <h4 className="text-green-300 font-semibold mb-2 text-center text-lg sm:text-xl md:text-2xl">✅ Doğru Cevap</h4>
                       <p className="text-white text-3xl sm:text-4xl md:text-6xl font-bold text-center">{gameResult?.correct}</p>
                     </div>
                     
                     <div className="bg-gradient-to-r from-blue-500/20 to-purple-500/20 border border-blue-500/30 rounded-lg p-6 relative overflow-hidden">
-                      <h4 className="text-blue-300 font-semibold mb-4 text-center">🎯 Doğru veya En Yakın Cevap Veren</h4>
+                      <h4 className="text-blue-300 font-semibold mb-4 text-center text-lg sm:text-xl md:text-2xl">🎯 Doğru veya En Yakın Cevap Veren</h4>
                       <div className="relative">
                         {/* Kazanan isimlerini göster */}
                         {gameResult?.winners && gameResult.winners.length > 0 ? (
@@ -971,7 +971,7 @@ const QuizHost: React.FC<QuizHostProps> = ({ onBack }) => {
                             ) : (
                               /* Birden fazla kazanan varsa liste halinde göster */
                               <div className="space-y-2">
-                                <p className="text-blue-300 text-lg mb-3">Aynı cevabı veren kazananlar:</p>
+                                <p className="text-blue-300 text-lg mb-3 text-center">Aynı cevabı veren kazananlar:</p>
                                 {gameResult.winners.map((winner, index) => (
                                   <div key={winner} className="bg-white/10 rounded-lg p-3 animate-slideInRight" style={{
                                     animationDelay: `${index * 0.2}s`
@@ -985,7 +985,7 @@ const QuizHost: React.FC<QuizHostProps> = ({ onBack }) => {
                             )}
                             
                             {/* Cevap bilgisi */}
-                            <p className="text-blue-300 text-lg mt-4">
+                            <p className="text-blue-300 text-lg mt-4 text-center">
                               Cevap: {gameResult.closest.includes('(') ? gameResult.closest.split('(')[1].replace(')', '') : gameResult.correct}
                             </p>
                           </div>
