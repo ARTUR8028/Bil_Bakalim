@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { ArrowLeft, Play, Users, Trophy, RotateCcw, Shuffle, CheckCircle, Wifi, WifiOff } from 'lucide-react';
+import { ArrowLeft, Play, Users, Trophy, RotateCcw, Shuffle, Copy, CheckCircle, Wifi, WifiOff } from 'lucide-react';
 import { io, Socket } from 'socket.io-client';
 import QRCode from 'qrcode';
 import { getDeviceInfo } from '../utils/deviceDetection';
@@ -508,7 +508,7 @@ const QuizHost: React.FC<QuizHostProps> = ({ onBack }) => {
     
     return (
       <div translate="no" className="min-h-screen bg-gradient-to-br from-green-900 via-blue-900 to-purple-900 p-4">
-        <div className={`mx-auto ${deviceInfo.isMobile || deviceInfo.isTablet ? 'max-w-4xl' : 'max-w-full'}`}>
+        <div className="max-w-4xl mx-auto">
           <div className="flex justify-between items-center mb-8">
             <button
               onClick={goBackToModeSelection}
@@ -687,7 +687,7 @@ const QuizHost: React.FC<QuizHostProps> = ({ onBack }) => {
   if (waitingForPlayers) {
     return (
       <div translate="no" className="min-h-screen bg-gradient-to-br from-green-900 via-blue-900 to-purple-900 p-4">
-        <div className={`mx-auto ${deviceInfo.isMobile || deviceInfo.isTablet ? 'max-w-4xl' : 'max-w-full'}`}>
+        <div className="max-w-4xl mx-auto">
           {/* Header */}
           <div className="flex items-center justify-between mb-8">
             <button
@@ -762,7 +762,8 @@ const QuizHost: React.FC<QuizHostProps> = ({ onBack }) => {
                       </>
                     ) : (
                       <>
-                        📋 Linki Kopyala
+                        <Copy className="w-5 h-5 mr-2" />
+                        Linki Kopyala
                       </>
                     )}
                   </button>
@@ -805,7 +806,7 @@ const QuizHost: React.FC<QuizHostProps> = ({ onBack }) => {
 
   return (
     <div translate="no" className="min-h-screen bg-gradient-to-br from-green-900 via-blue-900 to-purple-900 p-4">
-      <div className={`mx-auto ${deviceInfo.isMobile || deviceInfo.isTablet ? 'max-w-6xl' : 'max-w-full px-4'}`}>
+      <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <button

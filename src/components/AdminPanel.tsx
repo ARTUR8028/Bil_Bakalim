@@ -551,7 +551,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onBack }) => {
         <div className="mb-8 bg-white/10 backdrop-blur-lg rounded-2xl p-6 border border-white/20">
           <div className="flex justify-between items-center mb-4">
             <h3 className="text-xl font-semibold text-white">
-              📊 Sunucu Durumu
+              Sunucu Durumu
             </h3>
             <button
               onClick={checkServerHealth}
