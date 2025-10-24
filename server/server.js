@@ -9,7 +9,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
 import QRCode from 'qrcode';
-import { initializeDatabase, getAllQuestions, addQuestion, addQuestionsInBulk, getQuestionCount } from './db.js';
+import { initializeDatabase, getAllQuestions, addQuestion, addQuestionsInBulk, getQuestionCount, deleteAllQuestions } from './db.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);

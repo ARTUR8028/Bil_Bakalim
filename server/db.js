@@ -125,5 +125,17 @@ export async function getQuestionCount() {
   }
 }
 
+// Tüm soruları sil
+export async function deleteAllQuestions() {
+  try {
+    const result = await pool.query('DELETE FROM questions');
+    console.log(`✅ ${result.rowCount} soru veritabanından silindi!`);
+    return result.rowCount;
+  } catch (error) {
+    console.error('❌ Sorular silinemedi:', error);
+    throw error;
+  }
+}
+
 export default pool;
 
