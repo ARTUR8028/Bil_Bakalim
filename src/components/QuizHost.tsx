@@ -762,8 +762,7 @@ const QuizHost: React.FC<QuizHostProps> = ({ onBack }) => {
                       </>
                     ) : (
                       <>
-                        <Copy className="w-5 h-5 mr-2" />
-                        Linki Kopyala
+                        📋 Linki Kopyala
                       </>
                     )}
                   </button>
