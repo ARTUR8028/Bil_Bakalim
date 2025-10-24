@@ -508,9 +508,9 @@ const QuizHost: React.FC<QuizHostProps> = ({ onBack }) => {
     const sortedScores = Object.entries(scores).sort(([,a], [,b]) => b - a);
     
     return (
-      <div translate="no" className={`h-screen overflow-hidden bg-gradient-to-br from-green-900 via-blue-900 to-purple-900 ${deviceInfo.isMobile || deviceInfo.isTablet ? 'p-4' : 'p-0'}`}>
-        <div className="max-w-4xl mx-auto h-full overflow-y-auto py-4">
-          <div className="flex justify-between items-center mb-8">
+      <div translate="no" className={`h-screen overflow-hidden bg-gradient-to-br from-green-900 via-blue-900 to-purple-900 ${deviceInfo.isMobile || deviceInfo.isTablet ? 'p-4' : 'p-2'}`}>
+        <div className="max-w-4xl mx-auto h-full flex flex-col">
+          <div className="flex justify-between items-center mb-3 flex-shrink-0">
             <button
               onClick={goBackToModeSelection}
               className="flex items-center text-white hover:text-green-300 transition-colors"
@@ -521,15 +521,15 @@ const QuizHost: React.FC<QuizHostProps> = ({ onBack }) => {
             <ConnectionIndicator />
           </div>
 
-          <div className="text-center">
-            <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-8 mb-8 relative overflow-hidden">
-              <h1 className="text-4xl font-bold text-white mb-6">🏆 Oyun Bitti! 🏆</h1>
+          <div className="flex-1 flex flex-col justify-center overflow-hidden">
+            <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-4 relative overflow-hidden">
+              <h1 className="text-2xl font-bold text-white mb-4">🏆 Oyun Bitti! 🏆</h1>
               
               {/* Kazanan animasyonu */}
               {sortedScores.length > 0 && (
-                <div className="mb-8 relative">
-                  {/* Havai Fişek Animasyonu */}
-                  <div className="absolute inset-0 pointer-events-none">
+                <div className="mb-4 relative">
+                  {/* Havai Fişek Animasyonu - sadece birkaç tane */}
+                  <div className="absolute inset-0 pointer-events-none hidden md:block">
                     <div className="absolute top-1/4 left-1/4 w-4 h-4 bg-yellow-400 rounded-full animate-fireworks" style={{ animationDelay: '0s', animationDuration: '2s' }}></div>
                     <div className="absolute top-1/3 right-1/4 w-3 h-3 bg-orange-400 rounded-full animate-fireworks" style={{ animationDelay: '0.5s', animationDuration: '2.5s' }}></div>
                     <div className="absolute top-1/2 left-1/3 w-5 h-5 bg-red-400 rounded-full animate-fireworks" style={{ animationDelay: '1s', animationDuration: '2.2s' }}></div>
@@ -542,15 +542,15 @@ const QuizHost: React.FC<QuizHostProps> = ({ onBack }) => {
                     <div className="absolute top-3/4 left-1/4 w-2 h-2 bg-orange-300 rounded-full animate-sparkle" style={{ animationDelay: '1.3s', animationDuration: '1.6s' }}></div>
                   </div>
                   
-                  <div className="bg-gradient-to-r from-yellow-400/20 to-orange-500/20 rounded-xl p-6 border border-yellow-400/30 relative z-10">
-                    <h3 className="text-2xl font-semibold text-yellow-300 mb-4">🏆 TEBRİKLER KAZANAN</h3>
+                  <div className="bg-gradient-to-r from-yellow-400/20 to-orange-500/20 rounded-xl p-3 border border-yellow-400/30 relative z-10">
+                    <h3 className="text-lg font-semibold text-yellow-300 mb-2">🏆 TEBRİKLER KAZANAN</h3>
                     <div className="relative">
-                      <p className="text-white text-6xl font-bold animate-pulse" style={{
+                      <p className="text-white text-3xl md:text-4xl font-bold animate-pulse" style={{
                         animation: 'heartbeat 1.5s ease-in-out infinite, glow 2s ease-in-out infinite alternate'
                       }}>
                         {sortedScores[0][0]}
                       </p>
-                      <p className="text-yellow-300 text-2xl font-semibold mt-2">
+                      <p className="text-yellow-300 text-xl font-semibold mt-1">
                         {sortedScores[0][1]} Puan
                       </p>
                     </div>
@@ -558,22 +558,22 @@ const QuizHost: React.FC<QuizHostProps> = ({ onBack }) => {
                 </div>
               )}
               
-              <div className="mb-8">
-                <h2 className="text-2xl font-semibold text-green-300 mb-4">Final Sıralaması</h2>
-                <div className="space-y-2">
+              <div className="mb-4 max-h-60 overflow-y-auto">
+                <h2 className="text-lg font-semibold text-green-300 mb-2">Final Sıralaması</h2>
+                <div className="space-y-1">
                   {sortedScores.map(([name, score], index) => (
                     <div
                       key={name}
-                      className={`flex justify-between items-center p-4 rounded-lg transition-all duration-300 ${
+                      className={`flex justify-between items-center p-2 rounded-lg transition-all duration-300 ${
                         index === 0 ? 'animate-pulse bg-yellow-600/20' : 'bg-white/10'
                       }`}
                     >
-                      <span className="text-white flex items-center text-lg">
-                        {index === 0 && <Trophy className="w-6 h-6 text-yellow-400 mr-3" />}
+                      <span className="text-white flex items-center text-sm">
+                        {index === 0 && <Trophy className="w-4 h-4 text-yellow-400 mr-2" />}
                         {index + 1} - {name}
-                        {index === 0 && <span className="ml-3 text-yellow-400 font-bold text-xl">👑</span>}
+                        {index === 0 && <span className="ml-2 text-yellow-400 font-bold">👑</span>}
                       </span>
-                      <span className="text-blue-300 font-semibold text-lg">{score} puan</span>
+                      <span className="text-blue-300 font-semibold text-sm">{score} puan</span>
                     </div>
                   ))}
                 </div>
@@ -581,7 +581,7 @@ const QuizHost: React.FC<QuizHostProps> = ({ onBack }) => {
 
               <button
                 onClick={goBackToModeSelection}
-                className="bg-green-600 text-white px-8 py-3 rounded-lg hover:bg-green-700 transition-colors font-medium"
+                className="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition-colors font-medium text-sm"
               >
                 Yeni Oyun
               </button>
@@ -687,10 +687,10 @@ const QuizHost: React.FC<QuizHostProps> = ({ onBack }) => {
 
   if (waitingForPlayers) {
     return (
-      <div translate="no" className={`h-screen overflow-hidden bg-gradient-to-br from-green-900 via-blue-900 to-purple-900 ${deviceInfo.isMobile || deviceInfo.isTablet ? 'p-4' : 'p-0'}`}>
-        <div className="max-w-4xl mx-auto h-full overflow-y-auto py-4">
+      <div translate="no" className={`h-screen overflow-hidden bg-gradient-to-br from-green-900 via-blue-900 to-purple-900 ${deviceInfo.isMobile || deviceInfo.isTablet ? 'p-4' : 'p-2'}`}>
+        <div className="max-w-4xl mx-auto h-full flex flex-col">
           {/* Header */}
-          <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center justify-between mb-4 flex-shrink-0">
             <button
               onClick={goBackToModeSelection}
               className="flex items-center text-white hover:text-green-300 transition-colors"
@@ -709,63 +709,63 @@ const QuizHost: React.FC<QuizHostProps> = ({ onBack }) => {
           </div>
 
           {/* Oyuncu Bekleme Ekranı */}
-          <div className="text-center">
-            <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 mb-6">
-              <h2 className="text-3xl font-bold text-white mb-6">👥 Oyuncular Katılıyor</h2>
+          <div className="flex-1 flex flex-col justify-center overflow-hidden">
+            <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-4">
+              <h2 className="text-2xl font-bold text-white mb-4">👥 Oyuncular Katılıyor</h2>
               
               {/* Room ID */}
               {roomId && (
-                <div className="bg-gradient-to-r from-purple-600 to-blue-600 rounded-xl p-4 mb-6">
-                  <div className="flex items-center justify-center mb-2">
-                    <h3 className="text-lg font-bold text-white">🎮 Oyun Kodu</h3>
+                <div className="bg-gradient-to-r from-purple-600 to-blue-600 rounded-xl p-3 mb-4">
+                  <div className="flex items-center justify-center mb-1">
+                    <h3 className="text-base font-bold text-white">🎮 Oyun Kodu</h3>
                   </div>
-                  <div className="bg-white/20 rounded-lg p-3">
-                    <p className="text-3xl font-bold text-white text-center tracking-wider">{roomId}</p>
+                  <div className="bg-white/20 rounded-lg p-2">
+                    <p className="text-2xl font-bold text-white text-center tracking-wider">{roomId}</p>
                   </div>
-                  <p className="text-white/80 text-center mt-2 text-xs">Oyunculara bu kodu verin</p>
+                  <p className="text-white/80 text-center mt-1 text-xs">Oyunculara bu kodu verin</p>
                 </div>
               )}
 
               {/* QR Kod, Link ve Katılımcı Listesi - 3 Sütun Layout */}
-              <div className="grid lg:grid-cols-3 md:grid-cols-2 gap-6 mb-8">
+              <div className="grid lg:grid-cols-3 md:grid-cols-2 gap-4 mb-4">
                 {/* QR Kod */}
-                <div className="bg-white/10 rounded-xl p-6">
-                  <div className="flex items-center justify-center mb-4">
-                    <QrCode className="w-8 h-8 text-blue-300 mr-3" />
-                    <h3 className="text-xl font-semibold text-white">QR Kod ile Katıl</h3>
+                <div className="bg-white/10 rounded-xl p-3">
+                  <div className="flex items-center justify-center mb-2">
+                    <QrCode className="w-5 h-5 text-blue-300 mr-2" />
+                    <h3 className="text-sm font-semibold text-white">QR Kod ile Katıl</h3>
                   </div>
                   {qrCodeUrl ? (
-                    <div className="bg-white p-4 rounded-lg inline-block">
-                      <img src={qrCodeUrl} alt="QR Kod" className="w-48 h-48 mx-auto" />
+                    <div className="bg-white p-2 rounded-lg inline-block">
+                      <img src={qrCodeUrl} alt="QR Kod" className="w-32 h-32 mx-auto" />
                     </div>
                   ) : (
-                    <div className="bg-white/10 rounded-lg p-12">
-                      <div className="animate-pulse">QR Kod Yükleniyor...</div>
+                    <div className="bg-white/10 rounded-lg p-8">
+                      <div className="animate-pulse text-xs">QR Kod Yükleniyor...</div>
                     </div>
                   )}
                 </div>
 
                 {/* Link */}
-                <div className="bg-white/10 rounded-xl p-6">
-                  <div className="flex items-center justify-center mb-4">
-                    <Copy className="w-8 h-8 text-green-300 mr-3" />
-                    <h3 className="text-xl font-semibold text-white">Katılım Linki</h3>
+                <div className="bg-white/10 rounded-xl p-3">
+                  <div className="flex items-center justify-center mb-2">
+                    <Copy className="w-5 h-5 text-green-300 mr-2" />
+                    <h3 className="text-sm font-semibold text-white">Katılım Linki</h3>
                   </div>
-                  <div className="bg-white/10 rounded-lg p-4 mb-4">
-                    <p className="text-blue-200 font-mono text-sm break-all">{joinLink}</p>
+                  <div className="bg-white/10 rounded-lg p-2 mb-2">
+                    <p className="text-blue-200 font-mono text-xs break-all">{joinLink}</p>
                   </div>
                   <button
                     onClick={copyLink}
-                    className="bg-green-600 text-white px-8 py-3 rounded-lg hover:bg-green-700 transition-colors flex items-center mx-auto"
+                    className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors flex items-center mx-auto text-sm"
                   >
                     {linkCopied ? (
                       <>
-                        <CheckCircle className="w-5 h-5 mr-2" />
+                        <CheckCircle className="w-4 h-4 mr-1" />
                         Kopyalandı!
                       </>
                     ) : (
                       <>
-                        <Copy className="w-5 h-5 mr-2" />
+                        <Copy className="w-4 h-4 mr-1" />
                         Linki Kopyala
                       </>
                     )}
@@ -779,9 +779,9 @@ const QuizHost: React.FC<QuizHostProps> = ({ onBack }) => {
               </div>
 
               {/* Oyuncu Sayısı */}
-              <div className="flex flex-col items-center mb-6">
-                <div className="text-5xl font-bold text-blue-300">{playerCount.total}</div>
-                <p className="text-lg text-white">Katılan Oyuncu</p>
+              <div className="flex flex-col items-center mb-3">
+                <div className="text-3xl font-bold text-blue-300">{playerCount.total}</div>
+                <p className="text-sm text-white">Katılan Oyuncu</p>
               </div>
 
               {/* Başlat Butonu ve Uyarı */}
@@ -789,13 +789,13 @@ const QuizHost: React.FC<QuizHostProps> = ({ onBack }) => {
                 <button
                   onClick={startQuizGame}
                   disabled={false}
-                  className="bg-green-600 text-white px-12 py-4 rounded-xl hover:bg-green-700 transition-colors font-semibold text-xl flex items-center"
+                  className="bg-green-600 text-white px-6 py-3 rounded-xl hover:bg-green-700 transition-colors font-semibold text-lg flex items-center"
                 >
-                  <Play className="w-6 h-6 mr-3" />
+                  <Play className="w-5 h-5 mr-2" />
                   Oyunu Başlat
                 </button>
                 
-                <p className="text-blue-300 mt-3 text-base">Oyunu başlatmak için butona tıklayın</p>
+                <p className="text-blue-300 mt-2 text-sm">Oyunu başlatmak için butona tıklayın</p>
               </div>
             </div>
           </div>
@@ -808,10 +808,10 @@ const QuizHost: React.FC<QuizHostProps> = ({ onBack }) => {
   }
 
   return (
-    <div translate="no" className={`h-screen overflow-hidden bg-gradient-to-br from-green-900 via-blue-900 to-purple-900 ${deviceInfo.isMobile || deviceInfo.isTablet ? 'p-4' : 'p-0'}`}>
-      <div className="max-w-6xl mx-auto h-full overflow-y-auto py-4">
+    <div translate="no" className={`h-screen overflow-hidden bg-gradient-to-br from-green-900 via-blue-900 to-purple-900 ${deviceInfo.isMobile || deviceInfo.isTablet ? 'p-4' : 'p-2'}`}>
+      <div className="max-w-6xl mx-auto h-full flex flex-col">
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex items-center justify-between mb-3 flex-shrink-0">
           <button
             onClick={onBack}
             className="flex items-center text-white hover:text-green-300 transition-colors"
@@ -847,14 +847,14 @@ const QuizHost: React.FC<QuizHostProps> = ({ onBack }) => {
         </div>
 
         {/* Ana İçerik */}
-        <div className="text-center">
-          <div className="space-y-8">
+        <div className="flex-1 flex flex-col justify-center overflow-hidden">
+          <div className="space-y-3">
             {/* Gelişmiş Geri Sayım */}
             {currentQuestionIndex < questions.length && !showResult && timer > 0 && (
-              <div className="flex justify-center mb-6 md:mb-8">
+              <div className="flex justify-center mb-2">
                 <div className="relative">
                   {/* Dış çember - progress bar */}
-                  <div className="w-32 h-32 sm:w-40 sm:h-40 md:w-48 md:h-48 rounded-full border-4 sm:border-6 md:border-8 border-purple-600 relative overflow-hidden bg-gradient-to-br from-purple-900 to-blue-900">
+                  <div className="w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 rounded-full border-3 sm:border-4 md:border-5 border-purple-600 relative overflow-hidden bg-gradient-to-br from-purple-900 to-blue-900">
                     <div 
                       className={`absolute inset-0 rounded-full transition-all duration-1000 ${
                         timer <= 5 ? 'bg-gradient-to-br from-red-500 to-red-600' : 
@@ -875,7 +875,7 @@ const QuizHost: React.FC<QuizHostProps> = ({ onBack }) => {
                   
                   {/* İç sayı */}
                   <div className="absolute inset-0 flex items-center justify-center">
-                    <div className={`text-4xl sm:text-5xl md:text-7xl font-black transition-all duration-500 transform ${
+                    <div className={`text-2xl sm:text-3xl md:text-4xl font-black transition-all duration-500 transform ${
                       timer <= 5 ? 'animate-bounce text-white scale-110' : 
                       timer <= 10 ? 'animate-pulse text-white scale-105' : 
                       'text-white'
@@ -901,26 +901,26 @@ const QuizHost: React.FC<QuizHostProps> = ({ onBack }) => {
 
             {/* Soru */}
             {currentQuestionIndex < questions.length && (
-              <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-8">
-                <div className="flex justify-center items-center mb-6">
-                  <span className="text-green-300 font-semibold">
+              <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-4">
+                <div className="flex justify-center items-center mb-3">
+                  <span className="text-green-300 font-semibold text-sm">
                     📝 Soru {currentQuestionIndex + 1} / {questions.length}
                   </span>
                 </div>
                 
-                <h3 className="text-xl sm:text-2xl md:text-3xl font-bold text-white mb-6 md:mb-8 px-4 break-words">
+                <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-white mb-4 px-2 break-words">
                   {questions[currentQuestionIndex]?.question}
                 </h3>
 
                 {/* Cevap Verenler Listesi */}
                 {!showResult && (
-                  <div className="bg-white/5 rounded-lg p-6 mb-8">
-                    <h4 className="text-blue-300 font-semibold mb-4 text-center">📝 Cevap Verenler</h4>
+                  <div className="bg-white/5 rounded-lg p-3 mb-4">
+                    <h4 className="text-blue-300 font-semibold mb-2 text-center text-sm">📝 Cevap Verenler</h4>
                     <div className="text-center">
-                      <div className="text-3xl font-bold text-green-400 mb-2">
+                      <div className="text-2xl font-bold text-green-400 mb-1">
                         {playerCount.answered} / {playerCount.total}
                       </div>
-                      <p className="text-gray-300 mb-4">
+                      <p className="text-gray-300 text-sm mb-2">
                         {playerCount.answered === playerCount.total 
                           ? '🎉 Tüm oyuncular cevap verdi!' 
                           : `${playerCount.total - playerCount.answered} oyuncu daha cevap bekleniyor...`
@@ -928,12 +928,12 @@ const QuizHost: React.FC<QuizHostProps> = ({ onBack }) => {
                       </p>
                       
                       {/* Cevap Veren Oyuncular Listesi */}
-                      {answeredPlayers.length > 0 && (
-                        <div className="mt-4">
-                          <h5 className="text-blue-300 font-semibold mb-3">⚡ Cevap Verenler</h5>
-                          <div className="space-y-2">
-                            {answeredPlayers.map((player, index) => (
-                              <div key={player.name} className="flex justify-between items-center bg-white/10 rounded-lg p-3">
+                      {answeredPlayers.length > 0 && answeredPlayers.length <= 5 && (
+                        <div className="mt-2">
+                          <h5 className="text-blue-300 font-semibold mb-2 text-sm">⚡ Cevap Verenler</h5>
+                          <div className="space-y-1">
+                            {answeredPlayers.slice(0, 5).map((player, index) => (
+                              <div key={player.name} className="flex justify-between items-center bg-white/10 rounded-lg p-2 text-sm">
                                 <span className="text-white font-medium">
                                   {index + 1}. {player.name}
                                 </span>
