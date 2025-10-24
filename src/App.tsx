@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';  
-import { Settings, Play, Trophy, Tv, Download } from 'lucide-react';
+import { Users, Trophy, Tv, Smartphone } from 'lucide-react';
 import AdminPanel from './components/AdminPanel';
 import QuizHost from './components/QuizHost';
 import PlayerView from './components/PlayerView';
@@ -150,7 +150,7 @@ function App() {
                       onClick={() => setCurrentView('admin')}
                       className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 md:p-8 cursor-pointer transform hover:scale-105 transition-all duration-300 hover:bg-white/20 border border-white/20 mobile-btn mobile-touch-manipulation tv-focusable"
                     >
-                      <Settings className="w-10 h-10 md:w-12 md:h-12 text-blue-300 mx-auto mb-3 md:mb-4" />
+                      <div className="text-4xl md:text-5xl mx-auto mb-3 md:mb-4">📊</div>
                       <h3 className="text-lg md:text-xl font-semibold text-white mb-2 mobile-text-lg">Admin Paneli</h3>
                       <p className="text-blue-200 text-sm mobile-text-sm">Soru ekleyin ve oyunu yönetin</p>
                     </div>
@@ -159,8 +159,8 @@ function App() {
                       onClick={() => setCurrentView('host')}
                       className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 md:p-8 cursor-pointer transform hover:scale-105 transition-all duration-300 hover:bg-white/20 border border-white/20 mobile-btn mobile-touch-manipulation tv-focusable"
                     >
-                      <Play className="w-10 h-10 md:w-12 md:h-12 text-green-300 mx-auto mb-3 md:mb-4" />
-                      <h3 className="text-lg md:text-xl font-semibold text-white mb-2 mobile-text-lg">Oyun Sunucusu</h3>
+                      <Users className="w-10 h-10 md:w-12 md:h-12 text-green-300 mx-auto mb-3 md:mb-4" />
+                      <h3 className="text-lg md:text-xl font-semibold text-white mb-2 mobile-text-lg">👥 Oyun Sunucusu</h3>
                       <p className="text-blue-200 text-sm mobile-text-sm">Quiz oyununu başlatın ve yönetin</p>
                     </div>
 
@@ -168,8 +168,8 @@ function App() {
                       onClick={() => setCurrentView('apk')}
                       className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 md:p-8 cursor-pointer transform hover:scale-105 transition-all duration-300 hover:bg-white/20 border border-white/20 mobile-btn mobile-touch-manipulation tv-focusable"
                     >
-                      <Download className="w-10 h-10 md:w-12 md:h-12 text-orange-300 mx-auto mb-3 md:mb-4" />
-                      <h3 className="text-lg md:text-xl font-semibold text-white mb-2 mobile-text-lg">Android APP</h3>
+                      <Smartphone className="w-10 h-10 md:w-12 md:h-12 text-orange-300 mx-auto mb-3 md:mb-4" />
+                      <h3 className="text-lg md:text-xl font-semibold text-white mb-2 mobile-text-lg">📱 Android APP</h3>
                       <p className="text-blue-200 text-sm mobile-text-sm">APK dosyasını indirin</p>
                     </div>
                   </>

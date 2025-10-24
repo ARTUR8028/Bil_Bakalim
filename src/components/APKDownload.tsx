@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Download, Smartphone, ArrowLeft } from 'lucide-react';
+import { Download, Smartphone, ArrowLeft, QrCode } from 'lucide-react';
 import QRCode from 'qrcode';
 
 interface APKDownloadProps {
@@ -97,7 +97,10 @@ const APKDownload: React.FC<APKDownloadProps> = ({ onBack }) => {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
             {/* Direct Download */}
             <div className="bg-white/10 backdrop-blur-lg rounded-3xl p-8 border border-white/20">
-              <h2 className="text-3xl font-bold text-white mb-6">📥 Direkt İndirme</h2>
+              <div className="flex items-center justify-center mb-6">
+                <Smartphone className="w-8 h-8 text-white mr-3" />
+                <h2 className="text-3xl font-bold text-white">Direkt İndirme</h2>
+              </div>
               <p className="text-lg text-gray-300 mb-8">
                 APK dosyasını direkt olarak indirin ve Google TV cihazınıza yükleyin.
               </p>
@@ -113,7 +116,10 @@ const APKDownload: React.FC<APKDownloadProps> = ({ onBack }) => {
 
             {/* QR Code Download */}
             <div className="bg-white/10 backdrop-blur-lg rounded-3xl p-8 border border-white/20">
-              <h2 className="text-3xl font-bold text-white mb-6">📱 QR Kod İndirme</h2>
+              <div className="flex items-center justify-center mb-6">
+                <QrCode className="w-8 h-8 text-white mr-3" />
+                <h2 className="text-3xl font-bold text-white">QR Kod İndirme</h2>
+              </div>
               <p className="text-lg text-gray-300 mb-6">
                 QR kodu telefonunuzla okutarak APK dosyasını indirin.
               </p>
