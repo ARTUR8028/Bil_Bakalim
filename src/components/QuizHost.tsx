@@ -419,7 +419,6 @@ const QuizHost: React.FC<QuizHostProps> = ({ onBack }) => {
     return (
       <div className="bg-white/10 backdrop-blur-lg rounded-xl p-6">
         <div className="flex items-center justify-center mb-4">
-          <Users className="w-6 h-6 text-green-300 mr-3" />
           <h3 className="text-xl font-semibold text-white">🎉 Katılımcılar</h3>
         </div>
         
@@ -731,7 +730,6 @@ const QuizHost: React.FC<QuizHostProps> = ({ onBack }) => {
                 {/* QR Kod */}
                 <div className="bg-white/10 rounded-xl p-6">
                   <div className="flex items-center justify-center mb-4">
-                    <QrCode className="w-8 h-8 text-blue-300 mr-3" />
                     <h3 className="text-xl font-semibold text-white">📱 QR Kod ile Katıl</h3>
                   </div>
                   {qrCodeUrl ? (
@@ -748,7 +746,6 @@ const QuizHost: React.FC<QuizHostProps> = ({ onBack }) => {
                 {/* Link */}
                 <div className="bg-white/10 rounded-xl p-6">
                   <div className="flex items-center justify-center mb-4">
-                    <Copy className="w-8 h-8 text-green-300 mr-3" />
                     <h3 className="text-xl font-semibold text-white">🔗 Katılım Linki</h3>
                   </div>
                   <div className="bg-white/10 rounded-lg p-4 mb-4">
@@ -809,7 +806,7 @@ const QuizHost: React.FC<QuizHostProps> = ({ onBack }) => {
 
   return (
     <div translate="no" className="min-h-screen bg-gradient-to-br from-green-900 via-blue-900 to-purple-900 p-4">
-      <div className={`mx-auto ${deviceInfo.isMobile || deviceInfo.isTablet ? 'max-w-6xl' : 'max-w-full px-8'}`}>
+      <div className={`mx-auto ${deviceInfo.isMobile || deviceInfo.isTablet ? 'max-w-6xl' : 'max-w-full px-4'}`}>
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <button
