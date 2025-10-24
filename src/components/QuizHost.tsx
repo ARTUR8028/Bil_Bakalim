@@ -508,8 +508,8 @@ const QuizHost: React.FC<QuizHostProps> = ({ onBack }) => {
     const sortedScores = Object.entries(scores).sort(([,a], [,b]) => b - a);
     
     return (
-      <div translate="no" className={`min-h-screen bg-gradient-to-br from-green-900 via-blue-900 to-purple-900 ${deviceInfo.isMobile || deviceInfo.isTablet ? 'p-4' : 'p-0'}`}>
-        <div className="max-w-4xl mx-auto">
+      <div translate="no" className={`h-screen overflow-hidden bg-gradient-to-br from-green-900 via-blue-900 to-purple-900 ${deviceInfo.isMobile || deviceInfo.isTablet ? 'p-4' : 'p-0'}`}>
+        <div className={deviceInfo.isMobile || deviceInfo.isTablet ? 'max-w-4xl mx-auto h-full overflow-y-auto' : 'w-full h-full overflow-y-auto py-4'}>
           <div className="flex justify-between items-center mb-8">
             <button
               onClick={goBackToModeSelection}
@@ -687,8 +687,8 @@ const QuizHost: React.FC<QuizHostProps> = ({ onBack }) => {
 
   if (waitingForPlayers) {
     return (
-      <div translate="no" className={`min-h-screen bg-gradient-to-br from-green-900 via-blue-900 to-purple-900 ${deviceInfo.isMobile || deviceInfo.isTablet ? 'p-4' : 'p-0'}`}>
-        <div className="max-w-4xl mx-auto">
+      <div translate="no" className={`h-screen overflow-hidden bg-gradient-to-br from-green-900 via-blue-900 to-purple-900 ${deviceInfo.isMobile || deviceInfo.isTablet ? 'p-4' : 'p-0'}`}>
+        <div className={deviceInfo.isMobile || deviceInfo.isTablet ? 'max-w-4xl mx-auto h-full overflow-y-auto' : 'w-full h-full overflow-y-auto py-4'}>
           {/* Header */}
           <div className="flex items-center justify-between mb-8">
             <button
@@ -808,8 +808,8 @@ const QuizHost: React.FC<QuizHostProps> = ({ onBack }) => {
   }
 
   return (
-    <div translate="no" className={`min-h-screen bg-gradient-to-br from-green-900 via-blue-900 to-purple-900 ${deviceInfo.isMobile || deviceInfo.isTablet ? 'p-4' : 'p-0'}`}>
-      <div className="max-w-6xl mx-auto">
+    <div translate="no" className={`h-screen overflow-hidden bg-gradient-to-br from-green-900 via-blue-900 to-purple-900 ${deviceInfo.isMobile || deviceInfo.isTablet ? 'p-4' : 'p-0'}`}>
+      <div className={deviceInfo.isMobile || deviceInfo.isTablet ? 'max-w-6xl mx-auto h-full overflow-y-auto' : 'w-full h-full overflow-y-auto py-4'}>
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <button
