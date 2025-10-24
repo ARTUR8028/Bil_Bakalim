@@ -509,7 +509,7 @@ const QuizHost: React.FC<QuizHostProps> = ({ onBack }) => {
     
     return (
       <div translate="no" className="min-h-screen bg-gradient-to-br from-green-900 via-blue-900 to-purple-900 p-4">
-        <div className={`mx-auto ${deviceInfo.isMobile || deviceInfo.isTablet ? 'max-w-4xl' : 'max-w-full px-4'}`}>
+        <div className={deviceInfo.isMobile || deviceInfo.isTablet ? 'max-w-4xl mx-auto' : 'w-full'}>
           <div className="flex justify-between items-center mb-8">
             <button
               onClick={goBackToModeSelection}
@@ -688,7 +688,7 @@ const QuizHost: React.FC<QuizHostProps> = ({ onBack }) => {
   if (waitingForPlayers) {
     return (
       <div translate="no" className="min-h-screen bg-gradient-to-br from-green-900 via-blue-900 to-purple-900 p-4">
-        <div className={`mx-auto ${deviceInfo.isMobile || deviceInfo.isTablet ? 'max-w-4xl' : 'max-w-full px-4'}`}>
+        <div className={deviceInfo.isMobile || deviceInfo.isTablet ? 'max-w-4xl mx-auto' : 'w-full'}>
           {/* Header */}
           <div className="flex items-center justify-between mb-8">
             <button
@@ -809,7 +809,7 @@ const QuizHost: React.FC<QuizHostProps> = ({ onBack }) => {
 
   return (
     <div translate="no" className="min-h-screen bg-gradient-to-br from-green-900 via-blue-900 to-purple-900 p-4">
-      <div className={`mx-auto ${deviceInfo.isMobile || deviceInfo.isTablet ? 'max-w-6xl' : 'max-w-full px-4'}`}>
+      <div className={deviceInfo.isMobile || deviceInfo.isTablet ? 'max-w-6xl mx-auto' : 'w-full'}>
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <button
