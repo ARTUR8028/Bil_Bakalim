@@ -554,17 +554,19 @@ const TVHost: React.FC<TVHostProps> = ({ onBack }) => {
               </div>
           </div>
 
-            <div className="flex justify-center space-x-4 mt-4">
+            <div className="flex justify-center space-x-6 mt-6">
               <button
                 onClick={restartGame}
-                className="bg-green-600 hover:bg-green-700 text-white text-lg px-6 py-3 rounded-xl transition-colors flex items-center"
+                className="bg-green-600 hover:bg-green-700 focus:bg-green-800 focus:ring-4 focus:ring-green-300 text-white text-2xl px-10 py-6 rounded-xl transition-all flex items-center font-bold"
+                tabIndex={0}
               >
-                <RotateCcw className="w-5 h-5 mr-2" />
+                <RotateCcw className="w-8 h-8 mr-3" />
                 🔄 Yeniden Başlat
               </button>
               <button
                 onClick={goBackToModeSelection}
-                className="bg-blue-600 hover:bg-blue-700 text-white text-lg px-6 py-3 rounded-xl transition-colors"
+                className="bg-blue-600 hover:bg-blue-700 focus:bg-blue-800 focus:ring-4 focus:ring-blue-300 text-white text-2xl px-10 py-6 rounded-xl transition-all font-bold"
+                tabIndex={0}
               >
                 🏠 Ana Menü
               </button>
@@ -577,25 +579,27 @@ const TVHost: React.FC<TVHostProps> = ({ onBack }) => {
   }
 
   return (
-    <div translate="no" className="h-screen overflow-hidden bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 p-1 flex flex-col">
-      <div className="max-w-8xl mx-auto flex-1 flex flex-col overflow-hidden">
-        {/* Header - Minimum */}
-        <div className="flex items-center justify-between mb-1">
+    <div translate="no" className="h-screen overflow-hidden bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 p-4 md:p-8 flex flex-col">
+      <div className="max-w-full mx-auto flex-1 flex flex-col overflow-hidden px-4">
+        {/* Header - TV Kumanda Dostu */}
+        <div className="flex items-center justify-between mb-6">
           <button
             onClick={onBack}
-            className="flex items-center text-white hover:text-yellow-300 transition-colors"
+            className="flex items-center text-white bg-white/10 hover:bg-white/20 focus:bg-yellow-500 focus:ring-4 focus:ring-yellow-300 transition-all px-6 py-4 rounded-xl text-xl font-semibold"
+            tabIndex={0}
           >
-            <ArrowLeft className="w-5 h-5 mr-2" />
+            <ArrowLeft className="w-8 h-8 mr-3" />
             Ana Menü
           </button>
           
-          {/* Sonraki Soru Butonu - Orta (sadece soru ekranında) */}
+          {/* Sonraki Soru Butonu - TV Kumanda Dostu */}
           {gameMode && !waitingForPlayers && !showFinalRankings && currentQuestionIndex < questions.length && (
-            <div className="flex justify-center items-center gap-3">
+            <div className="flex justify-center items-center gap-4">
             <button
                 onClick={nextQuestion}
                 disabled={currentQuestionIndex >= questions.length - 1}
-                className="bg-purple-600 text-white px-6 py-3 rounded-lg hover:bg-purple-700 transition-colors font-medium disabled:bg-gray-500 disabled:cursor-not-allowed text-lg"
+                className="bg-purple-600 text-white px-8 py-5 rounded-xl hover:bg-purple-700 focus:bg-purple-800 focus:ring-4 focus:ring-purple-300 transition-all font-bold disabled:bg-gray-500 disabled:cursor-not-allowed text-2xl"
+                tabIndex={0}
               >
                 Sonraki Soru
             </button>
@@ -700,16 +704,17 @@ const TVHost: React.FC<TVHostProps> = ({ onBack }) => {
               </div>
                 </div>
 
-                {/* Oyunu Başlat Butonu - Kompakt */}
+                {/* Oyunu Başlat Butonu - TV Kumanda Dostu */}
                 <div className="text-center">
                   <button
                     onClick={startQuizGame}
                     disabled={playerCount.total === 0}
-                    className={`text-lg px-6 py-3 rounded-xl transition-colors ${
+                    className={`text-3xl px-12 py-8 rounded-2xl transition-all font-bold ${
                       playerCount.total > 0
-                        ? 'bg-green-600 hover:bg-green-700 text-white'
+                        ? 'bg-green-600 hover:bg-green-700 focus:bg-green-800 focus:ring-4 focus:ring-green-300 text-white'
                         : 'bg-gray-600 text-gray-400 cursor-not-allowed'
                     }`}
+                    tabIndex={playerCount.total > 0 ? 0 : -1}
                   >
                     {playerCount.total > 0 ? '🎮 Oyunu Başlat' : '⏳ Oyuncu Bekleniyor...'}
                   </button>
@@ -718,12 +723,12 @@ const TVHost: React.FC<TVHostProps> = ({ onBack }) => {
             ) : (
               /* Oyun Aktif Ekranı - Minimum */
               <div className="space-y-1">
-                {/* Geri Sayım Timer - Kompakt */}
+                {/* Geri Sayım Timer - TV Kumanda Dostu */}
                 {currentQuestionIndex < questions.length && !showResult && timer > 0 && (
-                  <div className="flex justify-center mb-1">
+                  <div className="flex justify-center mb-8">
                     <div className="relative">
-                      {/* Dış çember - progress bar - Kompakt */}
-                      <div className="w-32 h-32 rounded-full border-4 border-purple-600 relative overflow-hidden bg-gradient-to-br from-purple-900 to-blue-900">
+                      {/* Dış çember - progress bar - BÜYÜK */}
+                      <div className="w-48 h-48 rounded-full border-8 border-purple-600 relative overflow-hidden bg-gradient-to-br from-purple-900 to-blue-900">
                         <div 
                           className={`absolute inset-0 rounded-full transition-all duration-1000 ${
                             timer <= 5 ? 'bg-gradient-to-br from-red-500 to-red-600' : 
@@ -742,9 +747,9 @@ const TVHost: React.FC<TVHostProps> = ({ onBack }) => {
                         )}
                   </div>
                       
-                      {/* İç sayı - Kompakt */}
+                      {/* İç sayı - TV BÜYÜK */}
                       <div className="absolute inset-0 flex items-center justify-center">
-                        <div className={`text-4xl font-black transition-all duration-500 transform ${
+                        <div className={`text-7xl font-black transition-all duration-500 transform ${
                           timer <= 5 ? 'animate-bounce text-white scale-110' : 
                           timer <= 10 ? 'animate-pulse text-white scale-105' : 
                           'text-white'
@@ -768,28 +773,28 @@ const TVHost: React.FC<TVHostProps> = ({ onBack }) => {
                   </div>
                 )}
 
-                {/* Soru - Kompakt */}
+                {/* Soru - TV BÜYÜK */}
                 {currentQuestionIndex < questions.length && (
-                  <div className="bg-white/10 backdrop-blur-lg rounded-xl p-2">
-                    <div className="flex justify-center items-center mb-2">
-                      <span className="text-green-300 font-semibold text-base">
+                  <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-8">
+                    <div className="flex justify-center items-center mb-6">
+                      <span className="text-green-300 font-semibold text-3xl">
                         📝 Soru {currentQuestionIndex + 1} / {questions.length}
                       </span>
                     </div>
                     
-                    <h3 className="text-xl font-bold text-white mb-2 px-2 break-words text-center leading-relaxed">
+                    <h3 className="text-4xl font-bold text-white mb-8 px-4 break-words text-center leading-relaxed">
                       {questions[currentQuestionIndex]?.question}
                     </h3>
 
-                    {/* Cevap Verenler Listesi - Kompakt */}
+                    {/* Cevap Verenler Listesi - TV BÜYÜK */}
                     {!showResult && (
-                      <div className="bg-white/5 rounded-lg p-2 mb-2">
-                        <h4 className="text-blue-300 font-semibold mb-2 text-center text-base">📝 Cevap Verenler</h4>
+                      <div className="bg-white/5 rounded-xl p-6 mb-6">
+                        <h4 className="text-blue-300 font-semibold mb-4 text-center text-2xl">📝 Cevap Verenler</h4>
                         <div className="text-center">
-                          <div className="text-2xl font-bold text-green-400 mb-2">
+                          <div className="text-5xl font-bold text-green-400 mb-4">
                             {playerCount.answered} / {playerCount.total}
                           </div>
-                          <p className="text-gray-300 mb-4 text-base">
+                          <p className="text-gray-300 mb-6 text-2xl">
                             {playerCount.answered === playerCount.total 
                               ? '🎉 Tüm oyuncular cevap verdi!' 
                               : `${playerCount.total - playerCount.answered} oyuncu daha cevap bekleniyor...`}

@@ -808,10 +808,10 @@ const QuizHost: React.FC<QuizHostProps> = ({ onBack }) => {
   }
 
   return (
-    <div translate="no" className={`h-screen overflow-hidden bg-gradient-to-br from-green-900 via-blue-900 to-purple-900 ${deviceInfo.isMobile || deviceInfo.isTablet ? 'p-4' : 'p-2'}`}>
-      <div className="max-w-6xl mx-auto h-full flex flex-col">
+    <div translate="no" className={`h-screen overflow-hidden bg-gradient-to-br from-green-900 via-blue-900 to-purple-900 ${deviceInfo.isMobile || deviceInfo.isTablet ? 'p-4' : deviceInfo.isTV ? 'p-8' : 'p-2'}`}>
+      <div className={`${deviceInfo.isTV ? 'w-full px-16' : 'max-w-6xl'} mx-auto h-full flex flex-col`}>
         {/* Header */}
-        <div className="flex items-center justify-between mb-3 flex-shrink-0">
+        <div className={`flex items-center justify-between ${deviceInfo.isTV ? 'mb-6' : 'mb-3'} flex-shrink-0`}>
           <button
             onClick={onBack}
             className="flex items-center text-white hover:text-green-300 transition-colors"
@@ -851,10 +851,10 @@ const QuizHost: React.FC<QuizHostProps> = ({ onBack }) => {
           <div className="space-y-3">
             {/* Gelişmiş Geri Sayım */}
             {currentQuestionIndex < questions.length && !showResult && timer > 0 && (
-              <div className="flex justify-center mb-2">
+              <div className={`flex justify-center ${deviceInfo.isTV ? 'mb-6' : 'mb-2'}`}>
                 <div className="relative">
                   {/* Dış çember - progress bar */}
-                  <div className="w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 rounded-full border-3 sm:border-4 md:border-5 border-purple-600 relative overflow-hidden bg-gradient-to-br from-purple-900 to-blue-900">
+                  <div className={`${deviceInfo.isTV ? 'w-40 h-40' : 'w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28'} rounded-full ${deviceInfo.isTV ? 'border-8' : 'border-3 sm:border-4 md:border-5'} border-purple-600 relative overflow-hidden bg-gradient-to-br from-purple-900 to-blue-900`}>
                     <div 
                       className={`absolute inset-0 rounded-full transition-all duration-1000 ${
                         timer <= 5 ? 'bg-gradient-to-br from-red-500 to-red-600' : 
@@ -875,7 +875,7 @@ const QuizHost: React.FC<QuizHostProps> = ({ onBack }) => {
                   
                   {/* İç sayı */}
                   <div className="absolute inset-0 flex items-center justify-center">
-                    <div className={`text-2xl sm:text-3xl md:text-4xl font-black transition-all duration-500 transform ${
+                    <div className={`${deviceInfo.isTV ? 'text-7xl' : 'text-2xl sm:text-3xl md:text-4xl'} font-black transition-all duration-500 transform ${
                       timer <= 5 ? 'animate-bounce text-white scale-110' : 
                       timer <= 10 ? 'animate-pulse text-white scale-105' : 
                       'text-white'
@@ -901,14 +901,14 @@ const QuizHost: React.FC<QuizHostProps> = ({ onBack }) => {
 
             {/* Soru */}
             {currentQuestionIndex < questions.length && (
-              <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-4 mx-auto w-full max-w-3xl">
-                <div className="flex justify-center items-center mb-3">
-                  <span className="text-green-300 font-semibold text-sm">
+              <div className={`bg-white/10 backdrop-blur-lg rounded-2xl ${deviceInfo.isTV ? 'p-8' : 'p-4'} mx-auto w-full ${deviceInfo.isTV ? 'max-w-none' : 'max-w-3xl'}`}>
+                <div className={`flex justify-center items-center ${deviceInfo.isTV ? 'mb-6' : 'mb-3'}`}>
+                  <span className={`text-green-300 font-semibold ${deviceInfo.isTV ? 'text-xl' : 'text-sm'}`}>
                     📝 Soru {currentQuestionIndex + 1} / {questions.length}
                   </span>
                 </div>
                 
-                <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-white mb-4 px-2 break-words">
+                <h3 className={`${deviceInfo.isTV ? 'text-3xl' : 'text-lg sm:text-xl md:text-2xl'} font-bold text-white ${deviceInfo.isTV ? 'mb-8' : 'mb-4'} ${deviceInfo.isTV ? 'px-4' : 'px-2'} break-words`}>
                   {questions[currentQuestionIndex]?.question}
                 </h3>
 
