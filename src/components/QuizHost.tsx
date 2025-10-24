@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { ArrowLeft, Play, Users, Trophy, RotateCcw, Shuffle, QrCode, Copy, CheckCircle, Wifi, WifiOff } from 'lucide-react';
+import { ArrowLeft, Play, Users, Trophy, RotateCcw, Shuffle, CheckCircle, Wifi, WifiOff } from 'lucide-react';
 import { io, Socket } from 'socket.io-client';
 import QRCode from 'qrcode';
 import { getDeviceInfo } from '../utils/deviceDetection';
