@@ -420,7 +420,7 @@ const QuizHost: React.FC<QuizHostProps> = ({ onBack }) => {
       <div className="bg-white/10 backdrop-blur-lg rounded-xl p-6">
         <div className="flex items-center justify-center mb-4">
           <Users className="w-6 h-6 text-green-300 mr-3" />
-          <h3 className="text-xl font-semibold text-white">🎉 Katılımcılar</h3>
+          <h3 className="text-xl font-semibold text-white">Katılımcılar</h3>
         </div>
         
         {participantNames.length === 0 ? (
@@ -732,7 +732,7 @@ const QuizHost: React.FC<QuizHostProps> = ({ onBack }) => {
                 <div className="bg-white/10 rounded-xl p-6">
                   <div className="flex items-center justify-center mb-4">
                     <QrCode className="w-8 h-8 text-blue-300 mr-3" />
-                    <h3 className="text-xl font-semibold text-white">📱 QR Kod ile Katıl</h3>
+                    <h3 className="text-xl font-semibold text-white">QR Kod ile Katıl</h3>
                   </div>
                   {qrCodeUrl ? (
                     <div className="bg-white p-4 rounded-lg inline-block">
@@ -749,7 +749,7 @@ const QuizHost: React.FC<QuizHostProps> = ({ onBack }) => {
                 <div className="bg-white/10 rounded-xl p-6">
                   <div className="flex items-center justify-center mb-4">
                     <Copy className="w-8 h-8 text-green-300 mr-3" />
-                    <h3 className="text-xl font-semibold text-white">🔗 Katılım Linki</h3>
+                    <h3 className="text-xl font-semibold text-white">Katılım Linki</h3>
                   </div>
                   <div className="bg-white/10 rounded-lg p-4 mb-4">
                     <p className="text-blue-200 font-mono text-sm break-all">{joinLink}</p>

@@ -72,7 +72,7 @@ const APKDownload: React.FC<APKDownloadProps> = ({ onBack }) => {
           {/* App Info */}
           <div className="mb-8">
             <h1 className="text-5xl font-bold text-white mb-4">
-              📱 BİL BAKALIM TV
+            📺 BİL BAKALIM TV
             </h1>
             <p className="text-xl text-gray-300 mb-6">
               Google TV için Interaktif Quiz Uygulaması
@@ -113,7 +113,8 @@ const APKDownload: React.FC<APKDownloadProps> = ({ onBack }) => {
 
             {/* QR Code Download */}
             <div className="bg-white/10 backdrop-blur-lg rounded-3xl p-8 border border-white/20">
-              <h2 className="text-3xl font-bold text-white mb-6">📱 QR Kod İndirme</h2>
+            {/*  className="text-3xl font-bold text-white mb-6">📱 QR Kod İndirme</h2>*/
+              <h3 className="text-xl font-semibold text-white">QR Kod ile Katıl</h3>
               <p className="text-lg text-gray-300 mb-6">
                 QR kodu telefonunuzla okutarak APK dosyasını indirin.
               </p>
