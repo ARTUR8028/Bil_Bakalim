@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { ArrowLeft, Plus, Upload, Eye, EyeOff, CheckCircle, AlertCircle, Wifi, WifiOff, Server, Database, Download, QrCode } from 'lucide-react';
+import { ArrowLeft, Plus, Eye, EyeOff, CheckCircle, AlertCircle, Wifi, WifiOff, Server, Database, Download, QrCode } from 'lucide-react';
 import { io, Socket } from 'socket.io-client';
 
 interface AdminPanelProps {
@@ -780,10 +780,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onBack }) => {
 
           {/* Excel Yükleme */}
           <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 border border-white/20">
-            <div className="flex items-center mb-6">
-              <Upload className="w-6 h-6 text-green-400 mr-2" />
-              <h2 className="text-xl font-semibold text-white">Excel Dosyasından Yükle</h2>
-            </div>
+            <h2 className="text-xl font-semibold text-white mb-6">Excel Dosyasından Yükle</h2>
 
             <div className="space-y-4">
               <div>
@@ -806,7 +803,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onBack }) => {
                     htmlFor="file-upload"
                     className="cursor-pointer flex flex-col items-center"
                   >
-                    <Upload className="w-8 h-8 text-gray-400 mb-2" />
+                    <div className="text-4xl mb-2">📄</div>
                     <span className="text-sm text-white">
                       {selectedFile ? selectedFile.name : 'Dosya seçmek için tıklayın'}
                     </span>
@@ -867,8 +864,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onBack }) => {
                   </>
                 ) : (
                   <>
-                    <Upload className="w-4 h-4 mr-2" />
-                    Dosyayı Yükle
+                    📤 Dosyayı Yükle
                   </>
                 )}
               </button>
