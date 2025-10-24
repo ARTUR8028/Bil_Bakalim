@@ -462,21 +462,31 @@ app.delete('/api/delete-all-questions', async (req, res) => {
     });
   }
   
-  // Soruları temizle
   const deletedCount = questions.length;
+  
+  // Veritabanından temizle
+  try {
+    await deleteAllQuestions();
+    console.log('✅ Veritabanından tüm sorular silindi');
+  } catch (dbError) {
+    console.error('❌ Veritabanı silme hatası:', dbError);
+    return res.status(500).json({ 
+      success: false, 
+      message: 'Veritabanından sorular silinemedi: ' + dbError.message
+    });
+  }
+  
+  // Memory'deki listeyi temizle
   questions = [];
   
-  // Dosyaya da yaz
+  // questions.json dosyasını da temizle
   try {
     const questionsPath = path.join(__dirname, '../data/questions.json');
     await fs.writeFile(questionsPath, JSON.stringify([], null, 2), 'utf-8');
-    console.log('✅ questions.json dosyası temizlendi');
+    console.log('💾 questions.json dosyası temizlendi');
   } catch (error) {
-    console.error('❌ Dosya yazma hatası:', error);
-    return res.status(500).json({ 
-      success: false, 
-      message: 'Sorular bellekten silindi ama dosyaya yazılamadı.' 
-    });
+    console.error('⚠️ Dosya yazma hatası:', error);
+    // Devam et, çünkü veritabanı ve memory temizlendi
   }
   
   // Oyun durumunu sıfırla
@@ -583,14 +593,23 @@ app.post('/api/upload', (req, res) => {
         console.log('📊 Sütun isimleri:', Object.keys(data[0]));
       }
 
-      // Mevcut soruları yükle
+      // Replace mode kontrolü (Frontend'den gelen parametre)
+      const replaceMode = req.body.replaceMode === 'true';
+      console.log(`🔄 Replace mode: ${replaceMode ? 'AÇIK (Eski sorular silinecek)' : 'KAPALI (Eski soruların üstüne eklenecek)'}`);
+
+      // Mevcut soruları yükle (eğer replace mode kapalıysa)
       let existing = [];
-      try {
-        const raw = await fs.readFile('data/questions.json', 'utf-8');
-        existing = JSON.parse(raw);
-      } catch (err) {
-        console.log('📝 Yeni soru dosyası oluşturuluyor...');
-        existing = [];
+      if (!replaceMode) {
+        try {
+          const raw = await fs.readFile('data/questions.json', 'utf-8');
+          existing = JSON.parse(raw);
+          console.log(`📚 Mevcut ${existing.length} soru yüklendi (üstüne eklenecek)`);
+        } catch (err) {
+          console.log('📝 Yeni soru dosyası oluşturuluyor...');
+          existing = [];
+        }
+      } else {
+        console.log('🗑️ Replace mode AÇIK: Mevcut sorular silinecek, sadece yeni sorular kalacak');
       }
 
       const merged = [...existing];
@@ -675,6 +694,16 @@ app.post('/api/upload', (req, res) => {
 
       console.log(`✅ İşlem tamamlandı: ${dbAdded} veritabanına eklendi, ${dbDuplicates} mükerrer, ${skippedCount} atlandı, ${errorCount} hata`);
 
+      // questions.json dosyasına da yaz (backup/fallback için)
+      try {
+        const questionsPath = path.join(__dirname, '../data/questions.json');
+        await fs.writeFile(questionsPath, JSON.stringify(questions, null, 2), 'utf-8');
+        console.log('💾 questions.json dosyası güncellendi');
+      } catch (fileError) {
+        console.error('⚠️ questions.json yazma hatası:', fileError);
+        // Dosya yazma hatası olsa bile devam et, çünkü veritabanına eklendi
+      }
+
       // Geçici dosyayı sil
       try {
         await fs.unlink(filePath);
@@ -683,7 +712,9 @@ app.post('/api/upload', (req, res) => {
         console.error('⚠️ Geçici dosya silinemedi:', unlinkErr);
       }
 
-      const message = `Dosya başarıyla işlendi! ${addedCount} yeni soru eklendi${duplicateCount > 0 ? `, ${duplicateCount} mükerrer soru atlandı` : ''}${skippedCount > 0 ? `, ${skippedCount} geçersiz satır` : ''}${errorCount > 0 ? `, ${errorCount} hata` : ''}. Toplam: ${merged.length} soru.`;
+      const message = replaceMode 
+        ? `✅ TÜM eski sorular silindi! ${addedCount} yeni soru yüklendi${skippedCount > 0 ? `, ${skippedCount} geçersiz satır atlandı` : ''}${errorCount > 0 ? `, ${errorCount} hata` : ''}. Toplam: ${merged.length} soru.`
+        : `Dosya başarıyla işlendi! ${addedCount} yeni soru eklendi${duplicateCount > 0 ? `, ${duplicateCount} mükerrer soru atlandı` : ''}${skippedCount > 0 ? `, ${skippedCount} geçersiz satır` : ''}${errorCount > 0 ? `, ${errorCount} hata` : ''}. Toplam: ${merged.length} soru.`;
 
       res.json({ 
         message,
@@ -1340,6 +1371,16 @@ io.on('connection', (socket) => {
         question: newQ.question.substring(0, 50),
         totalQuestions: questions.length
       });
+      
+      // questions.json dosyasına da yaz (backup/fallback için)
+      try {
+        const questionsPath = path.join(__dirname, '../data/questions.json');
+        await fs.writeFile(questionsPath, JSON.stringify(questions, null, 2), 'utf-8');
+        console.log('💾 questions.json dosyası güncellendi');
+      } catch (fileError) {
+        console.error('⚠️ questions.json yazma hatası:', fileError);
+        // Dosya yazma hatası olsa bile devam et, çünkü veritabanına eklendi
+      }
       
       const response = { 
         success: true, 
