@@ -442,11 +442,11 @@ const TVHost: React.FC<TVHostProps> = ({ onBack }) => {
     }
 
     return (
-      <div className="space-y-1 max-h-80 overflow-y-auto">
+      <div className="space-y-0.5 max-h-60 overflow-y-auto">
         {participantNames.map((name, index) => (
           <div
             key={`${name}-${index}`}
-            className="text-white text-lg py-2 px-3 hover:bg-white/10 rounded transition-colors duration-200"
+            className="text-white text-xs py-1 px-2 hover:bg-white/10 rounded transition-colors duration-200"
             style={{
               animation: `slideInFromRight 0.6s ease-out forwards`,
               animationDelay: `${index * 0.15}s`,
@@ -517,55 +517,56 @@ const TVHost: React.FC<TVHostProps> = ({ onBack }) => {
     const sortedScores = Object.entries(scores).sort(([,a], [,b]) => b - a);
 
   return (
-      <div translate="no" className="h-screen overflow-hidden bg-gradient-to-br from-green-900 via-blue-900 to-purple-900 p-4 flex flex-col">
-        <div className="max-w-6xl mx-auto flex-1 flex flex-col overflow-hidden">
-          <div className="flex justify-between items-center mb-8">
+      <div translate="no" className="h-screen overflow-hidden bg-gradient-to-br from-green-900 via-blue-900 to-purple-900 p-2 flex flex-col">
+        <div className="max-w-4xl mx-auto flex-1 flex flex-col overflow-hidden">
+          <div className="flex justify-between items-center mb-2">
         <button
               onClick={goBackToModeSelection}
-              className="flex items-center text-white hover:text-green-300 transition-colors"
+              className="flex items-center text-white hover:text-green-300 focus:text-yellow-300 focus:ring-2 focus:ring-yellow-300 transition-all px-2 py-1 rounded-lg text-sm"
+              tabIndex={0}
         >
-              <ArrowLeft className="w-5 h-5 mr-2" />
+              <ArrowLeft className="w-4 h-4 mr-1" />
               Ana Menü
         </button>
             <ConnectionIndicator />
           </div>
 
           <div className="flex-1 overflow-auto flex flex-col">
-            <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 mb-6 flex-1 flex flex-col">
-              <h1 className="text-3xl font-bold text-white mb-4 text-center">🏆 Oyun Bitti! 🏆</h1>
-              <p className="text-lg text-gray-300 mb-6 text-center">Final Sıralaması</p>
+            <div className="bg-white/10 backdrop-blur-lg rounded-xl p-3 mb-2 flex-1 flex flex-col">
+              <h1 className="text-xl font-bold text-white mb-2 text-center">🏆 Oyun Bitti! 🏆</h1>
+              <p className="text-sm text-gray-300 mb-2 text-center">Final Sıralaması</p>
               
-              <div className="space-y-3 overflow-auto flex-1">
+              <div className="space-y-1 overflow-auto flex-1">
                 {sortedScores.map(([playerName, score], index) => (
-                  <div key={playerName} className="flex justify-between items-center bg-white/5 rounded-lg p-4">
-        <div className="flex items-center space-x-4">
-                      <span className="text-2xl font-bold text-yellow-400">
+                  <div key={playerName} className="flex justify-between items-center bg-white/5 rounded-lg p-2">
+        <div className="flex items-center space-x-2">
+                      <span className="text-sm font-bold text-yellow-400">
                         {index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : `${index + 1}.`}
                       </span>
-                      <span className="text-xl text-white flex items-center">
-                        {index === 0 && <Trophy className="w-6 h-6 text-yellow-400 mr-3" />}
+                      <span className="text-sm text-white flex items-center">
+                        {index === 0 && <Trophy className="w-4 h-4 text-yellow-400 mr-1" />}
                         {playerName}
-                        {index === 0 && <span className="ml-3 text-yellow-400 font-bold text-xl">👑</span>}
+                        {index === 0 && <span className="ml-1 text-yellow-400 font-bold text-sm">👑</span>}
                       </span>
           </div>
-                    <span className="text-2xl font-bold text-green-400">{score} puan</span>
+                    <span className="text-sm font-bold text-green-400">{score} puan</span>
           </div>
                 ))}
               </div>
           </div>
 
-            <div className="flex justify-center space-x-6 mt-6">
+            <div className="flex justify-center space-x-3 mt-2">
               <button
                 onClick={restartGame}
-                className="bg-green-600 hover:bg-green-700 focus:bg-green-800 focus:ring-4 focus:ring-green-300 text-white text-2xl px-10 py-6 rounded-xl transition-all flex items-center font-bold"
+                className="bg-green-600 hover:bg-green-700 focus:bg-green-800 focus:ring-2 focus:ring-green-300 text-white text-sm px-4 py-2 rounded-lg transition-all flex items-center font-bold"
                 tabIndex={0}
               >
-                <RotateCcw className="w-8 h-8 mr-3" />
+                <RotateCcw className="w-4 h-4 mr-1" />
                 🔄 Yeniden Başlat
               </button>
               <button
                 onClick={goBackToModeSelection}
-                className="bg-blue-600 hover:bg-blue-700 focus:bg-blue-800 focus:ring-4 focus:ring-blue-300 text-white text-2xl px-10 py-6 rounded-xl transition-all font-bold"
+                className="bg-blue-600 hover:bg-blue-700 focus:bg-blue-800 focus:ring-2 focus:ring-blue-300 text-white text-sm px-4 py-2 rounded-lg transition-all font-bold"
                 tabIndex={0}
               >
                 🏠 Ana Menü
@@ -579,16 +580,16 @@ const TVHost: React.FC<TVHostProps> = ({ onBack }) => {
   }
 
   return (
-    <div translate="no" className="h-screen overflow-hidden bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 p-4 md:p-8 flex flex-col">
-      <div className="max-w-full mx-auto flex-1 flex flex-col overflow-hidden px-4">
-        {/* Header - TV Kumanda Dostu */}
-        <div className="flex items-center justify-between mb-6">
+    <div translate="no" className="h-screen overflow-hidden bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 p-2 flex flex-col">
+      <div className="max-w-full mx-auto flex-1 flex flex-col overflow-hidden px-2">
+        {/* Header - TV KOMPAKT */}
+        <div className="flex items-center justify-between mb-2">
           <button
             onClick={onBack}
-            className="flex items-center text-white bg-white/10 hover:bg-white/20 focus:bg-yellow-500 focus:ring-4 focus:ring-yellow-300 transition-all px-6 py-4 rounded-xl text-xl font-semibold"
+            className="flex items-center text-white bg-white/10 hover:bg-white/20 focus:bg-yellow-500 focus:ring-2 focus:ring-yellow-300 transition-all px-3 py-2 rounded-lg text-sm font-semibold"
             tabIndex={0}
           >
-            <ArrowLeft className="w-8 h-8 mr-3" />
+            <ArrowLeft className="w-4 h-4 mr-1" />
             Ana Menü
           </button>
           
@@ -598,7 +599,7 @@ const TVHost: React.FC<TVHostProps> = ({ onBack }) => {
             <button
                 onClick={nextQuestion}
                 disabled={currentQuestionIndex >= questions.length - 1}
-                className="bg-purple-600 text-white px-8 py-5 rounded-xl hover:bg-purple-700 focus:bg-purple-800 focus:ring-4 focus:ring-purple-300 transition-all font-bold disabled:bg-gray-500 disabled:cursor-not-allowed text-2xl"
+                className="bg-purple-600 text-white px-3 py-2 rounded-lg hover:bg-purple-700 focus:bg-purple-800 focus:ring-2 focus:ring-purple-300 transition-all font-bold disabled:bg-gray-500 disabled:cursor-not-allowed text-sm"
                 tabIndex={0}
               >
                 Sonraki Soru
@@ -607,10 +608,10 @@ const TVHost: React.FC<TVHostProps> = ({ onBack }) => {
           )}
           
           {/* Room ID, Bağlantı Durumu - Sağ */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
             {roomId && (
-              <div className="bg-white/10 backdrop-blur-lg rounded-lg px-4 py-2 flex items-center">
-                <span className="text-white font-medium text-lg">📍 Room: {roomId}</span>
+              <div className="bg-white/10 backdrop-blur-lg rounded-lg px-2 py-1 flex items-center">
+                <span className="text-white font-medium text-xs">📍 Room: {roomId}</span>
                   </div>
             )}
             <ConnectionIndicator />
@@ -625,110 +626,113 @@ const TVHost: React.FC<TVHostProps> = ({ onBack }) => {
             <div className="space-y-1">
             {!gameMode ? (
               /* Oyun Modu Seçimi - Kompakt */
-              <div className="bg-white/10 backdrop-blur-lg rounded-xl p-4 border border-white/20">
-                <h1 className="text-2xl font-bold text-white mb-2 text-center">📺 BİL BAKALIM TV</h1>
-                <p className="text-base text-gray-300 mb-4 text-center">Google TV için Interaktif Quiz</p>
+              <div className="bg-white/10 backdrop-blur-lg rounded-xl p-2 border border-white/20">
+                <h1 className="text-lg font-bold text-white mb-1 text-center">📺 BİL BAKALIM TV</h1>
+                <p className="text-xs text-gray-300 mb-2 text-center">Google TV için Interaktif Quiz</p>
                 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                <div className="grid grid-cols-2 gap-2">
                   <button
                     onClick={() => startGame('sequential')}
-                    className="bg-blue-600 hover:bg-blue-700 text-white text-base px-4 py-3 rounded-xl transition-colors flex items-center justify-center space-x-2"
+                    className="bg-blue-600 hover:bg-blue-700 focus:bg-blue-800 focus:ring-2 focus:ring-blue-300 text-white text-sm px-3 py-2 rounded-lg transition-colors flex items-center justify-center space-x-1"
+                    tabIndex={0}
                   >
-                    <Play className="w-5 h-5" />
-                    <span>📋 Sıralı Oyun</span>
+                    <Play className="w-4 h-4" />
+                    <span>📋 Sıralı</span>
                   </button>
                   
                   <button
                     onClick={() => startGame('random')}
-                    className="bg-purple-600 hover:bg-purple-700 text-white text-base px-4 py-3 rounded-xl transition-colors flex items-center justify-center space-x-2"
+                    className="bg-purple-600 hover:bg-purple-700 focus:bg-purple-800 focus:ring-2 focus:ring-purple-300 text-white text-sm px-3 py-2 rounded-lg transition-colors flex items-center justify-center space-x-1"
+                    tabIndex={0}
                   >
-                    <Shuffle className="w-5 h-5" />
-                    <span>🔀 Rastgele Oyun</span>
+                    <Shuffle className="w-4 h-4" />
+                    <span>🔀 Rastgele</span>
                   </button>
                   </div>
                 </div>
             ) : waitingForPlayers ? (
-              /* Oyuncu Bekleme Ekranı - Kompakt */
-              <div className="bg-white/10 backdrop-blur-lg rounded-xl p-4 border border-white/20">
-                <h2 className="text-xl font-bold text-white mb-2 text-center">👥 Oyuncular Bekleniyor</h2>
+              /* Oyuncu Bekleme Ekranı - TV MINI */
+              <div className="bg-white/10 backdrop-blur-lg rounded-xl p-2 border border-white/20">
+                <h2 className="text-base font-bold text-white mb-1 text-center">👥 Oyuncular Bekleniyor</h2>
                 
-                {/* Room ID - Kompakt */}
+                {/* Room ID - MINI */}
                 {roomId && (
-                  <div className="bg-gradient-to-r from-purple-600 to-blue-600 rounded-lg p-3 mb-2">
-                    <div className="flex items-center justify-center mb-1">
-                      <h3 className="text-xl font-bold text-white">🎮 Oyun Kodu</h3>
+                  <div className="bg-gradient-to-r from-purple-600 to-blue-600 rounded-lg p-2 mb-1">
+                    <div className="flex items-center justify-center mb-0.5">
+                      <h3 className="text-sm font-bold text-white">🎮 Oyun Kodu</h3>
                     </div>
-                    <div className="bg-white/20 rounded-lg p-3">
-                      <p className="text-2xl font-bold text-white text-center tracking-wider">{roomId}</p>
+                    <div className="bg-white/20 rounded-lg p-1.5">
+                      <p className="text-lg font-bold text-white text-center tracking-wider">{roomId}</p>
                     </div>
-                    <p className="text-white/80 text-center mt-2 text-sm">Oyunculara bu kodu verin</p>
+                    <p className="text-white/80 text-center mt-1 text-xs">Oyunculara bu kodu verin</p>
                   </div>
                 )}
 
-                {/* QR Kod ve Link - Kompakt */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mb-3">
+                {/* QR Kod ve Link - MINI */}
+                <div className="grid grid-cols-2 gap-2 mb-2">
                 <div className="text-center">
-                    <div className="flex items-center justify-center mb-2">
-                      <QrCode className="w-6 h-6 text-blue-300 mr-2" />
-                      <h3 className="text-lg font-bold text-white">📱 QR Kod</h3>
+                    <div className="flex items-center justify-center mb-1">
+                      <QrCode className="w-4 h-4 text-blue-300 mr-1" />
+                      <h3 className="text-xs font-bold text-white">📱 QR</h3>
                     </div>
                     {qrCodeUrl && (
-                      <img src={qrCodeUrl} alt="QR Code" className="mx-auto mb-1 rounded-lg shadow-lg max-w-[150px]" />
+                      <img src={qrCodeUrl} alt="QR Code" className="mx-auto mb-1 rounded-lg shadow-lg max-w-[80px]" />
                     )}
-                    <p className="text-gray-300 text-xs">QR kodu okutarak katılın</p>
+                    <p className="text-gray-300 text-xs">QR okut</p>
                 </div>
 
                   <div className="text-center">
-                    <h3 className="text-lg font-bold text-white mb-3">🔗 Katılım Linki</h3>
-                    <div className="bg-white/10 rounded-lg p-2 mb-2">
+                    <h3 className="text-xs font-bold text-white mb-1">🔗 Link</h3>
+                    <div className="bg-white/10 rounded-lg p-1 mb-1">
                       <p className="text-blue-200 font-mono text-xs break-all">{joinLink}</p>
                     </div>
                     <button
                       onClick={copyLink}
-                      className="bg-green-600 text-white px-4 py-2 text-sm rounded-lg hover:bg-green-700 transition-colors flex items-center mx-auto"
+                      className="bg-green-600 text-white px-2 py-1 text-xs rounded-lg hover:bg-green-700 focus:bg-green-800 focus:ring-2 focus:ring-green-300 transition-colors flex items-center mx-auto"
+                      tabIndex={0}
                     >
-                      {linkCopied ? <CheckCircle className="w-4 h-4 mr-1" /> : <Copy className="w-4 h-4 mr-1" />}
-                      {linkCopied ? 'Kopyalandı!' : 'Linki Kopyala'}
+                      {linkCopied ? <CheckCircle className="w-3 h-3 mr-0.5" /> : <Copy className="w-3 h-3 mr-0.5" />}
+                      {linkCopied ? 'Kopyalandı!' : 'Kopyala'}
                     </button>
                   </div>
                 </div>
 
-                {/* Oyuncu Sayısı - Kompakt */}
-                <div className="text-center mb-3">
-                  <div className="bg-white/10 rounded-xl p-3">
-                    <h3 className="text-lg font-bold text-white mb-1">👥 Oyuncular</h3>
-                    <div className="text-2xl font-bold text-green-400 mb-1">{playerCount.total}</div>
-                    <p className="text-gray-300 text-sm">
-                      {playerCount.total > 0 ? 'Oyuncular hazır!' : 'Oyuncu bekleniyor...'}
+                {/* Oyuncu Sayısı - MINI */}
+                <div className="text-center mb-2">
+                  <div className="bg-white/10 rounded-xl p-2">
+                    <h3 className="text-xs font-bold text-white mb-1">👥 Oyuncular</h3>
+                    <div className="text-xl font-bold text-green-400 mb-0.5">{playerCount.total}</div>
+                    <p className="text-gray-300 text-xs">
+                      {playerCount.total > 0 ? 'Hazır!' : 'Bekleniyor...'}
                     </p>
               </div>
                 </div>
 
-                {/* Oyunu Başlat Butonu - TV Kumanda Dostu */}
+                {/* Oyunu Başlat Butonu - TV ORTA BOY */}
                 <div className="text-center">
                   <button
                     onClick={startQuizGame}
                     disabled={playerCount.total === 0}
-                    className={`text-3xl px-12 py-8 rounded-2xl transition-all font-bold ${
+                    className={`text-lg px-6 py-3 rounded-xl transition-all font-bold ${
                       playerCount.total > 0
-                        ? 'bg-green-600 hover:bg-green-700 focus:bg-green-800 focus:ring-4 focus:ring-green-300 text-white'
+                        ? 'bg-green-600 hover:bg-green-700 focus:bg-green-800 focus:ring-2 focus:ring-green-300 text-white'
                         : 'bg-gray-600 text-gray-400 cursor-not-allowed'
                     }`}
                     tabIndex={playerCount.total > 0 ? 0 : -1}
                   >
-                    {playerCount.total > 0 ? '🎮 Oyunu Başlat' : '⏳ Oyuncu Bekleniyor...'}
+                    {playerCount.total > 0 ? '🎮 Başlat' : '⏳ Bekleniyor...'}
                   </button>
                 </div>
               </div>
             ) : (
               /* Oyun Aktif Ekranı - Minimum */
               <div className="space-y-1">
-                {/* Geri Sayım Timer - TV Kumanda Dostu */}
+                {/* Geri Sayım Timer - TV KÜÇÜK */}
                 {currentQuestionIndex < questions.length && !showResult && timer > 0 && (
-                  <div className="flex justify-center mb-8">
+                  <div className="flex justify-center mb-2">
                     <div className="relative">
-                      {/* Dış çember - progress bar - BÜYÜK */}
-                      <div className="w-48 h-48 rounded-full border-8 border-purple-600 relative overflow-hidden bg-gradient-to-br from-purple-900 to-blue-900">
+                      {/* Dış çember - progress bar - KÜÇÜK */}
+                      <div className="w-24 h-24 rounded-full border-4 border-purple-600 relative overflow-hidden bg-gradient-to-br from-purple-900 to-blue-900">
                         <div 
                           className={`absolute inset-0 rounded-full transition-all duration-1000 ${
                             timer <= 5 ? 'bg-gradient-to-br from-red-500 to-red-600' : 
@@ -747,9 +751,9 @@ const TVHost: React.FC<TVHostProps> = ({ onBack }) => {
                         )}
                   </div>
                       
-                      {/* İç sayı - TV BÜYÜK */}
+                      {/* İç sayı - TV KÜÇÜK */}
                       <div className="absolute inset-0 flex items-center justify-center">
-                        <div className={`text-7xl font-black transition-all duration-500 transform ${
+                        <div className={`text-4xl font-black transition-all duration-500 transform ${
                           timer <= 5 ? 'animate-bounce text-white scale-110' : 
                           timer <= 10 ? 'animate-pulse text-white scale-105' : 
                           'text-white'
@@ -773,44 +777,44 @@ const TVHost: React.FC<TVHostProps> = ({ onBack }) => {
                   </div>
                 )}
 
-                {/* Soru - TV BÜYÜK CENTER */}
+                {/* Soru - TV KÜÇÜK CENTER */}
                 {currentQuestionIndex < questions.length && (
-                  <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-8 mx-auto max-w-6xl">
-                    <div className="flex justify-center items-center mb-6">
-                      <span className="text-green-300 font-semibold text-3xl">
+                  <div className="bg-white/10 backdrop-blur-lg rounded-xl p-3 mx-auto max-w-4xl">
+                    <div className="flex justify-center items-center mb-2">
+                      <span className="text-green-300 font-semibold text-sm">
                         📝 Soru {currentQuestionIndex + 1} / {questions.length}
                       </span>
                     </div>
                     
-                    <h3 className="text-4xl font-bold text-white mb-8 px-4 break-words text-center leading-relaxed mx-auto">
+                    <h3 className="text-lg font-bold text-white mb-3 px-2 break-words text-center leading-relaxed mx-auto">
                       {questions[currentQuestionIndex]?.question}
                     </h3>
 
-                    {/* Cevap Verenler Listesi - TV BÜYÜK */}
+                    {/* Cevap Verenler Listesi - TV KÜÇÜK */}
                     {!showResult && (
-                      <div className="bg-white/5 rounded-xl p-6 mb-6">
-                        <h4 className="text-blue-300 font-semibold mb-4 text-center text-2xl">📝 Cevap Verenler</h4>
+                      <div className="bg-white/5 rounded-lg p-2 mb-2">
+                        <h4 className="text-blue-300 font-semibold mb-1 text-center text-xs">📝 Cevap Verenler</h4>
                         <div className="text-center">
-                          <div className="text-5xl font-bold text-green-400 mb-4">
+                          <div className="text-2xl font-bold text-green-400 mb-1">
                             {playerCount.answered} / {playerCount.total}
                           </div>
-                          <p className="text-gray-300 mb-6 text-2xl">
+                          <p className="text-gray-300 mb-2 text-xs">
                             {playerCount.answered === playerCount.total 
                               ? '🎉 Tüm oyuncular cevap verdi!' 
                               : `${playerCount.total - playerCount.answered} oyuncu daha cevap bekleniyor...`}
                           </p>
                           
-                          {/* Cevap Veren Oyuncular Listesi - Kompakt */}
+                          {/* Cevap Veren Oyuncular Listesi - TV MINI */}
                           {answeredPlayers.length > 0 && (
-                            <div className="mt-4">
-                              <h5 className="text-blue-300 font-semibold mb-2 text-base">⚡ Cevap Verenler</h5>
-                    <div className="space-y-2">
+                            <div className="mt-2">
+                              <h5 className="text-blue-300 font-semibold mb-1 text-xs">⚡ Cevap Verenler</h5>
+                    <div className="space-y-1">
                                 {answeredPlayers.map((player, index) => (
-                                  <div key={player.name} className="flex justify-between items-center bg-white/10 rounded-lg p-3">
-                                    <span className="text-white font-medium text-base">
+                                  <div key={player.name} className="flex justify-between items-center bg-white/10 rounded-lg p-1.5">
+                                    <span className="text-white font-medium text-xs">
                                       {index + 1}. {player.name}
                                     </span>
-                                    <span className="text-yellow-400 font-bold text-base">
+                                    <span className="text-yellow-400 font-bold text-xs">
                                       {player.answerTime}s ⚡
                                     </span>
                         </div>
@@ -823,79 +827,79 @@ const TVHost: React.FC<TVHostProps> = ({ onBack }) => {
                     )}
                 
                     {showResult && gameResult && (
-                      <div className="space-y-6 mx-auto max-w-6xl">
-                        {/* Doğru Cevap - TV CENTER */}
-                        <div className="bg-green-600/20 rounded-2xl p-8">
-                          <h4 className="text-green-300 font-semibold mb-4 text-3xl text-center">✅ Doğru Cevap</h4>
-                          <p className="text-white text-6xl font-bold text-center">{gameResult.correct}</p>
+                      <div className="space-y-2 mx-auto max-w-4xl">
+                        {/* Doğru Cevap - TV KÜÇÜK CENTER */}
+                        <div className="bg-green-600/20 rounded-xl p-3">
+                          <h4 className="text-green-300 font-semibold mb-2 text-sm text-center">✅ Doğru Cevap</h4>
+                          <p className="text-white text-3xl font-bold text-center">{gameResult.correct}</p>
                   </div>
                   
-                        {/* Kazanan Gösterimi - TV CENTER */}
-                        <div className="bg-gradient-to-r from-blue-500/20 to-purple-500/20 border border-blue-500/30 rounded-2xl p-8 relative overflow-hidden">
-                          <h4 className="text-blue-300 font-semibold mb-6 text-3xl text-center">🎯 Doğru veya En Yakın Cevap Veren</h4>
+                        {/* Kazanan Gösterimi - TV KÜÇÜK CENTER */}
+                        <div className="bg-gradient-to-r from-blue-500/20 to-purple-500/20 border border-blue-500/30 rounded-xl p-3 relative overflow-hidden">
+                          <h4 className="text-blue-300 font-semibold mb-2 text-sm text-center">🎯 Doğru veya En Yakın Cevap Veren</h4>
                           <div className="relative">
                             {gameResult.winners && gameResult.winners.length > 0 ? (
-                              <div className="space-y-3">
+                              <div className="space-y-1">
                                 {gameResult.winners.length === 1 ? (
-                                  <p className="text-white text-5xl font-bold text-center animate-pulse" style={{
+                                  <p className="text-white text-2xl font-bold text-center animate-pulse" style={{
                                     animation: 'heartbeat 1.5s ease-in-out infinite, glow 2s ease-in-out infinite alternate'
                                   }}>{gameResult.winners[0]}</p>
                                 ) : (
-                    <div className="space-y-4">
-                                    <p className="text-blue-300 text-2xl mb-3 text-center">Aynı cevabı veren kazananlar:</p>
+                    <div className="space-y-1">
+                                    <p className="text-blue-300 text-xs mb-1 text-center">Aynı cevabı veren kazananlar:</p>
                                     {gameResult.winners.map((winner, index) => (
-                                      <div key={winner} className="bg-white/10 rounded-xl p-4 animate-slideInRight" style={{
+                                      <div key={winner} className="bg-white/10 rounded-lg p-2 animate-slideInRight" style={{
                                         animationDelay: `${index * 0.2}s`
                                       }}>
-                                        <p className="text-white text-4xl font-bold text-center animate-pulse">
+                                        <p className="text-white text-xl font-bold text-center animate-pulse">
                                           🏆 {winner}
                                         </p>
                                       </div>
                                     ))}
                                   </div>
                                 )}
-                                <p className="text-blue-300 text-2xl mt-6 text-center">
+                                <p className="text-blue-300 text-sm mt-2 text-center">
                                   Cevap: {gameResult.closest.includes('(') ? gameResult.closest.split('(')[1].replace(')', '') : gameResult.correct}
                                 </p>
                               </div>
                             ) : (
-                              <p className="text-white text-2xl font-bold text-center">
+                              <p className="text-white text-sm font-bold text-center">
                                 Kimse doğru bilmedi
                               </p>
                             )}
                     </div>
                   </div>
                   
-                        {/* Tüm Cevaplar Listesi - Kompakt */}
+                        {/* Tüm Cevaplar Listesi - TV MINI */}
                         {gameResult.allAnswers && gameResult.allAnswers.length > 0 && (
-                          <div className="mt-2 bg-white/5 rounded-lg p-2">
-                            <h5 className="text-blue-300 font-semibold mb-2 text-center text-base">📋 Tüm Cevaplar</h5>
-                    <div className="space-y-2">
+                          <div className="mt-1 bg-white/5 rounded-lg p-1.5">
+                            <h5 className="text-blue-300 font-semibold mb-1 text-center text-xs">📋 Tüm Cevaplar</h5>
+                    <div className="space-y-1">
                               {gameResult.allAnswers.map((answer, index) => (
-                                <div key={index} className={`flex justify-between items-center p-2 rounded-lg text-sm ${
+                                <div key={index} className={`flex justify-between items-center p-1.5 rounded-lg text-xs ${
                                   !answer.hasAnswered ? 'bg-red-600/20 border border-red-500/30' :
                                   answer.isCorrect ? 'bg-green-600/20 border border-green-500/30' : 
                                   answer.difference <= 5 ? 'bg-yellow-600/20 border border-yellow-500/30' :
                                   'bg-gray-600/20 border border-gray-500/30'
                                 }`}>
                                   <div className="flex items-center">
-                                    <span className={`text-base font-bold mr-2 ${
+                                    <span className={`text-xs font-bold mr-1 ${
                                       !answer.hasAnswered ? 'text-red-300' :
                                       answer.isCorrect ? 'text-green-300' : 
                                       answer.difference <= 5 ? 'text-yellow-300' : 'text-gray-300'
                                     }`}>
                                       {index + 1}.
                                     </span>
-                                    <span className="text-white font-medium text-base">{answer.playerName}</span>
+                                    <span className="text-white font-medium text-xs">{answer.playerName}</span>
                                   </div>
-                                  <div className="flex items-center space-x-2">
+                                  <div className="flex items-center space-x-1">
                                     {!answer.hasAnswered ? (
-                                      <span className="text-red-300 font-bold text-base">Cevap yok</span>
+                                      <span className="text-red-300 font-bold text-xs">Cevap yok</span>
                                     ) : (
                                       <>
-                                        <span className="text-white font-bold text-base">{answer.answer}</span>
-                                        {answer.isCorrect && <span className="text-green-300 text-lg">✓</span>}
-                                        {!answer.isCorrect && gameResult.allAnswers && answer.difference === Math.min(...gameResult.allAnswers.filter(a => a.hasAnswered).map(a => a.difference)) && <span className="text-yellow-300 text-lg">🎯</span>}
+                                        <span className="text-white font-bold text-xs">{answer.answer}</span>
+                                        {answer.isCorrect && <span className="text-green-300 text-xs">✓</span>}
+                                        {!answer.isCorrect && gameResult.allAnswers && answer.difference === Math.min(...gameResult.allAnswers.filter(a => a.hasAnswered).map(a => a.difference)) && <span className="text-yellow-300 text-xs">🎯</span>}
                                       </>
                                     )}
                                   </div>
@@ -909,11 +913,12 @@ const TVHost: React.FC<TVHostProps> = ({ onBack }) => {
                 </div>
                 )}
 
-                {/* Oyunu Bitir Butonu - Kompakt */}
-                <div className="flex justify-center mt-3">
+                {/* Oyunu Bitir Butonu - TV KÜÇÜK */}
+                <div className="flex justify-center mt-2">
                   <button
                     onClick={endGame}
-                    className="bg-red-600 text-white px-8 py-4 rounded-xl hover:bg-red-700 transition-colors font-medium text-xl"
+                    className="bg-red-600 text-white px-3 py-2 rounded-lg hover:bg-red-700 focus:bg-red-800 focus:ring-2 focus:ring-red-300 transition-colors font-medium text-sm"
+                    tabIndex={0}
                   >
                     🏁 Oyunu Bitir
                   </button>
@@ -923,15 +928,15 @@ const TVHost: React.FC<TVHostProps> = ({ onBack }) => {
       </div>
           </div>
 
-          {/* Sağ Panel - Oyuncu Listesi */}
+          {/* Sağ Panel - Oyuncu Listesi - TV KÜÇÜK */}
           <div className="lg:col-span-1">
-            <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 border border-white/20">
-              <div className="flex items-center justify-between mb-6">
-                <h3 className="text-xl font-bold text-white flex items-center">
-                  <Users className="w-5 h-5 mr-2" />
+            <div className="bg-white/10 backdrop-blur-lg rounded-xl p-2 border border-white/20">
+              <div className="flex items-center justify-between mb-2">
+                <h3 className="text-sm font-bold text-white flex items-center">
+                  <Users className="w-3 h-3 mr-1" />
                   Oyuncular
                 </h3>
-                <div className="bg-blue-600 text-white px-3 py-1 rounded-full text-sm">
+                <div className="bg-blue-600 text-white px-2 py-0.5 rounded-full text-xs">
                   {participantNames.length}
                 </div>
               </div>
