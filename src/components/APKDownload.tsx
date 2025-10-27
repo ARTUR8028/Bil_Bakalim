@@ -9,7 +9,7 @@ interface APKDownloadProps {
 const APKDownload: React.FC<APKDownloadProps> = ({ onBack }) => {
   const apkUrl = '/apps/BilBakalimTV.apk';
   const apkSize = '6.3 MB'; // Debug APK (İmzalı - Yüklenebilir)
-  const version = '2.2.2'; // Tüm Ekranlar CENTER + İmzalı
+  const version = '2.3.0'; // TV Responsive - Ekrana Sığar + Kumanda Dostu
   const [qrCodeUrl, setQrCodeUrl] = useState('');
   const fullApkUrl = `${window.location.origin}${apkUrl}`;
 
