@@ -333,22 +333,33 @@ app.get('/api/health', (req, res) => {
 app.get('/api/download/apk', (req, res) => {
   console.log('📱 APK indirme isteği alındı');
   
-  const apkPath = path.join(__dirname, '../public/apps/BilBakalimTV.apk');
+  // Production'da dist, Development'da public
+  const apkPath = process.env.NODE_ENV === 'production' 
+    ? path.join(__dirname, '../dist/bilbakalim-tv.apk')
+    : path.join(__dirname, '../public/bilbakalim-tv.apk');
+  
+  console.log('📂 APK dosya yolu:', apkPath);
   
   // APK dosyası var mı kontrol et
   if (!fsSync.existsSync(apkPath)) {
     console.log('❌ APK dosyası bulunamadı:', apkPath);
     return res.status(404).json({ 
       error: 'APK dosyası bulunamadı',
-      message: 'Android uygulaması henüz hazır değil'
+      message: 'Android uygulaması henüz hazır değil',
+      path: apkPath
     });
   }
   
-  // APK dosyasını gönder
-  res.download(apkPath, 'BilBakalimTV.apk', (err) => {
+  // APK dosyasını doğru MIME type ile gönder
+  res.setHeader('Content-Type', 'application/vnd.android.package-archive');
+  res.setHeader('Content-Disposition', 'attachment; filename=BilBakalimTV-v2.3.0.apk');
+  
+  res.download(apkPath, 'BilBakalimTV-v2.3.0.apk', (err) => {
     if (err) {
       console.error('❌ APK indirme hatası:', err);
-      res.status(500).json({ error: 'APK indirilemedi' });
+      if (!res.headersSent) {
+        res.status(500).json({ error: 'APK indirilemedi' });
+      }
     } else {
       console.log('✅ APK başarıyla indirildi');
     }

@@ -7,11 +7,10 @@ interface APKDownloadProps {
 }
 
 const APKDownload: React.FC<APKDownloadProps> = ({ onBack }) => {
-  const apkUrl = '/bilbakalim-tv.apk';
   const apkSize = '6.3 MB'; // Debug APK (İmzalı - Yüklenebilir)
   const version = '2.3.0'; // TV Responsive - Ekrana Sığar + Kumanda Dostu
   const [qrCodeUrl, setQrCodeUrl] = useState('');
-  const fullApkUrl = `${window.location.origin}${apkUrl}`;
+  const fullApkUrl = `${window.location.origin}/api/download/apk`;
 
   // QR kod oluştur
   useEffect(() => {
@@ -34,13 +33,35 @@ const APKDownload: React.FC<APKDownloadProps> = ({ onBack }) => {
     generateQRCode();
   }, [fullApkUrl]);
 
-  const handleDownload = () => {
-    const link = document.createElement('a');
-    link.href = apkUrl;
-    link.download = 'BilBakalimTV.apk';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+  const handleDownload = async () => {
+    try {
+      // API endpoint üzerinden APK indir
+      const response = await fetch('/api/download/apk');
+      
+      if (!response.ok) {
+        throw new Error('APK indirilemedi');
+      }
+      
+      // Blob olarak al
+      const blob = await response.blob();
+      
+      // Download link oluştur
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'BilBakalimTV-v2.3.0.apk';
+      document.body.appendChild(link);
+      link.click();
+      
+      // Temizlik
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+      
+      console.log('✅ APK indirme başarılı');
+    } catch (error) {
+      console.error('❌ APK indirme hatası:', error);
+      alert('APK indirilemedi. Lütfen tekrar deneyin.');
+    }
   };
 
   return (
