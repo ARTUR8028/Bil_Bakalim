@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { ArrowLeft, User, Send, Wifi, WifiOff, Trophy } from 'lucide-react';
 import { io, Socket } from 'socket.io-client';
+import { formatQuizNumber } from '../utils/formatQuizNumber';
 
 interface PlayerViewProps {
   onBack: () => void;
@@ -783,7 +784,7 @@ const PlayerView: React.FC<PlayerViewProps> = ({ onBack }) => {
                     }}>
                       {winnerInfo.playerName}
                     </p>
-                    <p className="text-xl text-yellow-200 text-center">Cevap: {winnerInfo.answer}</p>
+                    <p className="text-xl text-yellow-200 text-center">Cevap: {formatQuizNumber(winnerInfo.answer)}</p>
                   </div>
                 </div>
               ) : showFullResults ? (
@@ -798,7 +799,7 @@ const PlayerView: React.FC<PlayerViewProps> = ({ onBack }) => {
                       <h3 className="text-white font-semibold text-center">Doğru Cevap</h3>
                     </div>
                     <div className="text-4xl font-bold text-white text-center">
-                      {gameResult?.correct || 'Bilinmiyor'}
+                      {formatQuizNumber(gameResult?.correct)}
                     </div>
                   </div>
 
@@ -882,7 +883,7 @@ const PlayerView: React.FC<PlayerViewProps> = ({ onBack }) => {
                             <span className="text-red-300 font-bold">Cevap yok</span>
                           ) : (
                             <>
-                          <span className="text-white font-bold">{answer.answer}</span>
+                          <span className="text-white font-bold">{formatQuizNumber(answer.answer)}</span>
                               {answer.isCorrect && <span className="text-green-300 text-xs">✓</span>}
                               {!answer.isCorrect && answer.difference === Math.min(...allAnswers.filter(a => a.hasAnswered).map(a => a.difference)) && <span className="text-yellow-300 text-xs">🎯</span>}
                             </>

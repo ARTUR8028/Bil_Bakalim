@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { ArrowLeft, Play, Users, Trophy, RotateCcw, Shuffle, QrCode, Copy, CheckCircle, Wifi, WifiOff } from 'lucide-react';
 import { io, Socket } from 'socket.io-client';
 import QRCode from 'qrcode';
+import { formatQuizNumber } from '../utils/formatQuizNumber';
 
 interface TVHostProps {
   onBack: () => void;
@@ -832,7 +833,7 @@ const TVHost: React.FC<TVHostProps> = ({ onBack }) => {
                         {/* Doğru Cevap - TV KÜÇÜK CENTER */}
                         <div className="bg-green-600/20 rounded-xl p-3">
                           <h4 className="text-green-300 font-semibold mb-2 text-sm text-center">✅ Doğru Cevap</h4>
-                          <p className="text-white text-3xl font-bold text-center">{gameResult.correct}</p>
+                          <p className="text-white text-3xl font-bold text-center">{formatQuizNumber(gameResult.correct)}</p>
                   </div>
                   
                         {/* Kazanan Gösterimi - TV KÜÇÜK CENTER */}
@@ -860,7 +861,7 @@ const TVHost: React.FC<TVHostProps> = ({ onBack }) => {
                                   </div>
                                 )}
                                 <p className="text-blue-300 text-sm mt-2 text-center">
-                                  Cevap: {gameResult.closest.includes('(') ? gameResult.closest.split('(')[1].replace(')', '') : gameResult.correct}
+                                  Cevap: {formatQuizNumber(gameResult.closest.includes('(') ? gameResult.closest.split('(')[1].replace(')', '') : gameResult.correct)}
                                 </p>
                               </div>
                             ) : (
@@ -898,7 +899,7 @@ const TVHost: React.FC<TVHostProps> = ({ onBack }) => {
                                       <span className="text-red-300 font-bold text-xs">Cevap yok</span>
                                     ) : (
                                       <>
-                                        <span className="text-white font-bold text-xs">{answer.answer}</span>
+                                        <span className="text-white font-bold text-xs">{formatQuizNumber(answer.answer)}</span>
                                         {answer.isCorrect && <span className="text-green-300 text-xs">✓</span>}
                                         {!answer.isCorrect && gameResult.allAnswers && answer.difference === Math.min(...gameResult.allAnswers.filter(a => a.hasAnswered).map(a => a.difference)) && <span className="text-yellow-300 text-xs">🎯</span>}
                                       </>
