@@ -197,6 +197,30 @@ function deleteRoom(roomId) {
 let players = {};
 let currentAnswer = null;
 let answers = {};
+
+function parseQuizNumber(value) {
+  let normalized = String(value ?? '').trim().replace(/\s/g, '');
+
+  if (!normalized) {
+    return NaN;
+  }
+
+  if (normalized.includes(',') && normalized.includes('.')) {
+    if (normalized.lastIndexOf(',') > normalized.lastIndexOf('.')) {
+      normalized = normalized.replace(/\./g, '').replace(',', '.');
+    } else {
+      normalized = normalized.replace(/,/g, '');
+    }
+  } else if (normalized.includes(',')) {
+    normalized = /^[-+]?\d{1,3}(,\d{3})+$/.test(normalized)
+      ? normalized.replace(/,/g, '')
+      : normalized.replace(',', '.');
+  } else if (/^[-+]?\d{1,3}(\.\d{3})+$/.test(normalized)) {
+    normalized = normalized.replace(/\./g, '');
+  }
+
+  return Number(normalized);
+}
 let globalScores = {}; // Global puan sistemi - oyuncular çıksa bile puanları korunur
 let currentTimerInterval = null; // Timer interval'ı global olarak sakla
 let gameState = {
@@ -995,7 +1019,7 @@ io.on('connection', (socket) => {
       playersObj[socket.id].lastActivity = Date.now();
       
       // Cevabı float olarak sakla
-      const numericValue = parseFloat(value);
+      const numericValue = parseQuizNumber(value);
       answersObj[socket.id] = {
         value: numericValue,
         timestamp: currentTime,
@@ -1158,7 +1182,7 @@ io.on('connection', (socket) => {
     if (questionObj && questionObj.answer) {
       // Room'a göre state seç
       if (room) {
-        room.currentAnswer = parseFloat(questionObj.answer);
+        room.currentAnswer = parseQuizNumber(questionObj.answer);
         room.answers = {};
         room.gameState.isActive = true;
         room.gameState.currentQuestion = questionObj;
@@ -1167,7 +1191,7 @@ io.on('connection', (socket) => {
         console.log(`✅ [${roomId}] Room currentAnswer SET EDİLDİ:`, room.currentAnswer);
         console.log(`✅ [${roomId}] Room gameState.isActive:`, room.gameState.isActive);
       } else {
-        currentAnswer = parseFloat(questionObj.answer);
+        currentAnswer = parseQuizNumber(questionObj.answer);
         answers = {};
         gameState.isActive = true;
         gameState.currentQuestion = questionObj;
