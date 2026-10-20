@@ -22,6 +22,7 @@ interface GameResult {
 }
 
 const PlayerView: React.FC<PlayerViewProps> = ({ onBack }) => {
+  const serverUrl = import.meta.env.VITE_SERVER_URL || window.location.origin;
   const [socket, setSocket] = useState<Socket | null>(null);
   const [roomId, setRoomId] = useState<string>('');
   const [playerName, setPlayerName] = useState('');
@@ -153,7 +154,7 @@ const PlayerView: React.FC<PlayerViewProps> = ({ onBack }) => {
     setGameResult(null);
     
     // Optimize edilmiş socket konfigürasyonu
-    const socketConnection = io(import.meta.env.VITE_SERVER_URL || 'https://bil-bakalim.onrender.com', {
+    const socketConnection = io(serverUrl, {
       transports: ['polling', 'websocket'], // Polling öncelikli
       upgrade: true, // WebSocket'e upgrade et
       timeout: 30000, // Daha uzun timeout

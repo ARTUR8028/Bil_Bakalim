@@ -16,11 +16,16 @@ const __dirname = dirname(__filename);
 
 const app = express();
 const server = createServer(app);
+const allowedOrigins = (process.env.ALLOWED_ORIGINS || [
+  'https://bil-bakalim.onrender.com',
+  'https://www.bil-bakalim.onrender.com',
+  'https://bil-bakalim-yeni.onrender.com'
+].join(',')).split(',').map(origin => origin.trim()).filter(Boolean);
 const io = new Server(server, {
   cors: {
-    origin: process.env.NODE_ENV === 'production' 
-      ? ["https://bil-bakalim.onrender.com", "https://www.bil-bakalim.onrender.com"] 
-      : ["http://localhost:5173", "http://127.0.0.1:5173", "http://0.0.0.0:5173"],
+    origin: process.env.NODE_ENV === 'production'
+      ? allowedOrigins
+      : ['http://localhost:5173', 'http://127.0.0.1:5173', 'http://0.0.0.0:5173'],
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     credentials: true,
     allowedHeaders: ["Origin", "X-Requested-With", "Content-Type", "Accept", "Authorization"]

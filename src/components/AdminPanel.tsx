@@ -7,6 +7,7 @@ interface AdminPanelProps {
 }
 
 const AdminPanel: React.FC<AdminPanelProps> = ({ onBack }) => {
+  const serverUrl = import.meta.env.VITE_SERVER_URL || window.location.origin;
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -32,7 +33,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onBack }) => {
   const checkServerHealth = useCallback(async () => {
     try {
       console.log('🏥 Sunucu durumu kontrol ediliyor...');
-      const response = await fetch(`${import.meta.env.VITE_SERVER_URL || 'https://bil-bakalim.onrender.com'}/api/health`, {
+      const response = await fetch(`${serverUrl}/api/health`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -56,7 +57,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onBack }) => {
     console.log('🔌 Admin Panel socket bağlantısı kuruluyor...');
     
     // Optimize edilmiş socket konfigürasyonu
-    const socketConnection = io(import.meta.env.VITE_SERVER_URL || 'https://bil-bakalim.onrender.com', {
+    const socketConnection = io(serverUrl, {
       transports: ['polling', 'websocket'], // Polling öncelikli
       upgrade: true, // WebSocket'e upgrade et
       timeout: 30000,
@@ -229,7 +230,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onBack }) => {
     setMessage(null);
 
     try {
-      const response = await fetch(`${import.meta.env.VITE_SERVER_URL || 'https://bil-bakalim.onrender.com'}/api/change-password`, {
+      const response = await fetch(`${serverUrl}/api/change-password`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -265,7 +266,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onBack }) => {
     setMessage(null);
 
     try {
-      const response = await fetch(`${import.meta.env.VITE_SERVER_URL || 'https://bil-bakalim.onrender.com'}/api/delete-all-questions`, {
+      const response = await fetch(`${serverUrl}/api/delete-all-questions`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
