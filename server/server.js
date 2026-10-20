@@ -594,6 +594,14 @@ app.post('/api/upload', (req, res) => {
         header: 1
       });
 
+      const headers = (data[0] || []).map(value => value.toString().trim().toLocaleLowerCase('tr-TR'));
+      const questionColumnIndex = headers.findIndex(header => header.includes('soru') || header.includes('question'));
+      const answerColumnIndex = headers.findIndex(header => header.includes('cevap') || header.includes('answer'));
+
+      if (questionColumnIndex === -1 || answerColumnIndex === -1) {
+        throw new Error('Excel dosyasında Soru ve Cevap başlıklı sütunlar bulunamadı.');
+      }
+
       console.log('📊 Excel verisi okundu:', {
         sheetCount: workbook.SheetNames.length,
         rowCount: data.length,
@@ -622,28 +630,16 @@ app.post('/api/upload', (req, res) => {
       let duplicateCount = 0;
       
       // Array formatında gelen veriyi işle
-      data.forEach((row, index) => {
+      data.slice(1).forEach((row, index) => {
         try {
-          // İlk satırı (başlık) atla
-          if (index === 0) {
-            const firstCol = row[0]?.toString().toLowerCase();
-            if (firstCol && (firstCol.includes('soru') || firstCol.includes('question'))) {
-              console.log(`📋 Başlık satırı atlandı: ${row.join(', ')}`);
-              skippedCount++;
-              return;
-            }
-          }
-          
-          // Array formatında gelen veriyi kontrol et
-          if (!Array.isArray(row) || row.length < 2) {
+          if (!Array.isArray(row) || row.length <= Math.max(questionColumnIndex, answerColumnIndex)) {
             skippedCount++;
             console.log(`⚠️ Satır ${index + 1} atlandı: yetersiz veri`);
             return;
           }
 
-          // İlk iki sütunu soru ve cevap olarak al
-          const questionText = row[0];
-          const answerText = row[1];
+          const questionText = row[questionColumnIndex];
+          const answerText = row[answerColumnIndex];
 
           console.log(`📝 Satır ${index + 1}:`, { 
             questionText: questionText?.toString().substring(0, 50),
