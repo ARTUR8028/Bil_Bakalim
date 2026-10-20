@@ -1,7 +1,34 @@
 import { Pool } from 'pg';
 import dotenv from 'dotenv';
+import { promises as fs } from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
 dotenv.config();
+
+const questionsFilePath = path.join(path.dirname(fileURLToPath(import.meta.url)), '../data/questions.json');
+
+function decodeQuestionsBuffer(buffer) {
+  if (buffer.length >= 2 && buffer[0] === 0xFF && buffer[1] === 0xFE) {
+    return buffer.toString('utf16le');
+  }
+  if (buffer.length >= 2 && buffer[0] === 0xFE && buffer[1] === 0xFF) {
+    return new TextDecoder('utf-16be').decode(buffer);
+  }
+  if (buffer.length >= 3 && buffer[0] === 0xEF && buffer[1] === 0xBB && buffer[2] === 0xBF) {
+    return buffer.slice(3).toString('utf8');
+  }
+  return buffer.toString('utf8');
+}
+
+export async function readQuestionsFromFile(filePath = questionsFilePath) {
+  const buffer = await fs.readFile(filePath);
+  return JSON.parse(decodeQuestionsBuffer(buffer));
+}
+
+export async function writeQuestionsToFile(questionList, filePath = questionsFilePath) {
+  await fs.writeFile(filePath, JSON.stringify(questionList, null, 2) + '\n', { encoding: 'utf8' });
+}
 
 // PostgreSQL bağlantısı
 const pool = new Pool({
@@ -33,10 +60,8 @@ export async function initializeDatabase() {
 
     if (count === 0) {
       console.log('📥 questions.json\'dan sorular yükleniyor...');
-      const fs = await import('fs/promises');
       try {
-        const data = await fs.readFile('data/questions.json', 'utf-8');
-        const questions = JSON.parse(data);
+        const questions = await readQuestionsFromFile();
         
         for (const q of questions) {
           await pool.query(

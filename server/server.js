@@ -9,7 +9,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
 import QRCode from 'qrcode';
-import { initializeDatabase, getAllQuestions, addQuestion, addQuestionsInBulk, getQuestionCount, deleteAllQuestions } from './db.js';
+import { initializeDatabase, getAllQuestions, addQuestion, addQuestionsInBulk, getQuestionCount, deleteAllQuestions, readQuestionsFromFile, writeQuestionsToFile } from './db.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -236,8 +236,7 @@ async function initializeServer() {
     try {
       const questionsPath = path.join(__dirname, '../data/questions.json');
       if (fsSync.existsSync(questionsPath)) {
-        const raw = await fs.readFile(questionsPath, 'utf-8');
-        questions = JSON.parse(raw);
+        questions = await readQuestionsFromFile(questionsPath);
         gameState.totalQuestions = questions.length;
         console.log(`✅ ${questions.length} soru JSON dosyasından yüklendi (fallback)`);
       } else {
@@ -292,6 +291,7 @@ app.get('/', (req, res) => {
 app.get('/api/questions', (req, res) => {
   try {
     console.log(`📋 Sorular istendi: ${questions.length} soru`);
+    res.setHeader('Content-Type', 'application/json; charset=utf-8');
     res.json(questions);
   } catch (error) {
     console.error('❌ Questions endpoint error:', error);
@@ -492,8 +492,7 @@ app.delete('/api/delete-all-questions', async (req, res) => {
   
   // questions.json dosyasını da temizle
   try {
-    const questionsPath = path.join(__dirname, '../data/questions.json');
-    await fs.writeFile(questionsPath, JSON.stringify([], null, 2), 'utf-8');
+    await writeQuestionsToFile([]);
     console.log('💾 questions.json dosyası temizlendi');
   } catch (error) {
     console.error('⚠️ Dosya yazma hatası:', error);
@@ -560,6 +559,7 @@ app.post('/api/upload', (req, res) => {
         path: filePath
       });
       
+      const isLegacyXls = path.extname(filePath).toLowerCase() === '.xls';
       const workbook = xlsx.readFile(filePath, { 
         cellDates: false,
         cellNF: false,
@@ -570,9 +570,10 @@ app.post('/api/upload', (req, res) => {
         bookVBA: false,
         password: '',
         WTF: false,
-        // Performans optimizasyonu
         dense: false,
-        raw: false
+        raw: false,
+        // .xlsx UTF-8; eski .xls Türkçe Windows Excel için 1254
+        codepage: isLegacyXls ? 1254 : 65001
       });
       
       if (!workbook.SheetNames || workbook.SheetNames.length === 0) {
@@ -607,8 +608,7 @@ app.post('/api/upload', (req, res) => {
       // Mevcut soruları yükle (her zaman ekleme modunda)
       let existing = [];
       try {
-        const raw = await fs.readFile('data/questions.json', 'utf-8');
-        existing = JSON.parse(raw);
+        existing = await readQuestionsFromFile();
         console.log(`📚 Mevcut ${existing.length} soru yüklendi (yeni sorular üstüne eklenecek)`);
       } catch (err) {
         console.log('📝 Yeni soru dosyası oluşturuluyor...');
@@ -699,8 +699,7 @@ app.post('/api/upload', (req, res) => {
 
       // questions.json dosyasına da yaz (backup/fallback için)
       try {
-        const questionsPath = path.join(__dirname, '../data/questions.json');
-        await fs.writeFile(questionsPath, JSON.stringify(questions, null, 2), 'utf-8');
+        await writeQuestionsToFile(questions);
         console.log('💾 questions.json dosyası güncellendi');
       } catch (fileError) {
         console.error('⚠️ questions.json yazma hatası:', fileError);
@@ -1375,8 +1374,7 @@ io.on('connection', (socket) => {
       
       // questions.json dosyasına da yaz (backup/fallback için)
       try {
-        const questionsPath = path.join(__dirname, '../data/questions.json');
-        await fs.writeFile(questionsPath, JSON.stringify(questions, null, 2), 'utf-8');
+        await writeQuestionsToFile(questions);
         console.log('💾 questions.json dosyası güncellendi');
       } catch (fileError) {
         console.error('⚠️ questions.json yazma hatası:', fileError);
